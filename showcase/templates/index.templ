@@ -1,0 +1,748 @@
+package templates
+
+import (
+	"github.com/pietjan/loom/accordion"
+	"github.com/pietjan/loom/avatar"
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/breadcrumbs"
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/callout"
+	"github.com/pietjan/loom/card"
+	"github.com/pietjan/loom/carousel"
+	"github.com/pietjan/loom/chart"
+	"github.com/pietjan/loom/checkbox"
+	"github.com/pietjan/loom/description"
+	"github.com/pietjan/loom/dropdown"
+	"github.com/pietjan/loom/field"
+	"github.com/pietjan/loom/fieldset"
+	"github.com/pietjan/loom/fileupload"
+	"github.com/pietjan/loom/flash"
+	"github.com/pietjan/loom/header"
+	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/input"
+	"github.com/pietjan/loom/inputgroup"
+	"github.com/pietjan/loom/kbd"
+	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/modal"
+	"github.com/pietjan/loom/navbar"
+	"github.com/pietjan/loom/navlist"
+	"github.com/pietjan/loom/pagination"
+	"github.com/pietjan/loom/popover"
+	"github.com/pietjan/loom/picker"
+	"github.com/pietjan/loom/progress"
+	"github.com/pietjan/loom/radio"
+	"github.com/pietjan/loom/separator"
+	"github.com/pietjan/loom/skeleton"
+	"github.com/pietjan/loom/slider"
+	"github.com/pietjan/loom/stat"
+	"github.com/pietjan/loom/table"
+	"github.com/pietjan/loom/timeline"
+	"github.com/pietjan/loom/tabs"
+	"github.com/pietjan/loom/text"
+	"github.com/pietjan/loom/textarea"
+	"github.com/pietjan/loom/toggle"
+	"github.com/pietjan/loom/tooltip"
+)
+
+templ Index() {
+	@layout("loom showcase") {
+		@heading.New(heading.Level(1), heading.XL) {
+			loom
+		}
+		@text.New() {
+			Pre-styled components for Go + templ, powered by web platform primitives.
+		}
+		@section("Buttons") {
+			@button.New() {
+				Outline
+			}
+			@button.New(button.Primary) {
+				Primary
+			}
+			@button.New(button.Filled) {
+				Filled
+			}
+			@button.New(button.Danger) {
+				Danger
+			}
+			@button.New(button.Ghost) {
+				Ghost
+			}
+			@button.New(button.Subtle) {
+				Subtle
+			}
+			@button.New(button.Primary, button.Disabled()) {
+				Disabled
+			}
+			@button.New(button.Small) {
+				Small
+			}
+			@button.New(button.Tiny) {
+				Tiny
+			}
+			@button.New(button.Label("Notifications")) {
+				@icon.New(icon.Bell)
+			}
+			@button.New(button.Primary) {
+				@icon.New(icon.Plus)
+				With icon
+			}
+		}
+		@section("Button group") {
+			@button.Group() {
+				@button.New() {
+					Years
+				}
+				@button.New() {
+					Months
+				}
+				@button.New() {
+					Days
+				}
+			}
+		}
+		@section("Badges") {
+			@badge.New() {
+				Zinc
+			}
+			@badge.New(badge.Green) {
+				Active
+			}
+			@badge.New(badge.Red) {
+				Failed
+			}
+			@badge.New(badge.Blue, badge.Pill()) {
+				Pill
+			}
+			@badge.New(badge.Amber, badge.Small) {
+				Small
+			}
+			@badge.New(badge.Green) {
+				@icon.New(icon.CheckCircle)
+				With icon
+			}
+		}
+		@section("Icons") {
+			@icon.New(icon.Bell)
+			@icon.New(icon.Bell, icon.Solid)
+			@icon.New(icon.Bell, icon.Mini)
+			@icon.New(icon.Bell, icon.Micro)
+			@icon.New(icon.Heart, icon.Solid, icon.Class("text-red-500"))
+		}
+		@section("Avatars") {
+			@avatar.New(avatar.Initials("OM"), avatar.Alt("Olivia Martin"))
+			@avatar.New(avatar.Initials("GH"), avatar.Alt("Grace Hopper"), avatar.Online)
+			@avatar.New(avatar.Initials("AL"), avatar.Alt("Ada Lovelace"), avatar.Busy, avatar.Large)
+			@avatar.New(avatar.Initials("TD"), avatar.Alt("Truly Delta"), avatar.Small)
+			@avatar.Group() {
+				@avatar.New(avatar.Initials("A"), avatar.Alt("Ada"))
+				@avatar.New(avatar.Initials("G"), avatar.Alt("Grace"))
+				@avatar.New(avatar.Initials("O"), avatar.Alt("Olivia"))
+			}
+		}
+		@section("Breadcrumbs") {
+			@breadcrumbs.New() {
+				@breadcrumbs.Item("#") {
+					Home
+				}
+				@breadcrumbs.Item("#") {
+					Projects
+				}
+				@breadcrumbs.Item("", breadcrumbs.Current()) {
+					loom
+				}
+			}
+		}
+		@section("Progress") {
+			<div class="w-full max-w-md space-y-3">
+				@progress.New(progress.Value(70))
+				@progress.New(progress.Value(40), progress.WithEmerald)
+				@progress.New(progress.Value(90), progress.WithAmber)
+				@progress.New(progress.Indeterminate())
+			</div>
+		}
+		@section("Skeleton") {
+			<div class="w-full max-w-md flex gap-4">
+				@skeleton.New(skeleton.Circle, skeleton.Class("size-12"))
+				<div class="flex-1 space-y-2">
+					@skeleton.New()
+					@skeleton.New(skeleton.Class("w-2/3"))
+				</div>
+			</div>
+		}
+		@section("Pagination") {
+			@pagination.New() {
+				@pagination.Prev("#")
+				@pagination.Item("#") {
+					1
+				}
+				@pagination.Item("#", pagination.Current()) {
+					2
+				}
+				@pagination.Item("#") {
+					3
+				}
+				@pagination.Gap()
+				@pagination.Item("#") {
+					12
+				}
+				@pagination.Next("#")
+			}
+		}
+		@section("Stats") {
+			<div class="grid w-full gap-4 sm:grid-cols-3">
+				@stat.New(stat.Label("Revenue"), stat.Value("$48.2k")) {
+					@badge.New(badge.Green) {
+						+12%
+					}
+				}
+				@stat.New(stat.Label("Signups"), stat.Value("1,204")) {
+					@badge.New(badge.Green) {
+						+8%
+					}
+				}
+				@stat.New(stat.Label("Churn"), stat.Value("2.1%")) {
+					@badge.New(badge.Red) {
+						+0.3%
+					}
+				}
+			</div>
+		}
+		@section("Timeline") {
+			<div class="w-full max-w-md">
+				@timeline.New() {
+					@timeline.Item(timeline.Title("Deployed v2.0"), timeline.Time("2h ago")) {
+						@text.New() {
+							Rolled out the header layout to production.
+						}
+					}
+					@timeline.Item(timeline.Title("Merged #482"), timeline.Time("5h ago")) {
+						@text.New() {
+							Charts now reuse the tooltip component.
+						}
+					}
+					@timeline.Item(timeline.Title("Opened #480")) {
+						@text.New() {
+							Proposed the Tier A component batch.
+						}
+					}
+				}
+			</div>
+		}
+		@section("Description list") {
+			<div class="w-full max-w-md">
+				@description.New() {
+					@description.Term() {
+						Plan
+					}
+					@description.Detail() {
+						Pro
+					}
+					@description.Term() {
+						Renews
+					}
+					@description.Detail() {
+						March 1, 2026
+					}
+					@description.Term() {
+						Seats
+					}
+					@description.Detail() {
+						8 of 10 used
+					}
+				}
+			</div>
+		}
+		@section("Keyboard keys") {
+			<div class="flex items-center gap-1 text-sm text-base-500 dark:text-base-400">
+				Press
+				@kbd.New() {
+					⌘
+				}
+				@kbd.New() {
+					K
+				}
+				to search.
+			</div>
+		}
+		@section("Typography") {
+			<div class="space-y-2 w-full">
+				@heading.New(heading.Level(2), heading.XL) {
+					Extra large heading
+				}
+				@heading.New(heading.Level(3), heading.Large) {
+					Large heading
+				}
+				@heading.New() {
+					Base heading
+				}
+				@text.New() {
+					Body text with a
+					@text.Strong() {
+						strong
+					}
+					fragment.
+				}
+				@text.New(text.Subtle) {
+					Subtle secondary text.
+				}
+			</div>
+		}
+		@section("Links") {
+			@link.New("#") {
+				Default link
+			}
+			@link.New("#", link.Ghost) {
+				Ghost link
+			}
+			@link.New("#", link.Subtle) {
+				Subtle link
+			}
+			@link.New("https://example.com", link.External()) {
+				External link
+			}
+		}
+		@section("Separator") {
+			<div class="w-full space-y-4">
+				@text.New() {
+					Above
+				}
+				@separator.New()
+				@text.New() {
+					Below
+				}
+			</div>
+		}
+		@section("Card") {
+			@card.New() {
+				@heading.New() {
+					Revenue
+				}
+				@text.New() {
+					Up 12% this month.
+				}
+			}
+			@card.New(card.Small) {
+				@text.New() {
+					Compact card.
+				}
+			}
+		}
+		@section("Fields") {
+			<div class="w-full max-w-md space-y-6">
+				@field.Root() {
+					@field.Label() {
+						Email
+					}
+					@input.New(input.Type("email"), input.Name("email"), input.Placeholder("you@example.com"))
+					@field.Description() {
+						We never share it.
+					}
+				}
+				@field.Root(field.Error("That address is already taken."), field.Required()) {
+					@field.Label() {
+						Username
+					}
+					@input.New(input.Name("username"), input.Value("pietjan"))
+				}
+				@field.Root() {
+					@field.Label() {
+						Bio
+					}
+					@textarea.New(textarea.Name("bio"), textarea.Placeholder("A few words about you"))
+				}
+				@field.Root() {
+					@field.Label() {
+						Favorite pet
+					}
+					@picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")) {
+						@picker.Item("cat") {
+							@icon.New(icon.Heart)
+							Cat
+						}
+						@picker.Item("dog") {
+							@icon.New(icon.Star)
+							Dog
+						}
+						@picker.Item("fish", picker.Disabled()) {
+							Fish (sold out)
+						}
+					}
+				}
+			</div>
+		}
+		@section("Input groups") {
+			<div class="w-full max-w-md space-y-4">
+				@inputgroup.New() {
+					@inputgroup.Addon() {
+						@icon.New(icon.MagnifyingGlass, icon.Mini)
+					}
+					@input.New(input.Name("q"), input.Placeholder("Search projects"))
+				}
+				@inputgroup.New() {
+					@inputgroup.Addon() {
+						https://
+					}
+					@input.New(input.Name("site"), input.Value("acme"))
+					@inputgroup.Addon() {
+						.com
+					}
+				}
+			</div>
+		}
+		@section("Slider") {
+			<div class="w-full max-w-md space-y-4">
+				@slider.New(slider.Name("volume"), slider.Value(60))
+				@slider.New(slider.Name("zoom"), slider.Min(1), slider.Max(10), slider.Step(1), slider.Value(3))
+			</div>
+		}
+		@section("File upload") {
+			<div class="w-full max-w-md space-y-4">
+				@field.Root() {
+					@field.Label() {
+						Avatar
+					}
+					@fileupload.New(fileupload.Name("avatar"), fileupload.Accept("image/*"))
+					@field.Description() {
+						PNG or JPG, up to 2MB.
+					}
+				}
+			</div>
+		}
+		@section("Choice controls") {
+			<div class="w-full flex flex-col gap-3 items-start">
+				@checkbox.New(checkbox.Name("terms"), checkbox.Label("I agree to the terms"))
+				@checkbox.New(checkbox.Name("news"), checkbox.Label("Send me the newsletter"), checkbox.Checked())
+				@toggle.New(toggle.Name("notify"), toggle.Label("Email notifications"), toggle.Checked())
+				@radio.Group(radio.Name("plan"), radio.Legend("Plan")) {
+					@radio.New(radio.Value("free"), radio.Label("Free"))
+					@radio.New(radio.Value("pro"), radio.Label("Pro"), radio.Checked())
+					@radio.New(radio.Value("team"), radio.Label("Team"))
+				}
+			</div>
+		}
+		@section("Fieldset") {
+			@fieldset.New(fieldset.Legend("Shipping (disabled)"), fieldset.Disabled()) {
+				@field.Root() {
+					@field.Label() {
+						Street
+					}
+					@input.New(input.Name("street"))
+				}
+			}
+		}
+		@section("Modal") {
+			@modal.Root() {
+				@modal.Trigger() {
+					@button.New(button.Danger) {
+						Delete account
+					}
+				}
+				@modal.Content() {
+					@modal.Title() {
+						Are you sure?
+					}
+					@text.New() {
+						This action cannot be undone. All data will be permanently removed.
+					}
+					<div class="flex justify-end gap-2">
+						@modal.Close() {
+							@button.New() {
+								Cancel
+							}
+						}
+						@button.New(button.Danger) {
+							Delete
+						}
+					</div>
+				}
+			}
+		}
+		@section("Dropdown") {
+			@dropdown.Root() {
+				@dropdown.Trigger() {
+					@button.New() {
+						Options
+						@icon.New(icon.ChevronDown)
+					}
+				}
+				@dropdown.Menu() {
+					@dropdown.Item("#profile") {
+						@icon.New(icon.User)
+						Profile
+					}
+					@dropdown.Item("#settings") {
+						@icon.New(icon.Cog6Tooth)
+						Settings
+					}
+					@dropdown.Divider()
+					@dropdown.ItemButton() {
+						@icon.New(icon.ArrowRightStartOnRectangle)
+						Log out
+					}
+				}
+			}
+		}
+		@section("Tooltip") {
+			@tooltip.New(tooltip.Text("Delete forever")) {
+				@button.New(button.Label("Delete")) {
+					@icon.New(icon.Trash)
+				}
+			}
+			@tooltip.New(tooltip.Text("Add to favorites")) {
+				@button.New(button.Ghost, button.Label("Favorite")) {
+					@icon.New(icon.Heart)
+				}
+			}
+		}
+		@section("Popover") {
+			@popover.Root() {
+				@popover.Trigger() {
+					@button.New(button.Ghost) {
+						Storage
+						@icon.New(icon.ChevronDown, icon.Micro)
+					}
+				}
+				@popover.Content() {
+					@heading.New() {
+						Storage
+					}
+					@text.New() {
+						8.2 GB of your 10 GB is used across projects and backups.
+					}
+					@progress.New(progress.Value(82))
+				}
+			}
+		}
+		@section("Carousel") {
+			<div class="w-full max-w-lg">
+				@carousel.New() {
+					@carousel.Slide() {
+						<div class="flex h-40 items-center justify-center rounded-lg bg-accent text-2xl font-semibold text-accent-foreground">
+							Slide one
+						</div>
+					}
+					@carousel.Slide() {
+						<div class="flex h-40 items-center justify-center rounded-lg bg-emerald-500 text-2xl font-semibold text-white">
+							Slide two
+						</div>
+					}
+					@carousel.Slide() {
+						<div class="flex h-40 items-center justify-center rounded-lg bg-amber-500 text-2xl font-semibold text-white">
+							Slide three
+						</div>
+					}
+				}
+			</div>
+		}
+		@section("Flash") {
+			<div class="w-full max-w-md space-y-3">
+				@flash.New(flash.Success, flash.Dismissible()) {
+					Your changes were saved.
+				}
+				@flash.New(flash.Warning, flash.Dismissible()) {
+					Your trial ends in 3 days.
+				}
+				@flash.New(flash.Danger) {
+					We couldn't reach the server.
+				}
+			</div>
+		}
+		@section("Accordion") {
+			<div class="w-full max-w-md">
+				@accordion.Root(accordion.Exclusive()) {
+					@accordion.Item(accordion.Title("How long does shipping take?"), accordion.Open()) {
+						Usually 3-5 business days within Europe.
+					}
+					@accordion.Item(accordion.Title("Can I return an item?")) {
+						Yes, within 30 days of delivery.
+					}
+					@accordion.Item(accordion.Title("Do you ship worldwide?")) {
+						We ship to most countries.
+					}
+				}
+			</div>
+		}
+		@section("Header layout") {
+			<div class="w-full overflow-hidden rounded-lg border border-base-200 dark:border-base-600">
+				@header.New() {
+					@link.New("#", link.Ghost) {
+						@heading.New() {
+							Acme Inc.
+						}
+					}
+					@navbar.New(navbar.Label("Main")) {
+						@navbar.Item("#", navbar.Current()) {
+							@icon.New(icon.Home)
+							Home
+						}
+						@navbar.Item("#", navbar.Badge("12")) {
+							@icon.New(icon.Inbox)
+							Inbox
+						}
+						@navbar.Item("#") {
+							@icon.New(icon.DocumentText)
+							Documents
+						}
+					}
+					@header.Spacer()
+					@button.New(button.Ghost, button.Label("Settings")) {
+						@icon.New(icon.Cog6Tooth)
+					}
+				}
+				<div class="bg-base-50 p-6 text-sm text-base-500 dark:bg-base-900 dark:text-base-400">
+					Page content sits below the header. Add
+					<code>header.Sticky()</code> to pin it on scroll.
+				</div>
+			</div>
+		}
+		@section("Navlist") {
+			<div class="w-64">
+				@navlist.New(navlist.Label("Demo")) {
+					@navlist.Item("#", navlist.Current()) {
+						@icon.New(icon.Home, icon.Mini)
+						Dashboard
+					}
+					@navlist.Item("#") {
+						@icon.New(icon.ChartBar, icon.Mini)
+						Analytics
+					}
+					@navlist.Group(navlist.Title("Settings"), navlist.Open()) {
+						@navlist.Item("#") {
+							Profile
+						}
+						@navlist.Item("#") {
+							Billing
+						}
+					}
+				}
+			</div>
+		}
+		@section("Tabs") {
+			<div class="w-full">
+				@tabs.New(tabs.Label("Account")) {
+					@tabs.Section(tabs.Title("Profile"), tabs.Open()) {
+						@text.New() {
+							All panels ship in the page; the platform switches them. No JS.
+						}
+					}
+					@tabs.Section(tabs.Title("Billing")) {
+						@text.New() {
+							Exclusive switching via the details name attribute.
+						}
+					}
+					@tabs.Section(tabs.Title("Team")) {
+						@text.New() {
+							Laid out as tabs with display: contents and ::details-content.
+						}
+					}
+				}
+			</div>
+		}
+		@section("Chart") {
+			<div class="w-full space-y-6">
+				@chart.New(
+					chart.Title("Visitors per month"),
+					chart.Labels("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
+					chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}, chart.Colored(chart.Indigo)),
+					chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Colored(chart.Emerald)),
+					chart.Area(), chart.Smooth(), chart.Legend(),
+				)
+				@chart.New(
+					chart.Title("Revenue per quarter"),
+					chart.Bars(),
+					chart.Labels("Q1", "Q2", "Q3", "Q4"),
+					chart.Series("2025", []float64{110, 140, 125, 180}, chart.Colored(chart.Indigo)),
+					chart.Series("2026", []float64{150, 170, 160, 210}, chart.Colored(chart.Blue)),
+					chart.Legend(),
+				)
+				<div class="flex items-center gap-3">
+					@text.New() {
+						Sparkline:
+					}
+					<div class="w-40">
+						@chart.New(chart.Sparkline(), chart.Series("Trend", []float64{4, 7, 5, 9, 8, 12, 10, 14}))
+					</div>
+					@badge.New(badge.Green) {
+						+18%
+					}
+				</div>
+			</div>
+		}
+		@section("Table") {
+			@table.New() {
+				@table.Header() {
+					@table.Column() {
+						Name
+					}
+					@table.Column() {
+						Role
+					}
+					@table.Column() {
+						Status
+					}
+				}
+				@table.Body() {
+					@table.Row() {
+						@table.Cell() {
+							Ada Lovelace
+						}
+						@table.Cell() {
+							Engineer
+						}
+						@table.Cell() {
+							@badge.New(badge.Green) {
+								Active
+							}
+						}
+					}
+					@table.Row() {
+						@table.Cell() {
+							Grace Hopper
+						}
+						@table.Cell() {
+							Admiral
+						}
+						@table.Cell() {
+							@badge.New(badge.Amber) {
+								Away
+							}
+						}
+					}
+				}
+			}
+		}
+		@section("Callouts") {
+			<div class="w-full space-y-3">
+				@callout.New() {
+					@icon.New(icon.InformationCircle)
+					@callout.Heading() {
+						Neutral
+					}
+					@callout.Text() {
+						Just so you know.
+					}
+				}
+				@callout.New(callout.Warning) {
+					@icon.New(icon.ExclamationTriangle)
+					@callout.Heading() {
+						Subscription expiring
+					}
+					@callout.Text() {
+						Renew before Friday to keep access.
+					}
+				}
+				@callout.New(callout.Danger) {
+					@icon.New(icon.XCircle)
+					@callout.Heading() {
+						Payment failed
+					}
+					@callout.Text() {
+						Your card was declined.
+					}
+				}
+			</div>
+		}
+	}
+}

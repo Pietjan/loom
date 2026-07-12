@@ -1,0 +1,15 @@
+{
+    "editor.quickSuggestions": {
+        "strings": "on"
+    },
+    "tailwindCSS.includeLanguages": {
+        "go": "javascript"
+    },
+    "tailwindCSS.classFunctions": [
+        "b.Add",
+    ],
+    "css.customData": [
+        ".vscode/tailwind.css-data.json"
+    ],
+    "css.lint.unknownAtRules": "ignore"
+}
