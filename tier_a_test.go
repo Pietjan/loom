@@ -12,6 +12,7 @@ import (
 	"github.com/pietjan/loom/badge"
 	"github.com/pietjan/loom/breadcrumbs"
 	"github.com/pietjan/loom/description"
+	"github.com/pietjan/loom/icon"
 	"github.com/pietjan/loom/internal/dom"
 	"github.com/pietjan/loom/internal/testutil"
 	"github.com/pietjan/loom/kbd"
@@ -141,8 +142,11 @@ func TestGoldens(t *testing.T) {
 	})
 	t.Run("timeline", func(t *testing.T) {
 		testutil.Golden(t, "timeline", testutil.WithChildren(timeline.New(), testutil.Sequence(
-			testutil.WithChildren(timeline.Item(timeline.Title("Deployed"), timeline.Time("2h ago")), testutil.Text("Shipped.")),
-			testutil.WithChildren(timeline.Item(timeline.Title("Merged")), testutil.Text("Landed.")),
+			testutil.WithChildren(timeline.Item(timeline.Complete), testutil.Sequence(
+				testutil.WithChildren(timeline.Indicator(), icon.New(icon.Check, icon.Micro)),
+				testutil.WithChildren(timeline.Content(), testutil.Text("Shipped.")),
+			)),
+			testutil.WithChildren(timeline.Item(), testutil.WithChildren(timeline.Content(), testutil.Text("Landed."))),
 		)))
 	})
 	t.Run("description", func(t *testing.T) {

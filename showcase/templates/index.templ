@@ -212,19 +212,76 @@ templ Index() {
 		@section("Timeline") {
 			<div class="w-full max-w-md">
 				@timeline.New() {
-					@timeline.Item(timeline.Title("Deployed v2.0"), timeline.Time("2h ago")) {
-						@text.New() {
-							Rolled out the header layout to production.
+					@timeline.Item() {
+						@timeline.Indicator(timeline.Green) {
+							@icon.New(icon.RocketLaunch, icon.Micro)
+						}
+						@timeline.Content() {
+							@heading.New() {
+								Deployed v2.0
+								<span class="text-xs font-normal text-base-400">· 2h ago</span>
+							}
+							@text.New() {
+								Rolled out the header layout to production.
+							}
 						}
 					}
-					@timeline.Item(timeline.Title("Merged #482"), timeline.Time("5h ago")) {
-						@text.New() {
-							Charts now reuse the tooltip component.
+					@timeline.Item() {
+						@timeline.Indicator() {
+							@icon.New(icon.CodeBracket, icon.Micro)
+						}
+						@timeline.Content() {
+							@heading.New() {
+								Merged #482
+								<span class="text-xs font-normal text-base-400">· 5h ago</span>
+							}
+							@text.New() {
+								Charts now reuse the tooltip component.
+							}
 						}
 					}
-					@timeline.Item(timeline.Title("Opened #480")) {
-						@text.New() {
-							Proposed the Tier A component batch.
+					@timeline.Item() {
+						@timeline.Content() {
+							@heading.New() {
+								Opened #480
+							}
+							@text.New() {
+								Proposed the Tier A component batch.
+							}
+						}
+					}
+				}
+			</div>
+			<div class="w-full max-w-lg">
+				@timeline.New(timeline.Horizontal()) {
+					@timeline.Item(timeline.Complete) {
+						@timeline.Indicator() {
+							@icon.New(icon.CreditCard, icon.Micro)
+						}
+						@timeline.Content() {
+							@heading.New() {
+								Order placed
+							}
+						}
+					}
+					@timeline.Item(timeline.Current) {
+						@timeline.Indicator() {
+							@icon.New(icon.Truck, icon.Micro)
+						}
+						@timeline.Content() {
+							@heading.New() {
+								In transit
+							}
+						}
+					}
+					@timeline.Item(timeline.Incomplete) {
+						@timeline.Indicator() {
+							@icon.New(icon.Home, icon.Micro)
+						}
+						@timeline.Content() {
+							@heading.New() {
+								Delivered
+							}
 						}
 					}
 				}
