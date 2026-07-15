@@ -14,6 +14,7 @@ import (
 	"github.com/pietjan/loom/description"
 	"github.com/pietjan/loom/icon"
 	"github.com/pietjan/loom/internal/dom"
+	"github.com/pietjan/loom/kanban"
 	"github.com/pietjan/loom/internal/testutil"
 	"github.com/pietjan/loom/kbd"
 	"github.com/pietjan/loom/pagination"
@@ -147,6 +148,20 @@ func TestGoldens(t *testing.T) {
 				testutil.WithChildren(timeline.Content(), testutil.Text("Shipped.")),
 			)),
 			testutil.WithChildren(timeline.Item(), testutil.WithChildren(timeline.Content(), testutil.Text("Landed."))),
+		)))
+	})
+	t.Run("kanban", func(t *testing.T) {
+		testutil.Golden(t, "kanban", testutil.WithChildren(kanban.New(), testutil.Sequence(
+			testutil.WithChildren(kanban.Column(), testutil.Sequence(
+				kanban.Header(kanban.Heading("Planned"), kanban.Count(2)),
+				testutil.WithChildren(kanban.Cards(), testutil.Sequence(
+					testutil.WithChildren(kanban.Card(kanban.Heading("Update privacy policy")), testutil.Sequence(
+						testutil.WithChildren(kanban.CardHeader(), testutil.WithChildren(badge.New(badge.Blue, badge.Small), testutil.Text("UI"))),
+						testutil.WithChildren(kanban.CardFooter(), testutil.Text("2 comments")),
+					)),
+					kanban.Card(kanban.Heading("Fix login bug")),
+				)),
+			)),
 		)))
 	})
 	t.Run("description", func(t *testing.T) {

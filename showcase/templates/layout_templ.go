@@ -50,7 +50,7 @@ func layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link rel=\"stylesheet\" href=\"/static/styles.css\"></head><body class=\"bg-base-100 text-base-800 dark:bg-base-900 dark:text-base-100\"><div class=\"flex min-h-dvh\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link rel=\"stylesheet\" href=\"/static/styles.css\"></head><body class=\"bg-base-100/10 text-base-800 dark:bg-base-900 dark:text-base-100\"><div class=\"flex min-h-dvh\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

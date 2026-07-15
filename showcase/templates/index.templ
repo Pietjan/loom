@@ -22,6 +22,7 @@ import (
 	"github.com/pietjan/loom/icon"
 	"github.com/pietjan/loom/input"
 	"github.com/pietjan/loom/inputgroup"
+	"github.com/pietjan/loom/kanban"
 	"github.com/pietjan/loom/kbd"
 	"github.com/pietjan/loom/link"
 	"github.com/pietjan/loom/modal"
@@ -282,6 +283,71 @@ templ Index() {
 							@heading.New() {
 								Delivered
 							}
+						}
+					}
+				}
+			</div>
+		}
+		@section("Kanban") {
+			<div class="w-full">
+				@kanban.New() {
+					@kanban.Column() {
+						@kanban.Header(kanban.Heading("Planned"), kanban.Count(3)) {
+							@button.New(button.Subtle, button.Small, button.Label("New card")) {
+								@icon.New(icon.Plus, icon.Mini)
+							}
+						}
+						@kanban.Cards() {
+							@kanban.Card(kanban.Heading("Update privacy policy in app")) {
+								@kanban.CardHeader() {
+									@badge.New(badge.Blue, badge.Small) {
+										UI
+									}
+									@badge.New(badge.Red, badge.Small) {
+										Bug
+									}
+								}
+								@kanban.CardFooter() {
+									@icon.New(icon.Bars3BottomLeft, icon.Micro)
+									<span class="ms-auto"></span>
+									@avatar.Group() {
+										@avatar.New(avatar.Initials("PO"), avatar.Small)
+										@avatar.New(avatar.Initials("JR"), avatar.Small)
+									}
+								}
+							}
+							@kanban.Card(kanban.Heading("Migrate icons to heroicons"))
+							@kanban.Card(kanban.Heading("Draft Q3 roadmap"))
+						}
+						@kanban.Footer() {
+							@button.New(button.Subtle, button.Small) {
+								@icon.New(icon.Plus, icon.Mini)
+								New card
+							}
+						}
+					}
+					@kanban.Column() {
+						@kanban.Header(kanban.Heading("In Progress"), kanban.Count(2), kanban.Subheading("Limit 3"))
+						@kanban.Cards() {
+							@kanban.Card(kanban.Heading("Charts reuse the tooltip overlay")) {
+								@kanban.CardFooter() {
+									@icon.New(icon.ChatBubbleLeft, icon.Micro)
+									<span class="text-xs">4</span>
+								}
+							}
+							@kanban.Card(kanban.Heading("Flux-style timeline")) {
+								@kanban.CardHeader() {
+									@badge.New(badge.Green, badge.Small) {
+										Component
+									}
+								}
+							}
+						}
+					}
+					@kanban.Column() {
+						@kanban.Header(kanban.Heading("Done"), kanban.Count(1))
+						@kanban.Cards() {
+							@kanban.Card(kanban.Heading("Ship header layout"))
 						}
 					}
 				}
