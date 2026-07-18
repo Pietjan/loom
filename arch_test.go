@@ -25,7 +25,7 @@ const module = "github.com/pietjan/loom"
 var l1 = []string{
 	"icon", "button", "badge", "heading", "text", "separator", "link", "card", "callout", "chart", "tooltip",
 	"avatar", "breadcrumbs", "progress", "skeleton", "pagination", "stat", "timeline", "description", "kbd", "kanban",
-	"carousel", "flash",
+	"carousel", "flash", "markdown",
 }
 
 var l2 = []string{
@@ -36,7 +36,10 @@ var l2 = []string{
 
 // embeddable primitives may be composed by any component (their Node
 // called directly): self-contained leaves with no scope coupling.
-var embeddable = map[string]bool{"icon": true, "tooltip": true}
+var embeddable = map[string]bool{
+	"icon": true, "tooltip": true,
+	"heading": true, "text": true, "link": true, "separator": true,
+}
 
 // allowedEdges lists the only permitted component→component imports,
 // besides "anything may import icon".

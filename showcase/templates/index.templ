@@ -25,6 +25,7 @@ import (
 	"github.com/pietjan/loom/kanban"
 	"github.com/pietjan/loom/kbd"
 	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/markdown"
 	"github.com/pietjan/loom/modal"
 	"github.com/pietjan/loom/navbar"
 	"github.com/pietjan/loom/navlist"
@@ -45,6 +46,19 @@ import (
 	"github.com/pietjan/loom/toggle"
 	"github.com/pietjan/loom/tooltip"
 )
+
+const markdownSample = "# Release notes\n\n" +
+	"Version **1.4** ships the `markdown` component — pass a string, get\n" +
+	"[loom](https://github.com/pietjan/loom)-styled markup back.\n\n" +
+	"## Highlights\n\n" +
+	"- GFM tables, ~~footnotes~~ task lists, and autolinks\n" +
+	"- Server-side syntax highlighting, zero JavaScript\n\n" +
+	"- [x] parse with goldmark\n" +
+	"- [x] highlight with chroma\n" +
+	"- [ ] world domination\n\n" +
+	"| Stage | Status |\n| :--- | ---: |\n| Parse | done |\n| Render | done |\n\n" +
+	"> Interactivity from web platform primitives, not JavaScript.\n\n" +
+	"```go\nfunc greet(name string) string {\n\treturn fmt.Sprintf(\"hello, %s\", name) // wave\n}\n```\n"
 
 templ Index() {
 	@layout("loom showcase") {
@@ -351,6 +365,11 @@ templ Index() {
 						}
 					}
 				}
+			</div>
+		}
+		@section("Markdown") {
+			<div class="w-full max-w-2xl">
+				@markdown.New(markdownSample)
 			</div>
 		}
 		@section("Description list") {
