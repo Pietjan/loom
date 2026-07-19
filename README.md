@@ -183,11 +183,9 @@ combobox/autocomplete) are out of scope rather than faked.
 go test ./...                    # unit + golden + contract tests
 LOOM_UPDATE=1 go test ./...      # rewrite golden files
 
-cd showcase
-make dev                         # templ generate + CSS build + run :8080
-make browser                     # start Playwright server container (Docker)
-make smoke                       # real-browser smoke tests via playwright-go
-make browser-stop
+cd site
+make run                          # templ generate + CSS build + serve :8080
+make run/live                     # ...with live reload (templ watch + proxy)
 ```
 
 The contract harness (`contract_test.go`) checks every composite render:

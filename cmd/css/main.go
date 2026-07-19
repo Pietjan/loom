@@ -21,9 +21,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pietjan/loom/theme"
-
 	_ "embed"
+
+	"github.com/pietjan/loom/cmd/css/internal/theme"
 )
 
 //go:embed loom.css
