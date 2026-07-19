@@ -10,7 +10,7 @@ const dropdownSnippet = `@dropdown.Root() {
 	@dropdown.Trigger() {
 		@button.New() {
 			Options
-			@icon.New(icon.ChevronDown)
+			@icon.New(icon.CaretDown)
 		}
 	}
 	@dropdown.Menu() {
@@ -20,7 +20,7 @@ const dropdownSnippet = `@dropdown.Root() {
 		}
 		@dropdown.Divider()
 		@dropdown.ItemButton() {
-			@icon.New(icon.ArrowRightStartOnRectangle)
+			@icon.New(icon.SignOut)
 			Log out
 		}
 	}
@@ -37,7 +37,7 @@ templ Dropdown() {
 				@dropdown.Trigger() {
 					@button.New() {
 						Options
-						@icon.New(icon.ChevronDown)
+						@icon.New(icon.CaretDown)
 					}
 				}
 				@dropdown.Menu() {
@@ -46,12 +46,12 @@ templ Dropdown() {
 						Profile
 					}
 					@dropdown.Item("#settings") {
-						@icon.New(icon.Cog6Tooth)
+						@icon.New(icon.Gear)
 						Settings
 					}
 					@dropdown.Divider()
 					@dropdown.ItemButton() {
-						@icon.New(icon.ArrowRightStartOnRectangle)
+						@icon.New(icon.SignOut)
 						Log out
 					}
 				}

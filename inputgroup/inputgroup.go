@@ -2,7 +2,7 @@
 // icon, a text label, or a small button — inside one bordered control:
 //
 //	@inputgroup.New() {
-//		@inputgroup.Addon() { @icon.New(icon.MagnifyingGlass, icon.Mini) }
+//		@inputgroup.Addon() { @icon.New(icon.MagnifyingGlass, icon.Small) }
 //		@input.New(input.Name("q"), input.Placeholder("Search"))
 //	}
 //	@inputgroup.New() {

@@ -10,26 +10,41 @@ import (
 )
 
 func TestGolden(t *testing.T) {
-	testutil.Golden(t, "icon-bell-mini", icon.New(icon.Bell, icon.Mini))
+	testutil.Golden(t, "icon-bell-small", icon.New(icon.Bell, icon.Small))
 }
 
-func TestVariantsKeepTheirViewBox(t *testing.T) {
-	for _, tc := range []struct {
-		variant icon.Option
-		viewBox string
-	}{
-		{icon.Outline, "0 0 24 24"},
-		{icon.Mini, "0 0 20 20"},
-		{icon.Micro, "0 0 16 16"},
-	} {
-		variant, viewBox := tc.variant, tc.viewBox
-		tree := testutil.Parse(t, testutil.Render(t, icon.New(icon.Bell, variant)))
+// Phosphor draws every weight on one grid, so sizing is CSS-only: the
+// viewBox must survive untouched whatever variant or size is asked for.
+func TestSizesShareOneViewBox(t *testing.T) {
+	for _, option := range []icon.Option{icon.Regular, icon.Fill, icon.Small, icon.ExtraSmall} {
+		tree := testutil.Parse(t, testutil.Render(t, icon.New(icon.Bell, option)))
 		svg := dom.Find(tree, dom.ByMarker("icon"))
 		if svg == nil {
 			t.Fatal("no icon marker")
 		}
-		if got := dom.GetAttr(svg, "viewbox"); got != viewBox {
-			t.Fatalf("viewBox %q, want %q", got, viewBox)
+		if got := dom.GetAttr(svg, "viewbox"); got != "0 0 256 256" {
+			t.Fatalf("viewBox %q, want %q", got, "0 0 256 256")
+		}
+	}
+}
+
+func TestSizeSetsTheSizeUtility(t *testing.T) {
+	for _, tc := range []struct {
+		option icon.Option
+		class  string
+	}{
+		{nil, "size-6"},
+		{icon.Small, "size-5"},
+		{icon.ExtraSmall, "size-4"},
+	} {
+		options := []icon.Option{}
+		if tc.option != nil {
+			options = append(options, tc.option)
+		}
+		tree := testutil.Parse(t, testutil.Render(t, icon.New(icon.Bell, options...)))
+		svg := dom.Find(tree, dom.ByMarker("icon"))
+		if got := dom.GetAttr(svg, "class"); !strings.Contains(got, tc.class) {
+			t.Fatalf("class %q, want it to contain %q", got, tc.class)
 		}
 	}
 }

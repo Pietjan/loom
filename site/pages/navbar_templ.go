@@ -15,15 +15,15 @@ import (
 
 const navbarSnippet = `@navbar.New(navbar.Label("Main")) {
 	@navbar.Item("#", navbar.Current()) {
-		@icon.New(icon.Home)
+		@icon.New(icon.House)
 		Home
 	}
 	@navbar.Item("#", navbar.Badge("12")) {
-		@icon.New(icon.Inbox)
+		@icon.New(icon.Tray)
 		Inbox
 	}
 	@navbar.Item("#") {
-		@icon.New(icon.DocumentText)
+		@icon.New(icon.FileText)
 		Documents
 	}
 }`
@@ -101,7 +101,7 @@ func Navbar() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = icon.New(icon.Home).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = icon.New(icon.House).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -131,7 +131,7 @@ func Navbar() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = icon.New(icon.Inbox).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = icon.New(icon.Tray).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -161,7 +161,7 @@ func Navbar() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = icon.New(icon.DocumentText).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = icon.New(icon.FileText).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}

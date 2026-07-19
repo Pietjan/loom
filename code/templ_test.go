@@ -45,7 +45,7 @@ func TestTemplHighlightsCompositeLiterals(t *testing.T) {
 
 func TestTemplHighlightsMarkup(t *testing.T) {
 	const src = `<div class="grid">
-	@icon.New(icon.Home)
+	@icon.New(icon.House)
 </div>`
 	out := testutil.Render(t, code.New(src, code.Language("templ")))
 

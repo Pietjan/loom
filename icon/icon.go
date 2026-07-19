@@ -1,8 +1,10 @@
-// Package icon renders heroicons in four variants: outline (24px, the
-// default), solid (24px), mini (20px), and micro (16px).
+// Package icon renders Phosphor icons in two variants — regular (stroked,
+// the default) and fill — at three sizes: base (24px), small (20px), and
+// extra small (16px).
 //
 //	@icon.New(icon.Bell)
-//	@icon.New(icon.Bell, icon.Solid, icon.Class("text-red-500"))
+//	@icon.New(icon.Bell, icon.Fill, icon.Class("text-red-500"))
+//	@icon.New(icon.Bell, icon.Small)
 //
 // Icons are decorative by default (aria-hidden). Every icon name has a
 // generated constant in generated.go (see cmd/icons).
@@ -20,23 +22,31 @@ import (
 	"github.com/pietjan/loom/internal/render"
 )
 
-// Name identifies a heroicon, e.g. icon.Bell ("bell").
+// Name identifies an icon, e.g. icon.Bell ("bell").
 type Name string
 
-// Variant selects the heroicons style set.
+// Variant selects the Phosphor weight.
 type Variant string
 
 const (
-	VariantOutline Variant = "outline" // 24px stroked (default)
-	VariantSolid   Variant = "solid"   // 24px filled
-	VariantMini    Variant = "mini"    // 20px filled
-	VariantMicro   Variant = "micro"   // 16px filled
+	VariantRegular Variant = "regular" // stroked (default)
+	VariantFill    Variant = "fill"    // filled
+)
+
+// Size is the rendered icon size.
+type Size string
+
+const (
+	SizeBase       Size = "base" // 24px (default)
+	SizeSmall      Size = "sm"   // 20px
+	SizeExtraSmall Size = "xs"   // 16px
 )
 
 // Config holds icon options.
 type Config struct {
 	opts.Common
 	Variant Variant
+	Size    Size
 }
 
 // Option configures an icon.
@@ -49,17 +59,22 @@ var (
 	Attr  = opts.Attr[*Config]
 )
 
-// WithVariant sets the heroicons style set.
+// WithVariant sets the Phosphor weight.
 func WithVariant(v Variant) Option {
 	return func(c *Config) { c.Variant = v }
 }
 
-// Pre-baked variant options.
+// WithSize sets the rendered size.
+func WithSize(s Size) Option {
+	return func(c *Config) { c.Size = s }
+}
+
+// Pre-baked variant and size options.
 var (
-	Outline = WithVariant(VariantOutline)
-	Solid   = WithVariant(VariantSolid)
-	Mini    = WithVariant(VariantMini)
-	Micro   = WithVariant(VariantMicro)
+	Regular    = WithVariant(VariantRegular)
+	Fill       = WithVariant(VariantFill)
+	Small      = WithSize(SizeSmall)
+	ExtraSmall = WithSize(SizeExtraSmall)
 )
 
 // New renders the icon as a templ component.
@@ -71,7 +86,7 @@ func New(name Name, options ...Option) templ.Component {
 
 // Node builds the icon's <svg> node.
 func Node(_ context.Context, name Name, options ...Option) (*html.Node, error) {
-	cfg := Config{Variant: VariantOutline}
+	cfg := Config{Variant: VariantRegular, Size: SizeBase}
 	for _, opt := range options {
 		opt(&cfg)
 	}
@@ -83,6 +98,7 @@ func Node(_ context.Context, name Name, options ...Option) (*html.Node, error) {
 
 	dom.SetAttr(svg, dom.MarkerAttr, "icon")
 	dom.SetAttr(svg, "data-variant", string(cfg.Variant))
+	dom.SetAttr(svg, "data-size", string(cfg.Size))
 	dom.SetAttr(svg, "aria-hidden", "true")
 	cfg.Apply(svg, classes(cfg))
 	return svg, nil

@@ -3,7 +3,7 @@
 //
 //	@button.New(button.Primary) { Save }
 //	@button.New(button.Ghost, button.Label("Close")) {
-//		@icon.New(icon.XMark)
+//		@icon.New(icon.X)
 //	}
 //
 // An icon-only button renders square and MUST be given an accessible name

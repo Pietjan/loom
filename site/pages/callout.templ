@@ -6,12 +6,12 @@ import (
 )
 
 const calloutSnippet = `@callout.New() {
-	@icon.New(icon.InformationCircle)
+	@icon.New(icon.Info)
 	@callout.Heading() { Neutral }
 	@callout.Text() { Just so you know. }
 }
 @callout.New(callout.Warning) {
-	@icon.New(icon.ExclamationTriangle)
+	@icon.New(icon.Warning)
 	@callout.Heading() { Subscription expiring }
 	@callout.Text() { Renew before Friday to keep access. }
 }
@@ -26,7 +26,7 @@ templ Callout() {
 		@example("Severities", calloutSnippet) {
 			<div class="w-full space-y-3">
 				@callout.New() {
-					@icon.New(icon.InformationCircle)
+					@icon.New(icon.Info)
 					@callout.Heading() {
 						Neutral
 					}
@@ -35,7 +35,7 @@ templ Callout() {
 					}
 				}
 				@callout.New(callout.Warning) {
-					@icon.New(icon.ExclamationTriangle)
+					@icon.New(icon.Warning)
 					@callout.Heading() {
 						Subscription expiring
 					}

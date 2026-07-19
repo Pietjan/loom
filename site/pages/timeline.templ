@@ -10,7 +10,7 @@ import (
 const timelineSnippet = `@timeline.New() {
 	@timeline.Item() {
 		@timeline.Indicator(timeline.Green) {
-			@icon.New(icon.RocketLaunch, icon.Micro)
+			@icon.New(icon.RocketLaunch, icon.ExtraSmall)
 		}
 		@timeline.Content() {
 			@heading.New() { Deployed v2.0 }
@@ -32,7 +32,7 @@ templ Timeline() {
 				@timeline.New() {
 					@timeline.Item() {
 						@timeline.Indicator(timeline.Green) {
-							@icon.New(icon.RocketLaunch, icon.Micro)
+							@icon.New(icon.RocketLaunch, icon.ExtraSmall)
 						}
 						@timeline.Content() {
 							@heading.New() {
@@ -46,7 +46,7 @@ templ Timeline() {
 					}
 					@timeline.Item() {
 						@timeline.Indicator() {
-							@icon.New(icon.CodeBracket, icon.Micro)
+							@icon.New(icon.Code, icon.ExtraSmall)
 						}
 						@timeline.Content() {
 							@heading.New() {
@@ -76,7 +76,7 @@ templ Timeline() {
 				@timeline.New(timeline.Horizontal()) {
 					@timeline.Item(timeline.Complete) {
 						@timeline.Indicator() {
-							@icon.New(icon.CreditCard, icon.Micro)
+							@icon.New(icon.CreditCard, icon.ExtraSmall)
 						}
 						@timeline.Content() {
 							@heading.New() {
@@ -86,7 +86,7 @@ templ Timeline() {
 					}
 					@timeline.Item(timeline.Current) {
 						@timeline.Indicator() {
-							@icon.New(icon.Truck, icon.Micro)
+							@icon.New(icon.Truck, icon.ExtraSmall)
 						}
 						@timeline.Content() {
 							@heading.New() {
@@ -96,7 +96,7 @@ templ Timeline() {
 					}
 					@timeline.Item(timeline.Incomplete) {
 						@timeline.Indicator() {
-							@icon.New(icon.Home, icon.Micro)
+							@icon.New(icon.House, icon.ExtraSmall)
 						}
 						@timeline.Content() {
 							@heading.New() {

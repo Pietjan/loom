@@ -18,7 +18,7 @@ import (
 const timelineSnippet = `@timeline.New() {
 	@timeline.Item() {
 		@timeline.Indicator(timeline.Green) {
-			@icon.New(icon.RocketLaunch, icon.Micro)
+			@icon.New(icon.RocketLaunch, icon.ExtraSmall)
 		}
 		@timeline.Content() {
 			@heading.New() { Deployed v2.0 }
@@ -118,7 +118,7 @@ func Timeline() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.RocketLaunch, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.RocketLaunch, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -232,7 +232,7 @@ func Timeline() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.CodeBracket, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.Code, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -478,7 +478,7 @@ func Timeline() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.CreditCard, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.CreditCard, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -566,7 +566,7 @@ func Timeline() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.Truck, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.Truck, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -654,7 +654,7 @@ func Timeline() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.Home, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.House, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}

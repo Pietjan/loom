@@ -41,7 +41,7 @@ templ Kanban() {
 					@kanban.Column() {
 						@kanban.Header(kanban.Heading("Planned"), kanban.Count(3)) {
 							@button.New(button.Subtle, button.Small, button.Label("New card")) {
-								@icon.New(icon.Plus, icon.Mini)
+								@icon.New(icon.Plus, icon.Small)
 							}
 						}
 						@kanban.Cards() {
@@ -55,7 +55,7 @@ templ Kanban() {
 									}
 								}
 								@kanban.CardFooter() {
-									@icon.New(icon.Bars3BottomLeft, icon.Micro)
+									@icon.New(icon.ListDashes, icon.ExtraSmall)
 									<span class="ms-auto"></span>
 									@avatar.Group() {
 										@avatar.New(avatar.Initials("PO"), avatar.Small)
@@ -63,12 +63,12 @@ templ Kanban() {
 									}
 								}
 							}
-							@kanban.Card(kanban.Heading("Migrate icons to heroicons"))
+							@kanban.Card(kanban.Heading("Migrate icons to phosphor"))
 							@kanban.Card(kanban.Heading("Draft Q3 roadmap"))
 						}
 						@kanban.Footer() {
 							@button.New(button.Subtle, button.Small) {
-								@icon.New(icon.Plus, icon.Mini)
+								@icon.New(icon.Plus, icon.Small)
 								New card
 							}
 						}
@@ -78,7 +78,7 @@ templ Kanban() {
 						@kanban.Cards() {
 							@kanban.Card(kanban.Heading("Charts reuse the tooltip overlay")) {
 								@kanban.CardFooter() {
-									@icon.New(icon.ChatBubbleLeft, icon.Micro)
+									@icon.New(icon.Chat, icon.ExtraSmall)
 									<span class="text-xs">4</span>
 								}
 							}

@@ -7,11 +7,10 @@ import "github.com/pietjan/loom/internal/styles"
 func classes(c Config) string {
 	var b styles.Builder
 	b.Add("shrink-0")
-	styles.Match(&b, c.Variant, map[Variant]string{
-		VariantOutline: "[:where(&)]:size-6",
-		VariantSolid:   "[:where(&)]:size-6",
-		VariantMini:    "[:where(&)]:size-5",
-		VariantMicro:   "[:where(&)]:size-4",
+	styles.Match(&b, c.Size, map[Size]string{
+		SizeBase:       "[:where(&)]:size-6",
+		SizeSmall:      "[:where(&)]:size-5",
+		SizeExtraSmall: "[:where(&)]:size-4",
 	})
 	return b.String()
 }

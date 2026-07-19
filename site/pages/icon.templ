@@ -2,24 +2,32 @@ package pages
 
 import "github.com/pietjan/loom/icon"
 
-const iconSnippet = `@icon.New(icon.Bell)
-@icon.New(icon.Bell, icon.Solid)
-@icon.New(icon.Bell, icon.Mini)
-@icon.New(icon.Bell, icon.Micro)
-@icon.New(icon.Heart, icon.Solid, icon.Class("text-red-500"))`
+const iconVariantSnippet = `@icon.New(icon.Bell)
+@icon.New(icon.Bell, icon.Fill)
+@icon.New(icon.Heart, icon.Fill, icon.Class("text-red-500"))`
+
+const iconSizeSnippet = `@icon.New(icon.Bell)
+@icon.New(icon.Bell, icon.Small)
+@icon.New(icon.Bell, icon.ExtraSmall)`
 
 templ Icon() {
 	@componentPage("icon") {
 		@prose() {
-			Every heroicon ships as a generated name constant, in the outline, solid,
-			mini (20px), and micro (16px) styles.
+			Every Phosphor icon ships as a generated name constant, in the regular
+			(default) and fill variants.
 		}
-		@example("Styles", iconSnippet) {
+		@example("Variants", iconVariantSnippet) {
 			@icon.New(icon.Bell)
-			@icon.New(icon.Bell, icon.Solid)
-			@icon.New(icon.Bell, icon.Mini)
-			@icon.New(icon.Bell, icon.Micro)
-			@icon.New(icon.Heart, icon.Solid, icon.Class("text-red-500"))
+			@icon.New(icon.Bell, icon.Fill)
+			@icon.New(icon.Heart, icon.Fill, icon.Class("text-red-500"))
+		}
+		@prose() {
+			Size is a separate axis: base (24px), Small (20px), and ExtraSmall (16px).
+		}
+		@example("Sizes", iconSizeSnippet) {
+			@icon.New(icon.Bell)
+			@icon.New(icon.Bell, icon.Small)
+			@icon.New(icon.Bell, icon.ExtraSmall)
 		}
 	}
 }

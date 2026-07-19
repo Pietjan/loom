@@ -3,11 +3,11 @@
 //
 //	@navbar.New() {
 //		@navbar.Item("/", navbar.Current()) {
-//			@icon.New(icon.Home, icon.Mini)
+//			@icon.New(icon.House, icon.Small)
 //			Home
 //		}
 //		@navbar.Item("/inbox", navbar.Badge("12")) {
-//			@icon.New(icon.Inbox, icon.Mini)
+//			@icon.New(icon.Tray, icon.Small)
 //			Inbox
 //		}
 //	}

@@ -13,9 +13,9 @@ import (
 func TestCurrentAndBadge(t *testing.T) {
 	c := testutil.WithChildren(navbar.New(navbar.Label("Main")), testutil.Sequence(
 		testutil.WithChildren(navbar.Item("/", navbar.Current()),
-			testutil.Sequence(icon.New(icon.Home, icon.Mini), testutil.Text("Home"))),
+			testutil.Sequence(icon.New(icon.House, icon.Small), testutil.Text("Home"))),
 		testutil.WithChildren(navbar.Item("/inbox", navbar.Badge("12")),
-			testutil.Sequence(icon.New(icon.Inbox, icon.Mini), testutil.Text("Inbox"))),
+			testutil.Sequence(icon.New(icon.Tray, icon.Small), testutil.Text("Inbox"))),
 	))
 	tree := testutil.NewTree(t, testutil.Render(t, c))
 

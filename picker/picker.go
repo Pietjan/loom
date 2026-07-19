@@ -75,12 +75,12 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 
 	// The customizable-select internal button: ignored (harmless) by
 	// non-supporting browsers, the styled closed state in Chromium. The
-	// arrow is a real heroicon — the browser's ::picker-icon is hidden in
+	// arrow is a real icon — the browser's ::picker-icon is hidden in
 	// css/loom.css, since pseudo-element content can't use currentColor or
 	// our transitions.
 	btn := dom.El(atom.Button, dom.Attr("class", buttonClasses()))
 	btn.AppendChild(dom.CustomEl("selectedcontent"))
-	arrow, err := icon.Node(ctx, icon.ChevronDown, icon.Micro, icon.Class(arrowClasses()))
+	arrow, err := icon.Node(ctx, icon.CaretDown, icon.ExtraSmall, icon.Class(arrowClasses()))
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 // Item renders one option. Rich content (icons, secondary text) is
 // allowed; non-supporting browsers collapse it to its text.
 //
-// Each option carries a trailing heroicon checkmark, visible only while
+// Each option carries a trailing icon checkmark, visible only while
 // checked — the browser's ::checkmark pseudo is hidden in css/loom.css.
 // The data-picker-check attribute lets loom.css hide the checkmark's
 // clone inside <selectedcontent> (the browser copies the checked option's
@@ -142,7 +142,7 @@ func Item(value string, options ...Option) templ.Component {
 		if err := render.Children(ctx, o); err != nil {
 			return nil, err
 		}
-		check, err := icon.Node(ctx, icon.Check, icon.Micro, icon.Class(checkClasses()))
+		check, err := icon.Node(ctx, icon.Check, icon.ExtraSmall, icon.Class(checkClasses()))
 		if err != nil {
 			return nil, err
 		}

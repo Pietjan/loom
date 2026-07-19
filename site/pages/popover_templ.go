@@ -21,7 +21,7 @@ const popoverSnippet = `@popover.Root() {
 	@popover.Trigger() {
 		@button.New(button.Ghost) {
 			Storage
-			@icon.New(icon.ChevronDown, icon.Micro)
+			@icon.New(icon.CaretDown, icon.ExtraSmall)
 		}
 	}
 	@popover.Content() {
@@ -142,7 +142,7 @@ func Popover() templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = icon.New(icon.ChevronDown, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.CaretDown, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}

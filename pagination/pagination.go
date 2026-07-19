@@ -84,12 +84,12 @@ func Item(href string, options ...Option) templ.Component {
 // Prev renders the previous-page control. An empty href renders it
 // disabled.
 func Prev(href string, options ...Option) templ.Component {
-	return arrow(href, "Previous page", icon.ChevronLeft, options)
+	return arrow(href, "Previous page", icon.CaretLeft, options)
 }
 
 // Next renders the next-page control. An empty href renders it disabled.
 func Next(href string, options ...Option) templ.Component {
-	return arrow(href, "Next page", icon.ChevronRight, options)
+	return arrow(href, "Next page", icon.CaretRight, options)
 }
 
 func arrow(href, label string, name icon.Name, options []Option) templ.Component {
@@ -98,7 +98,7 @@ func arrow(href, label string, name icon.Name, options []Option) templ.Component
 		for _, opt := range options {
 			opt(&cfg)
 		}
-		glyph, err := icon.Node(ctx, name, icon.Micro)
+		glyph, err := icon.Node(ctx, name, icon.ExtraSmall)
 		if err != nil {
 			return nil, err
 		}

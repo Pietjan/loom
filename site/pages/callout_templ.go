@@ -14,12 +14,12 @@ import (
 )
 
 const calloutSnippet = `@callout.New() {
-	@icon.New(icon.InformationCircle)
+	@icon.New(icon.Info)
 	@callout.Heading() { Neutral }
 	@callout.Text() { Just so you know. }
 }
 @callout.New(callout.Warning) {
-	@icon.New(icon.ExclamationTriangle)
+	@icon.New(icon.Warning)
 	@callout.Heading() { Subscription expiring }
 	@callout.Text() { Renew before Friday to keep access. }
 }
@@ -90,7 +90,7 @@ func Callout() templ.Component {
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = icon.New(icon.InformationCircle).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = icon.New(icon.Info).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -164,7 +164,7 @@ func Callout() templ.Component {
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = icon.New(icon.ExclamationTriangle).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = icon.New(icon.Warning).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

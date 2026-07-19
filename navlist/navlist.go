@@ -2,7 +2,7 @@
 //
 //	@navlist.New(navlist.Label("Main")) {
 //		@navlist.Item("/", navlist.Current()) {
-//			@icon.New(icon.Home, icon.Mini)
+//			@icon.New(icon.House, icon.Small)
 //			Dashboard
 //		}
 //		@navlist.Group(navlist.Title("Settings"), navlist.Open()) {

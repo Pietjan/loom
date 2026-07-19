@@ -113,7 +113,7 @@ func TestTierBGoldens(t *testing.T) {
 	})
 	t.Run("inputgroup", func(t *testing.T) {
 		testutil.Golden(t, "inputgroup", testutil.WithChildren(inputgroup.New(), testutil.Sequence(
-			testutil.WithChildren(inputgroup.Addon(), icon.New(icon.MagnifyingGlass, icon.Mini)),
+			testutil.WithChildren(inputgroup.Addon(), icon.New(icon.MagnifyingGlass, icon.Small)),
 			input.New(input.Name("q"), input.Placeholder("Search")),
 		)))
 	})

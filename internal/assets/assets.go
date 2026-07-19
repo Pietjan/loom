@@ -1,13 +1,13 @@
-// Package assets embeds the heroicons SVG sources consumed by the icon
-// package. The SVG files are self-consistent (outline strokes with
-// currentColor, solid/mini/micro fill with currentColor, correct viewBox
-// per variant) — loaders must not override their presentation attributes.
+// Package assets embeds the Phosphor SVG sources consumed by the icon
+// package. The SVG files are self-consistent (every weight paints with
+// fill="currentColor" on a 0 0 256 256 viewBox, with no width/height, so
+// CSS sizing wins) — loaders must not override their presentation
+// attributes.
 package assets
 
 import (
 	"embed"
 	"fmt"
-	"strings"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -16,8 +16,8 @@ import (
 //go:embed icon/*/*.svg
 var files embed.FS
 
-// LoadIcon parses the named icon SVG for a variant (outline, solid, mini,
-// micro) and returns its root <svg> node.
+// LoadIcon parses the named icon SVG for a variant (regular, fill) and
+// returns its root <svg> node.
 func LoadIcon(name, variant string) (*html.Node, error) {
 	file, err := files.Open(fmt.Sprintf("icon/%s/%s.svg", variant, name))
 	if err != nil {
@@ -36,20 +36,4 @@ func LoadIcon(name, variant string) (*html.Node, error) {
 		}
 	}
 	return nil, fmt.Errorf("no <svg> root in icon %q (variant %q)", name, variant)
-}
-
-// IconNames lists the icon names available for a variant, without the .svg
-// suffix. Used by cmd/icons for code generation.
-func IconNames(variant string) ([]string, error) {
-	entries, err := files.ReadDir("icon/" + variant)
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for _, e := range entries {
-		if n, ok := strings.CutSuffix(e.Name(), ".svg"); ok {
-			names = append(names, n)
-		}
-	}
-	return names, nil
 }

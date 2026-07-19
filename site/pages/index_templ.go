@@ -125,7 +125,7 @@ func Index() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = icon.New(icon.InformationCircle).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = icon.New(icon.Info).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

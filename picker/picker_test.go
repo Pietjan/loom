@@ -18,7 +18,7 @@ func TestCustomizableSelectMarkup(t *testing.T) {
 		picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")),
 		testutil.Sequence(
 			testutil.WithChildren(picker.Item("cat"), testutil.Sequence(
-				icon.New(icon.Heart, icon.Micro), testutil.Text("Cat"))),
+				icon.New(icon.Heart, icon.ExtraSmall), testutil.Text("Cat"))),
 			testutil.WithChildren(picker.Item("dog"), testutil.Text("Dog")),
 		),
 	)
@@ -32,8 +32,8 @@ func TestCustomizableSelectMarkup(t *testing.T) {
 		`<option value="" disabled="" hidden="" selected=""`, // placeholder selected: nothing else claimed it
 		`<option data-ui="picker-option" value="cat"`,
 		`data-ui="icon"`,       // rich option content survives
-		`rotate-180`,           // heroicon arrow replaces ::picker-icon
-		`data-picker-check=""`, // heroicon checkmark replaces ::checkmark
+		`rotate-180`,           // icon arrow replaces ::picker-icon
+		`data-picker-check=""`, // icon checkmark replaces ::checkmark
 		`in-checked:visible`,   // ...and shows only while checked
 	} {
 		if !strings.Contains(out, want) {

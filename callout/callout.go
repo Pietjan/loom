@@ -2,7 +2,7 @@
 // and Heading/Text parts:
 //
 //	@callout.New(callout.Warning) {
-//		@icon.New(icon.ExclamationTriangle)
+//		@icon.New(icon.Warning)
 //		@callout.Heading() { Subscription expiring }
 //		@callout.Text() { Renew before Friday to keep access. }
 //	}

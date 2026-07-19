@@ -160,7 +160,7 @@ func Kanban() templ.Component {
 									}()
 								}
 								ctx = templ.InitializeContext(ctx)
-								templ_7745c5c3_Err = icon.New(icon.Plus, icon.Mini).Render(ctx, templ_7745c5c3_Buffer)
+								templ_7745c5c3_Err = icon.New(icon.Plus, icon.Small).Render(ctx, templ_7745c5c3_Buffer)
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
@@ -286,7 +286,7 @@ func Kanban() templ.Component {
 										}()
 									}
 									ctx = templ.InitializeContext(ctx)
-									templ_7745c5c3_Err = icon.New(icon.Bars3BottomLeft, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+									templ_7745c5c3_Err = icon.New(icon.ListDashes, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
@@ -340,7 +340,7 @@ func Kanban() templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = kanban.Card(kanban.Heading("Migrate icons to heroicons")).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = kanban.Card(kanban.Heading("Migrate icons to phosphor")).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -386,7 +386,7 @@ func Kanban() templ.Component {
 									}()
 								}
 								ctx = templ.InitializeContext(ctx)
-								templ_7745c5c3_Err = icon.New(icon.Plus, icon.Mini).Render(ctx, templ_7745c5c3_Buffer)
+								templ_7745c5c3_Err = icon.New(icon.Plus, icon.Small).Render(ctx, templ_7745c5c3_Buffer)
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
@@ -472,7 +472,7 @@ func Kanban() templ.Component {
 										}()
 									}
 									ctx = templ.InitializeContext(ctx)
-									templ_7745c5c3_Err = icon.New(icon.ChatBubbleLeft, icon.Micro).Render(ctx, templ_7745c5c3_Buffer)
+									templ_7745c5c3_Err = icon.New(icon.Chat, icon.ExtraSmall).Render(ctx, templ_7745c5c3_Buffer)
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}

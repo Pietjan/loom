@@ -264,7 +264,7 @@
             display: none;
         }
 
-        /* The arrow and checkmark are real heroicons in the markup
+        /* The arrow and checkmark are real icons in the markup
          * (colorable, transitionable); hide the browser-generated
          * pseudo-element glyphs. */
         select[data-ui="picker"]::picker-icon,

@@ -15,11 +15,11 @@ import (
 
 const navlistSnippet = `@navlist.New(navlist.Label("Demo")) {
 	@navlist.Item("#", navlist.Current()) {
-		@icon.New(icon.Home, icon.Mini)
+		@icon.New(icon.House, icon.Small)
 		Dashboard
 	}
 	@navlist.Item("#") {
-		@icon.New(icon.ChartBar, icon.Mini)
+		@icon.New(icon.ChartBar, icon.Small)
 		Analytics
 	}
 	@navlist.Group(navlist.Title("Settings"), navlist.Open()) {
@@ -101,7 +101,7 @@ func Navlist() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = icon.New(icon.Home, icon.Mini).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = icon.New(icon.House, icon.Small).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -131,7 +131,7 @@ func Navlist() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = icon.New(icon.ChartBar, icon.Mini).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = icon.New(icon.ChartBar, icon.Small).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}

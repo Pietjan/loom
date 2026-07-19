@@ -2,7 +2,7 @@
 //
 //	@badge.New(badge.Green) { Active }
 //	@badge.New(badge.Red, badge.Pill()) {
-//		@icon.New(icon.XCircle, icon.Micro)
+//		@icon.New(icon.XCircle, icon.ExtraSmall)
 //		Failed
 //	}
 //

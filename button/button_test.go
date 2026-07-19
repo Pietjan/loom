@@ -53,7 +53,7 @@ func TestUserClassWinsConflict(t *testing.T) {
 }
 
 func TestIconOnlyRequiresAccessibleName(t *testing.T) {
-	iconChild := icon.New(icon.XMark)
+	iconChild := icon.New(icon.X)
 
 	err := testutil.RenderErr(withChildren(button.New(), iconChild))
 	if !errors.Is(err, button.ErrNoAccessibleName) {

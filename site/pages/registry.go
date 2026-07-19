@@ -34,7 +34,7 @@ func init() {
 		{Name: "Foundation", Pages: []Page{
 			{Slug: "button", Title: "Button", Description: "Clickable actions in seven variants, three sizes, and groupable rows.", Body: Button},
 			{Slug: "badge", Title: "Badge", Description: "Small status labels in color variants, pill and small forms.", Body: Badge},
-			{Slug: "icon", Title: "Icon", Description: "Heroicons in outline, solid, mini, and micro styles with generated name constants.", Body: Icon},
+			{Slug: "icon", Title: "Icon", Description: "Phosphor icons in regular and fill variants at three sizes, with generated name constants.", Body: Icon},
 			{Slug: "heading", Title: "Heading", Description: "Semantic headings with visual size decoupled from heading level.", Body: Heading},
 			{Slug: "text", Title: "Text", Description: "Body copy with strong and subtle fragments.", Body: Text},
 			{Slug: "link", Title: "Link", Description: "Styled anchors: default, ghost, subtle, and external.", Body: Link},

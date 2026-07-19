@@ -40,7 +40,7 @@ func TestFoundationGoldens(t *testing.T) {
 	t.Run("callout", func(t *testing.T) {
 		testutil.Golden(t, "callout-warning",
 			testutil.WithChildren(callout.New(callout.Warning), testutil.Sequence(
-				icon.New(icon.ExclamationTriangle),
+				icon.New(icon.Warning),
 				testutil.WithChildren(callout.Heading(), testutil.Text("Heads up")),
 				testutil.WithChildren(callout.Text(), testutil.Text("Something needs attention.")),
 			)))

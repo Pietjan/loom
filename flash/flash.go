@@ -120,7 +120,7 @@ func dismissControl(ctx context.Context) *html.Node {
 	check := dom.El(atom.Input, dom.Attr("type", "checkbox"),
 		dom.Attr("class", "sr-only"), dom.Attr("aria-label", "Dismiss"))
 	label.AppendChild(check)
-	if x, err := icon.Node(ctx, icon.XMark, icon.Micro, icon.Attr("aria-hidden", "true")); err == nil {
+	if x, err := icon.Node(ctx, icon.X, icon.ExtraSmall, icon.Attr("aria-hidden", "true")); err == nil {
 		label.AppendChild(x)
 	}
 	return label

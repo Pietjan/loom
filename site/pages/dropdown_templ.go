@@ -18,7 +18,7 @@ const dropdownSnippet = `@dropdown.Root() {
 	@dropdown.Trigger() {
 		@button.New() {
 			Options
-			@icon.New(icon.ChevronDown)
+			@icon.New(icon.CaretDown)
 		}
 	}
 	@dropdown.Menu() {
@@ -28,7 +28,7 @@ const dropdownSnippet = `@dropdown.Root() {
 		}
 		@dropdown.Divider()
 		@dropdown.ItemButton() {
-			@icon.New(icon.ArrowRightStartOnRectangle)
+			@icon.New(icon.SignOut)
 			Log out
 		}
 	}
@@ -145,7 +145,7 @@ func Dropdown() templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = icon.New(icon.ChevronDown).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.CaretDown).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -219,7 +219,7 @@ func Dropdown() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.Cog6Tooth).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.Gear).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -257,7 +257,7 @@ func Dropdown() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.ArrowRightStartOnRectangle).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.SignOut).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}

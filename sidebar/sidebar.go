@@ -99,7 +99,7 @@ func Toggle(options ...Option) templ.Component {
 			dom.Attr("command", "toggle-popover"),
 			dom.Attr("commandfor", id),
 			dom.Attr("aria-label", "Toggle sidebar"))
-		bars, err := icon.Node(ctx, icon.Bars3, icon.WithVariant(icon.VariantMini))
+		bars, err := icon.Node(ctx, icon.List, icon.Small)
 		if err != nil {
 			return nil, err
 		}

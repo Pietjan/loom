@@ -1,24 +1,77 @@
-// Command icons regenerates icon/generated.go with a Name constant per
-// embedded heroicon. Run from the repository root:
+// Command icons vendors the Phosphor icon set and regenerates
+// icon/generated.go with a Name constant per embedded icon. Run from the
+// repository root:
 //
-//	go run ./cmd/icons
+//	go run ./cmd/icons              # regenerate constants from what is vendored
+//	go run ./cmd/icons -download    # refetch the pinned release, then regenerate
+//	go run ./cmd/icons -download -version v2.0.8
+//
+// Only the regular and fill weights are vendored: everything under
+// internal/assets is embedded into every binary that imports loom.
 package main
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
+	"flag"
 	"fmt"
 	"go/format"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
-	"github.com/pietjan/loom/internal/assets"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
+// phosphorVersion is the pinned upstream tag. Bump it deliberately: a
+// download rewrites every vendored SVG.
+const phosphorVersion = "v2.0.8"
+
+// assetDir is where the vendored SVGs live, relative to the repo root.
+const assetDir = "internal/assets/icon"
+
+// variants maps loom's variant directory to Phosphor's weight directory.
+// Phosphor names its fill files "<name>-fill.svg"; the suffix is stripped so
+// both variants share one name space.
+var variants = []struct {
+	dir, weight, suffix string
+}{
+	{dir: "regular", weight: "regular"},
+	{dir: "fill", weight: "fill", suffix: "-fill"},
+}
+
+// maxSVGSize caps a single icon; the largest Phosphor glyph is a few KB.
+const maxSVGSize = 256 << 10
+
 func main() {
-	names, err := assets.IconNames("outline")
-	if err != nil {
+	download := flag.Bool("download", false, "refetch the icon set before generating")
+	version := flag.String("version", phosphorVersion, "phosphor-icons/core tag to download")
+	flag.Parse()
+
+	if *download {
+		if err := vendorIcons(*version); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if err := generate(); err != nil {
 		log.Fatal(err)
+	}
+}
+
+// generate rewrites icon/generated.go from the vendored regular variant.
+// It reads the SVGs off disk rather than through internal/assets' embed FS,
+// so a single `-download` run sees the icons it just wrote.
+func generate() error {
+	names, err := iconNames(variants[0].dir)
+	if err != nil {
+		return err
 	}
 
 	var buf bytes.Buffer
@@ -32,12 +85,207 @@ func main() {
 
 	formatted, err := format.Source(buf.Bytes())
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if err := os.WriteFile("icon/generated.go", formatted, 0o644); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Printf("icon/generated.go: %d icons\n", len(names))
+	return nil
+}
+
+// iconNames lists the vendored icon names for a variant, sorted, without the
+// .svg suffix (os.ReadDir already sorts by file name).
+func iconNames(variant string) ([]string, error) {
+	entries, err := os.ReadDir(filepath.Join(assetDir, variant))
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, e := range entries {
+		if n, ok := strings.CutSuffix(e.Name(), ".svg"); ok {
+			names = append(names, n)
+		}
+	}
+	return names, nil
+}
+
+// vendorIcons downloads the tagged release and replaces the vendored SVGs.
+// Everything is staged in a temp directory first, so a failed download leaves
+// the working tree untouched.
+func vendorIcons(version string) error {
+	stage, err := os.MkdirTemp(filepath.Dir(assetDir), ".icons-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(stage)
+
+	counts, license, err := extract(version, stage)
+	if err != nil {
+		return err
+	}
+
+	// Every variant must cover the same names, or LoadIcon would fail for
+	// generated constants that only exist in one weight.
+	base := counts[variants[0].dir]
+	for _, v := range variants {
+		if len(counts[v.dir]) == 0 {
+			return fmt.Errorf("no icons found for variant %q in %s", v.dir, version)
+		}
+		for name := range base {
+			if !counts[v.dir][name] {
+				return fmt.Errorf("icon %q missing from variant %q", name, v.dir)
+			}
+		}
+		if len(counts[v.dir]) != len(base) {
+			return fmt.Errorf("variant %q has %d icons, want %d", v.dir, len(counts[v.dir]), len(base))
+		}
+	}
+
+	if license == nil {
+		return fmt.Errorf("no LICENSE in phosphor-icons/core %s", version)
+	}
+	if err := os.WriteFile(filepath.Join(stage, "LICENSE"), license, 0o644); err != nil {
+		return err
+	}
+
+	// Swap only once the staged tree is known-good.
+	if err := os.RemoveAll(assetDir); err != nil {
+		return err
+	}
+	if err := os.Rename(stage, assetDir); err != nil {
+		return err
+	}
+	fmt.Printf("%s: %d icons × %d variants (phosphor %s)\n", assetDir, len(base), len(variants), version)
+	return nil
+}
+
+// extract streams the release tarball into stage, keeping only the SVGs for
+// the wanted weights. It returns the icon names written per variant and the
+// upstream LICENSE.
+func extract(version, stage string) (map[string]map[string]bool, []byte, error) {
+	url := fmt.Sprintf("https://codeload.github.com/phosphor-icons/core/tar.gz/refs/tags/%s", version)
+	client := &http.Client{Timeout: 5 * time.Minute}
+	resp, err := client.Get(url)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, nil, fmt.Errorf("GET %s: %s", url, resp.Status)
+	}
+
+	gz, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer gz.Close()
+
+	counts := make(map[string]map[string]bool, len(variants))
+	for _, v := range variants {
+		counts[v.dir] = make(map[string]bool)
+		if err := os.MkdirAll(filepath.Join(stage, v.dir), 0o755); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	var license []byte
+	tr := tar.NewReader(gz)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, nil, err
+		}
+		if hdr.Typeflag != tar.TypeReg {
+			continue
+		}
+
+		// Strip the "core-<version>/" prefix GitHub adds.
+		path := hdr.Name
+		if i := strings.IndexByte(path, '/'); i >= 0 {
+			path = path[i+1:]
+		}
+		if path == "LICENSE" {
+			if license, err = io.ReadAll(io.LimitReader(tr, maxSVGSize)); err != nil {
+				return nil, nil, err
+			}
+			continue
+		}
+
+		dir, name, ok := match(path)
+		if !ok {
+			continue
+		}
+		if hdr.Size > maxSVGSize {
+			return nil, nil, fmt.Errorf("%s: %d bytes exceeds cap", hdr.Name, hdr.Size)
+		}
+
+		body, err := io.ReadAll(io.LimitReader(tr, maxSVGSize))
+		if err != nil {
+			return nil, nil, err
+		}
+		if !isSVG(body) {
+			return nil, nil, fmt.Errorf("%s: no <svg> root", hdr.Name)
+		}
+		if err := os.WriteFile(filepath.Join(stage, dir, name+".svg"), body, 0o644); err != nil {
+			return nil, nil, err
+		}
+		counts[dir][name] = true
+	}
+	return counts, license, nil
+}
+
+// match maps an archive path like "assets/fill/bell-fill.svg" to the variant
+// directory and icon name loom stores it under ("fill", "bell").
+func match(path string) (dir, name string, ok bool) {
+	parts := strings.Split(path, "/")
+	if len(parts) != 3 || parts[0] != "assets" {
+		return "", "", false
+	}
+	file, ok := strings.CutSuffix(parts[2], ".svg")
+	if !ok || file == "" || strings.Contains(file, "..") {
+		return "", "", false
+	}
+	for _, v := range variants {
+		if parts[1] != v.weight {
+			continue
+		}
+		name, ok := strings.CutSuffix(file, v.suffix)
+		if v.suffix != "" && !ok {
+			return "", "", false
+		}
+		return v.dir, name, name != ""
+	}
+	return "", "", false
+}
+
+// isSVG reports whether body parses to an <svg> root element.
+func isSVG(body []byte) bool {
+	container := &html.Node{Type: html.ElementNode, Data: "div", DataAtom: atom.Div}
+	nodes, err := html.ParseFragment(bytes.NewReader(body), container)
+	if err != nil {
+		return false
+	}
+	for _, n := range nodes {
+		if n.Type == html.ElementNode && n.DataAtom == atom.Svg {
+			return true
+		}
+	}
+	return false
+}
+
+// reserved are identifiers the icon package already declares. An icon whose
+// name collides (Phosphor ships an "option" glyph) gets an "Icon" suffix.
+var reserved = map[string]bool{
+	"Name": true, "Variant": true, "Size": true, "Config": true, "Option": true,
+	"Class": true, "ID": true, "Attr": true, "New": true, "Node": true,
+	"WithVariant": true, "WithSize": true,
+	"VariantRegular": true, "VariantFill": true,
+	"SizeBase": true, "SizeSmall": true, "SizeExtraSmall": true,
+	"Regular": true, "Fill": true, "Small": true, "ExtraSmall": true,
 }
 
 // constName converts a file name like "academic-cap" to "AcademicCap".
@@ -49,6 +297,9 @@ func constName(name string) string {
 		}
 		out.WriteString(strings.ToUpper(part[:1]))
 		out.WriteString(part[1:])
+	}
+	if s := out.String(); reserved[s] {
+		return s + "Icon"
 	}
 	return out.String()
 }

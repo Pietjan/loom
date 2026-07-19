@@ -47,7 +47,7 @@ templ layout(title, activeSlug string) {
 				}
 				@header.Spacer()
 				@link.New("https://github.com/pietjan/loom", link.Ghost) {
-					@icon.New(icon.CodeBracket, icon.Class("size-5"))
+					@icon.New(icon.Code, icon.Class("size-5"))
 				}
 				@button.New(button.Ghost, button.Label("Toggle theme"), button.Attr("data-theme-toggle", "")) {
 					@icon.New(icon.Moon, icon.Class("size-5 dark:hidden"))
@@ -58,7 +58,7 @@ templ layout(title, activeSlug string) {
 				@sidebar.New(sidebar.Class("lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:self-start lg:overflow-y-auto")) {
 					@navlist.New() {
 						@navlist.Item(href(ctx, "/"), navItemCurrent(activeSlug == "")...) {
-							@icon.New(icon.Home, icon.Mini)
+							@icon.New(icon.House, icon.Small)
 							Introduction
 						}
 					}

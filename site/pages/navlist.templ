@@ -7,11 +7,11 @@ import (
 
 const navlistSnippet = `@navlist.New(navlist.Label("Demo")) {
 	@navlist.Item("#", navlist.Current()) {
-		@icon.New(icon.Home, icon.Mini)
+		@icon.New(icon.House, icon.Small)
 		Dashboard
 	}
 	@navlist.Item("#") {
-		@icon.New(icon.ChartBar, icon.Mini)
+		@icon.New(icon.ChartBar, icon.Small)
 		Analytics
 	}
 	@navlist.Group(navlist.Title("Settings"), navlist.Open()) {
@@ -26,11 +26,11 @@ templ Navlist() {
 			<div class="w-64">
 				@navlist.New(navlist.Label("Demo")) {
 					@navlist.Item("#", navlist.Current()) {
-						@icon.New(icon.Home, icon.Mini)
+						@icon.New(icon.House, icon.Small)
 						Dashboard
 					}
 					@navlist.Item("#") {
-						@icon.New(icon.ChartBar, icon.Mini)
+						@icon.New(icon.ChartBar, icon.Small)
 						Analytics
 					}
 					@navlist.Group(navlist.Title("Settings"), navlist.Open()) {

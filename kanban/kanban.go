@@ -4,7 +4,7 @@
 //	@kanban.New() {
 //		@kanban.Column() {
 //			@kanban.Header(kanban.Heading("In Progress"), kanban.Count(3)) {
-//				@button.New(button.Subtle, button.Small, button.Square) { @icon.New(icon.Plus, icon.Mini) }
+//				@button.New(button.Subtle, button.Small, button.Square) { @icon.New(icon.Plus, icon.Small) }
 //			}
 //			@kanban.Cards() {
 //				@kanban.Card(kanban.Heading("Update privacy policy")) {

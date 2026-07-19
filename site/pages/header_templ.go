@@ -27,7 +27,7 @@ const headerSnippet = `@header.New() {
 	}
 	@header.Spacer()
 	@button.New(button.Ghost, button.Label("Settings")) {
-		@icon.New(icon.Cog6Tooth)
+		@icon.New(icon.Gear)
 	}
 }`
 
@@ -186,7 +186,7 @@ func Header() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.Home).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.House).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -216,7 +216,7 @@ func Header() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.Inbox).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.Tray).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -246,7 +246,7 @@ func Header() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.DocumentText).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.FileText).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -290,7 +290,7 @@ func Header() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = icon.New(icon.Cog6Tooth).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = icon.New(icon.Gear).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}

@@ -16,7 +16,7 @@ import (
 
 const inputgroupSnippet = `@inputgroup.New() {
 	@inputgroup.Addon() {
-		@icon.New(icon.MagnifyingGlass, icon.Mini)
+		@icon.New(icon.MagnifyingGlass, icon.Small)
 	}
 	@input.New(input.Name("q"), input.Placeholder("Search projects"))
 }
@@ -99,7 +99,7 @@ func Inputgroup() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = icon.New(icon.MagnifyingGlass, icon.Mini).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = icon.New(icon.MagnifyingGlass, icon.Small).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}

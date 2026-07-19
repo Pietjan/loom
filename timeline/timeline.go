@@ -5,7 +5,7 @@
 //
 //	@timeline.New() {
 //		@timeline.Item(timeline.Complete) {
-//			@timeline.Indicator() { @icon.New(icon.Check, icon.Micro) }
+//			@timeline.Indicator() { @icon.New(icon.Check, icon.ExtraSmall) }
 //			@timeline.Content() {
 //				@heading.New() { Deployed v2 }
 //				@text.New() { Rolled out to production. }

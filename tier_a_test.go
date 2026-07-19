@@ -144,7 +144,7 @@ func TestGoldens(t *testing.T) {
 	t.Run("timeline", func(t *testing.T) {
 		testutil.Golden(t, "timeline", testutil.WithChildren(timeline.New(), testutil.Sequence(
 			testutil.WithChildren(timeline.Item(timeline.Complete), testutil.Sequence(
-				testutil.WithChildren(timeline.Indicator(), icon.New(icon.Check, icon.Micro)),
+				testutil.WithChildren(timeline.Indicator(), icon.New(icon.Check, icon.ExtraSmall)),
 				testutil.WithChildren(timeline.Content(), testutil.Text("Shipped.")),
 			)),
 			testutil.WithChildren(timeline.Item(), testutil.WithChildren(timeline.Content(), testutil.Text("Landed."))),

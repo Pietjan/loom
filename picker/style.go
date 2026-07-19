@@ -40,7 +40,7 @@ func optionClasses() string {
 	return b.String()
 }
 
-// arrowClasses style the heroicon replacing ::picker-icon; :open on the
+// arrowClasses style the icon replacing ::picker-icon; :open on the
 // ancestor select rotates it. Scoped to select:open — a bare in-open:
 // would also match an open <details> ancestor (accordion, navlist group).
 func arrowClasses() string {
@@ -49,7 +49,7 @@ func arrowClasses() string {
 	return b.String()
 }
 
-// checkClasses style the heroicon replacing option::checkmark: pushed to
+// checkClasses style the icon replacing option::checkmark: pushed to
 // the row end, visible only while the option is checked.
 func checkClasses() string {
 	var b styles.Builder

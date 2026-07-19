@@ -8,7 +8,7 @@ import (
 
 const inputgroupSnippet = `@inputgroup.New() {
 	@inputgroup.Addon() {
-		@icon.New(icon.MagnifyingGlass, icon.Mini)
+		@icon.New(icon.MagnifyingGlass, icon.Small)
 	}
 	@input.New(input.Name("q"), input.Placeholder("Search projects"))
 }
@@ -24,7 +24,7 @@ templ Inputgroup() {
 			<div class="w-full max-w-md space-y-4">
 				@inputgroup.New() {
 					@inputgroup.Addon() {
-						@icon.New(icon.MagnifyingGlass, icon.Mini)
+						@icon.New(icon.MagnifyingGlass, icon.Small)
 					}
 					@input.New(input.Name("q"), input.Placeholder("Search projects"))
 				}

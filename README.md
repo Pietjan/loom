@@ -50,7 +50,7 @@ http.ListenAndServe(":8080", loom.Middleware(mux))
 
 ## Components
 
-**Foundation** — button, badge, icon (heroicons, generated constants),
+**Foundation** — button, badge, icon (phosphor, generated constants),
 heading, text, link, separator, card, callout, chart.
 
 **Data display** — avatar (photo/initials, status, stacking), breadcrumbs,
