@@ -20,14 +20,14 @@
 	src: url("fonts/geist-sans.woff2") format("woff2");
 }
 @font-face {
-	font-family: "Geist Mono";
+	font-family: "Intel One Mono";
 	font-style: normal;
 	font-weight: 100 900;
 	font-display: swap;
-	src: url("fonts/geist-mono.woff2") format("woff2");
+	src: url("fonts/intel-one-mono.woff2") format("woff2");
 }
 
 @theme {
 	--font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-	--font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+	--font-mono: "Intel One Mono", ui-monospace, SFMono-Regular, monospace;
 }
