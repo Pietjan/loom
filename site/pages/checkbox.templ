@@ -1,0 +1,17 @@
+package pages
+
+import "github.com/pietjan/loom/checkbox"
+
+const checkboxSnippet = `@checkbox.New(checkbox.Name("terms"), checkbox.Label("I agree to the terms"))
+@checkbox.New(checkbox.Name("news"), checkbox.Label("Send me the newsletter"), checkbox.Checked())`
+
+templ Checkbox() {
+	@componentPage("checkbox") {
+		@example("With labels", checkboxSnippet) {
+			<div class="w-full flex flex-col gap-3 items-start">
+				@checkbox.New(checkbox.Name("terms"), checkbox.Label("I agree to the terms"))
+				@checkbox.New(checkbox.Name("news"), checkbox.Label("Send me the newsletter"), checkbox.Checked())
+			</div>
+		}
+	}
+}

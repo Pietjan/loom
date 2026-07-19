@@ -1,0 +1,71 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/table"
+)
+
+const tableSnippet = `@table.New() {
+	@table.Header() {
+		@table.Column() { Name }
+		@table.Column() { Role }
+		@table.Column() { Status }
+	}
+	@table.Body() {
+		@table.Row() {
+			@table.Cell() { Ada Lovelace }
+			@table.Cell() { Engineer }
+			@table.Cell() {
+				@badge.New(badge.Green) { Active }
+			}
+		}
+	}
+}`
+
+templ Table() {
+	@componentPage("table") {
+		@example("Basic table", tableSnippet) {
+			@table.New() {
+				@table.Header() {
+					@table.Column() {
+						Name
+					}
+					@table.Column() {
+						Role
+					}
+					@table.Column() {
+						Status
+					}
+				}
+				@table.Body() {
+					@table.Row() {
+						@table.Cell() {
+							Ada Lovelace
+						}
+						@table.Cell() {
+							Engineer
+						}
+						@table.Cell() {
+							@badge.New(badge.Green) {
+								Active
+							}
+						}
+					}
+					@table.Row() {
+						@table.Cell() {
+							Grace Hopper
+						}
+						@table.Cell() {
+							Admiral
+						}
+						@table.Cell() {
+							@badge.New(badge.Amber) {
+								Away
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

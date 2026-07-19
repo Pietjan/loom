@@ -1,0 +1,61 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/dropdown"
+	"github.com/pietjan/loom/icon"
+)
+
+const dropdownSnippet = `@dropdown.Root() {
+	@dropdown.Trigger() {
+		@button.New() {
+			Options
+			@icon.New(icon.ChevronDown)
+		}
+	}
+	@dropdown.Menu() {
+		@dropdown.Item("#profile") {
+			@icon.New(icon.User)
+			Profile
+		}
+		@dropdown.Divider()
+		@dropdown.ItemButton() {
+			@icon.New(icon.ArrowRightStartOnRectangle)
+			Log out
+		}
+	}
+}`
+
+templ Dropdown() {
+	@componentPage("dropdown") {
+		@prose() {
+			The menu is a popover positioned with CSS anchor positioning; the trigger
+			opens it through invoker commands. Items are links or buttons.
+		}
+		@example("Menu", dropdownSnippet) {
+			@dropdown.Root() {
+				@dropdown.Trigger() {
+					@button.New() {
+						Options
+						@icon.New(icon.ChevronDown)
+					}
+				}
+				@dropdown.Menu() {
+					@dropdown.Item("#profile") {
+						@icon.New(icon.User)
+						Profile
+					}
+					@dropdown.Item("#settings") {
+						@icon.New(icon.Cog6Tooth)
+						Settings
+					}
+					@dropdown.Divider()
+					@dropdown.ItemButton() {
+						@icon.New(icon.ArrowRightStartOnRectangle)
+						Log out
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,35 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/card"
+	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/text"
+)
+
+const cardSnippet = `@card.New() {
+	@heading.New() { Revenue }
+	@text.New() { Up 12% this month. }
+}
+@card.New(card.Small) {
+	@text.New() { Compact card. }
+}`
+
+templ Card() {
+	@componentPage("card") {
+		@example("Sizes", cardSnippet) {
+			@card.New() {
+				@heading.New() {
+					Revenue
+				}
+				@text.New() {
+					Up 12% this month.
+				}
+			}
+			@card.New(card.Small) {
+				@text.New() {
+					Compact card.
+				}
+			}
+		}
+	}
+}

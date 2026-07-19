@@ -1,0 +1,44 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/navbar"
+)
+
+const navbarSnippet = `@navbar.New(navbar.Label("Main")) {
+	@navbar.Item("#", navbar.Current()) {
+		@icon.New(icon.Home)
+		Home
+	}
+	@navbar.Item("#", navbar.Badge("12")) {
+		@icon.New(icon.Inbox)
+		Inbox
+	}
+	@navbar.Item("#") {
+		@icon.New(icon.DocumentText)
+		Documents
+	}
+}`
+
+templ Navbar() {
+	@componentPage("navbar") {
+		@example("Horizontal navigation", navbarSnippet) {
+			<div class="w-full rounded-lg border border-base-200 p-2 dark:border-base-600">
+				@navbar.New(navbar.Label("Main")) {
+					@navbar.Item("#", navbar.Current()) {
+						@icon.New(icon.Home)
+						Home
+					}
+					@navbar.Item("#", navbar.Badge("12")) {
+						@icon.New(icon.Inbox)
+						Inbox
+					}
+					@navbar.Item("#") {
+						@icon.New(icon.DocumentText)
+						Documents
+					}
+				}
+			</div>
+		}
+	}
+}

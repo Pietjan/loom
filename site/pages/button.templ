@@ -1,0 +1,97 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/icon"
+)
+
+const buttonVariantsSnippet = `@button.New() { Outline }
+@button.New(button.Primary) { Primary }
+@button.New(button.Filled) { Filled }
+@button.New(button.Danger) { Danger }
+@button.New(button.Ghost) { Ghost }
+@button.New(button.Subtle) { Subtle }
+@button.New(button.Primary, button.Disabled()) { Disabled }`
+
+const buttonSizesSnippet = `@button.New() { Base }
+@button.New(button.Small) { Small }
+@button.New(button.Tiny) { Tiny }`
+
+const buttonIconsSnippet = `@button.New(button.Label("Notifications")) {
+	@icon.New(icon.Bell)
+}
+@button.New(button.Primary) {
+	@icon.New(icon.Plus)
+	With icon
+}`
+
+const buttonGroupSnippet = `@button.Group() {
+	@button.New() { Years }
+	@button.New() { Months }
+	@button.New() { Days }
+}`
+
+templ Button() {
+	@componentPage("button") {
+		@example("Variants", buttonVariantsSnippet) {
+			@button.New() {
+				Outline
+			}
+			@button.New(button.Primary) {
+				Primary
+			}
+			@button.New(button.Filled) {
+				Filled
+			}
+			@button.New(button.Danger) {
+				Danger
+			}
+			@button.New(button.Ghost) {
+				Ghost
+			}
+			@button.New(button.Subtle) {
+				Subtle
+			}
+			@button.New(button.Primary, button.Disabled()) {
+				Disabled
+			}
+		}
+		@example("Sizes", buttonSizesSnippet) {
+			@button.New() {
+				Base
+			}
+			@button.New(button.Small) {
+				Small
+			}
+			@button.New(button.Tiny) {
+				Tiny
+			}
+		}
+		@example("Icons", buttonIconsSnippet) {
+			@prose() {
+				An icon-only button needs a label for assistive technology; pass it with
+				button.Label.
+			}
+			@button.New(button.Label("Notifications")) {
+				@icon.New(icon.Bell)
+			}
+			@button.New(button.Primary) {
+				@icon.New(icon.Plus)
+				With icon
+			}
+		}
+		@example("Button group", buttonGroupSnippet) {
+			@button.Group() {
+				@button.New() {
+					Years
+				}
+				@button.New() {
+					Months
+				}
+				@button.New() {
+					Days
+				}
+			}
+		}
+	}
+}

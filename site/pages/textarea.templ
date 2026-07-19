@@ -1,0 +1,26 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/field"
+	"github.com/pietjan/loom/textarea"
+)
+
+const textareaSnippet = `@field.Root() {
+	@field.Label() { Bio }
+	@textarea.New(textarea.Name("bio"), textarea.Placeholder("A few words about you"))
+}`
+
+templ Textarea() {
+	@componentPage("textarea") {
+		@example("In a field", textareaSnippet) {
+			<div class="w-full max-w-md">
+				@field.Root() {
+					@field.Label() {
+						Bio
+					}
+					@textarea.New(textarea.Name("bio"), textarea.Placeholder("A few words about you"))
+				}
+			</div>
+		}
+	}
+}

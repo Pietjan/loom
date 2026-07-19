@@ -1,0 +1,21 @@
+package pages
+
+import "github.com/pietjan/loom/progress"
+
+const progressSnippet = `@progress.New(progress.Value(70))
+@progress.New(progress.Value(40), progress.WithEmerald)
+@progress.New(progress.Value(90), progress.WithAmber)
+@progress.New(progress.Indeterminate())`
+
+templ Progress() {
+	@componentPage("progress") {
+		@example("Determinate and indeterminate", progressSnippet) {
+			<div class="w-full max-w-md space-y-3">
+				@progress.New(progress.Value(70))
+				@progress.New(progress.Value(40), progress.WithEmerald)
+				@progress.New(progress.Value(90), progress.WithAmber)
+				@progress.New(progress.Indeterminate())
+			</div>
+		}
+	}
+}

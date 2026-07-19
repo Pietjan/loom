@@ -1,0 +1,29 @@
+package pages
+
+import "github.com/pietjan/loom/text"
+
+const textSnippet = `@text.New() {
+	Body text with a 
+	@text.Strong() { strong }
+	fragment.
+}
+@text.New(text.Subtle) { Subtle secondary text. }`
+
+templ Text() {
+	@componentPage("text") {
+		@example("Body text", textSnippet) {
+			<div class="space-y-2 w-full">
+				@text.New() {
+					Body text with a 
+					@text.Strong() {
+						strong
+					}
+					fragment.
+				}
+				@text.New(text.Subtle) {
+					Subtle secondary text.
+				}
+			</div>
+		}
+	}
+}

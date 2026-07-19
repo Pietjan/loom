@@ -1,0 +1,37 @@
+package pages
+
+import "github.com/pietjan/loom/pagination"
+
+const paginationSnippet = `@pagination.New() {
+	@pagination.Prev("#")
+	@pagination.Item("#") { 1 }
+	@pagination.Item("#", pagination.Current()) { 2 }
+	@pagination.Item("#") { 3 }
+	@pagination.Gap()
+	@pagination.Item("#") { 12 }
+	@pagination.Next("#")
+}`
+
+templ Pagination() {
+	@componentPage("pagination") {
+		@example("Pages with a gap", paginationSnippet) {
+			@pagination.New() {
+				@pagination.Prev("#")
+				@pagination.Item("#") {
+					1
+				}
+				@pagination.Item("#", pagination.Current()) {
+					2
+				}
+				@pagination.Item("#") {
+					3
+				}
+				@pagination.Gap()
+				@pagination.Item("#") {
+					12
+				}
+				@pagination.Next("#")
+			}
+		}
+	}
+}

@@ -1,0 +1,25 @@
+package pages
+
+import "github.com/pietjan/loom/radio"
+
+const radioSnippet = `@radio.Group(radio.Name("plan"), radio.Legend("Plan")) {
+	@radio.New(radio.Value("free"), radio.Label("Free"))
+	@radio.New(radio.Value("pro"), radio.Label("Pro"), radio.Checked())
+	@radio.New(radio.Value("team"), radio.Label("Team"))
+}`
+
+templ Radio() {
+	@componentPage("radio") {
+		@prose() {
+			radio.Group shares the input name with its items through context, so each
+			option only declares its value and label.
+		}
+		@example("Group", radioSnippet) {
+			@radio.Group(radio.Name("plan"), radio.Legend("Plan")) {
+				@radio.New(radio.Value("free"), radio.Label("Free"))
+				@radio.New(radio.Value("pro"), radio.Label("Pro"), radio.Checked())
+				@radio.New(radio.Value("team"), radio.Label("Team"))
+			}
+		}
+	}
+}

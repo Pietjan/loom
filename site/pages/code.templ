@@ -1,0 +1,47 @@
+package pages
+
+import "github.com/pietjan/loom/code"
+
+const codeSample = "// Greet builds a friendly greeting.\n" +
+	"func Greet(name string) string {\n" +
+	"\tif name == \"\" {\n" +
+	"\t\tname = \"world\"\n" +
+	"\t}\n" +
+	"\treturn fmt.Sprintf(\"hello, %s\", name)\n" +
+	"}\n"
+
+const diffSample = "diff --git a/greet.go b/greet.go\n" +
+	"index 83db48f..bf269f4 100644\n" +
+	"--- a/greet.go\n" +
+	"+++ b/greet.go\n" +
+	"@@ -1,5 +1,8 @@\n" +
+	" func Greet(name string) string {\n" +
+	"-\treturn \"hello, \" + name\n" +
+	"+\tif name == \"\" {\n" +
+	"+\t\tname = \"world\"\n" +
+	"+\t}\n" +
+	"+\treturn fmt.Sprintf(\"hello, %s\", name)\n" +
+	" }\n"
+
+const codeSnippet = `@code.New(src, code.Language("go"))`
+
+const codeDiffSnippet = `@code.New(patch, code.Language("go"), code.Diff())`
+
+templ Code() {
+	@componentPage("code") {
+		@prose() {
+			Highlighting runs server-side through chroma; any language chroma knows works,
+			and unknown languages degrade to plain text.
+		}
+		@example("Highlighted block", codeSnippet) {
+			<div class="w-full max-w-2xl">
+				@code.New(codeSample, code.Language("go"))
+			</div>
+		}
+		@example("Diff", codeDiffSnippet) {
+			<div class="w-full max-w-2xl">
+				@code.New(diffSample, code.Language("go"), code.Diff())
+			</div>
+		}
+	}
+}

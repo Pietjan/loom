@@ -1,0 +1,27 @@
+package pages
+
+import "github.com/pietjan/loom/link"
+
+const linkSnippet = `@link.New("#") { Default link }
+@link.New("#", link.Ghost) { Ghost link }
+@link.New("#", link.Subtle) { Subtle link }
+@link.New("https://example.com", link.External()) { External link }`
+
+templ Link() {
+	@componentPage("link") {
+		@example("Variants", linkSnippet) {
+			@link.New("#") {
+				Default link
+			}
+			@link.New("#", link.Ghost) {
+				Ghost link
+			}
+			@link.New("#", link.Subtle) {
+				Subtle link
+			}
+			@link.New("https://example.com", link.External()) {
+				External link
+			}
+		}
+	}
+}

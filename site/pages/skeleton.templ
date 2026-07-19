@@ -1,0 +1,23 @@
+package pages
+
+import "github.com/pietjan/loom/skeleton"
+
+const skeletonSnippet = `@skeleton.New(skeleton.Circle, skeleton.Class("size-12"))
+<div class="flex-1 space-y-2">
+	@skeleton.New()
+	@skeleton.New(skeleton.Class("w-2/3"))
+</div>`
+
+templ Skeleton() {
+	@componentPage("skeleton") {
+		@example("Loading placeholder", skeletonSnippet) {
+			<div class="w-full max-w-md flex gap-4">
+				@skeleton.New(skeleton.Circle, skeleton.Class("size-12"))
+				<div class="flex-1 space-y-2">
+					@skeleton.New()
+					@skeleton.New(skeleton.Class("w-2/3"))
+				</div>
+			</div>
+		}
+	}
+}

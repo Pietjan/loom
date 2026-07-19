@@ -82,14 +82,6 @@ func blockquoteClass() string {
 	return b.String()
 }
 
-func codeBlockClass() string {
-	var b styles.Builder
-	b.Add("mt-4 overflow-x-auto rounded-lg border p-4 first:mt-0")
-	b.Add("font-mono text-xs leading-relaxed")
-	b.Add("border-base-200 bg-base-50 dark:border-base-600 dark:bg-base-800")
-	return b.String()
-}
-
 func inlineCodeClass() string {
 	var b styles.Builder
 	b.Add("rounded bg-base-800/5 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10")

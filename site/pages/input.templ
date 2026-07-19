@@ -1,0 +1,23 @@
+package pages
+
+import "github.com/pietjan/loom/input"
+
+const inputSnippet = `@input.New(input.Name("name"), input.Placeholder("Jane Doe"))
+@input.New(input.Type("email"), input.Name("email"), input.Placeholder("you@example.com"))
+@input.New(input.Type("password"), input.Name("password"), input.Value("hunter2"))`
+
+templ Input() {
+	@componentPage("input") {
+		@prose() {
+			Inputs are usually placed inside field.Root so labels and errors wire up
+			automatically; on their own they still carry the full styling.
+		}
+		@example("Types", inputSnippet) {
+			<div class="w-full max-w-md space-y-4">
+				@input.New(input.Name("name"), input.Placeholder("Jane Doe"))
+				@input.New(input.Type("email"), input.Name("email"), input.Placeholder("you@example.com"))
+				@input.New(input.Type("password"), input.Name("password"), input.Value("hunter2"))
+			</div>
+		}
+	}
+}

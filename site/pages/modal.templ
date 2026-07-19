@@ -1,0 +1,62 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/modal"
+	"github.com/pietjan/loom/text"
+)
+
+const modalSnippet = `@modal.Root() {
+	@modal.Trigger() {
+		@button.New(button.Danger) { Delete account }
+	}
+	@modal.Content() {
+		@modal.Title() { Are you sure? }
+		@text.New() {
+			This action cannot be undone.
+		}
+		<div class="flex justify-end gap-2">
+			@modal.Close() {
+				@button.New() { Cancel }
+			}
+			@button.New(button.Danger) { Delete }
+		</div>
+	}
+}`
+
+templ Modal() {
+	@componentPage("modal") {
+		@prose() {
+			The modal is a native dialog element opened and closed through invoker commands
+			(commandfor/command) — the browser handles focus trapping, the backdrop, and the
+			Escape key. No JavaScript is shipped or required.
+		}
+		@example("Confirmation dialog", modalSnippet) {
+			@modal.Root() {
+				@modal.Trigger() {
+					@button.New(button.Danger) {
+						Delete account
+					}
+				}
+				@modal.Content() {
+					@modal.Title() {
+						Are you sure?
+					}
+					@text.New() {
+						This action cannot be undone. All data will be permanently removed.
+					}
+					<div class="flex justify-end gap-2">
+						@modal.Close() {
+							@button.New() {
+								Cancel
+							}
+						}
+						@button.New(button.Danger) {
+							Delete
+						}
+					</div>
+				}
+			}
+		}
+	}
+}

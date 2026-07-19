@@ -1,0 +1,42 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/icon"
+)
+
+const badgeSnippet = `@badge.New() { Zinc }
+@badge.New(badge.Green) { Active }
+@badge.New(badge.Red) { Failed }
+@badge.New(badge.Blue, badge.Pill()) { Pill }
+@badge.New(badge.Amber, badge.Small) { Small }
+@badge.New(badge.Green) {
+	@icon.New(icon.CheckCircle)
+	With icon
+}`
+
+templ Badge() {
+	@componentPage("badge") {
+		@example("Variants", badgeSnippet) {
+			@badge.New() {
+				Zinc
+			}
+			@badge.New(badge.Green) {
+				Active
+			}
+			@badge.New(badge.Red) {
+				Failed
+			}
+			@badge.New(badge.Blue, badge.Pill()) {
+				Pill
+			}
+			@badge.New(badge.Amber, badge.Small) {
+				Small
+			}
+			@badge.New(badge.Green) {
+				@icon.New(icon.CheckCircle)
+				With icon
+			}
+		}
+	}
+}

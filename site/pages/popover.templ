@@ -1,0 +1,52 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/popover"
+	"github.com/pietjan/loom/progress"
+	"github.com/pietjan/loom/text"
+)
+
+const popoverSnippet = `@popover.Root() {
+	@popover.Trigger() {
+		@button.New(button.Ghost) {
+			Storage
+			@icon.New(icon.ChevronDown, icon.Micro)
+		}
+	}
+	@popover.Content() {
+		@heading.New() { Storage }
+		@text.New() { 8.2 GB of your 10 GB is used. }
+		@progress.New(progress.Value(82))
+	}
+}`
+
+templ Popover() {
+	@componentPage("popover") {
+		@prose() {
+			A freeform panel on the Popover API: click the trigger to open, click outside
+			or press Escape to dismiss — light-dismiss comes from the platform.
+		}
+		@example("Panel", popoverSnippet) {
+			@popover.Root() {
+				@popover.Trigger() {
+					@button.New(button.Ghost) {
+						Storage
+						@icon.New(icon.ChevronDown, icon.Micro)
+					}
+				}
+				@popover.Content() {
+					@heading.New() {
+						Storage
+					}
+					@text.New() {
+						8.2 GB of your 10 GB is used across projects and backups.
+					}
+					@progress.New(progress.Value(82))
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,17 @@
+package pages
+
+import "github.com/pietjan/loom/slider"
+
+const sliderSnippet = `@slider.New(slider.Name("volume"), slider.Value(60))
+@slider.New(slider.Name("zoom"), slider.Min(1), slider.Max(10), slider.Step(1), slider.Value(3))`
+
+templ Slider() {
+	@componentPage("slider") {
+		@example("Ranges", sliderSnippet) {
+			<div class="w-full max-w-md space-y-4">
+				@slider.New(slider.Name("volume"), slider.Value(60))
+				@slider.New(slider.Name("zoom"), slider.Min(1), slider.Max(10), slider.Step(1), slider.Value(3))
+			</div>
+		}
+	}
+}

@@ -1,0 +1,32 @@
+package pages
+
+import "github.com/pietjan/loom/markdown"
+
+const markdownSample = "# Release notes\n\n" +
+	"Version **1.4** ships the `markdown` component — pass a string, get\n" +
+	"[loom](https://github.com/pietjan/loom)-styled markup back.\n\n" +
+	"## Highlights\n\n" +
+	"- GFM tables, ~~footnotes~~ task lists, and autolinks\n" +
+	"- Server-side syntax highlighting, zero JavaScript\n\n" +
+	"- [x] parse with goldmark\n" +
+	"- [x] highlight with chroma\n" +
+	"- [ ] world domination\n\n" +
+	"| Stage | Status |\n| :--- | ---: |\n| Parse | done |\n| Render | done |\n\n" +
+	"> Interactivity from web platform primitives, not JavaScript.\n\n" +
+	"```go\nfunc greet(name string) string {\n\treturn fmt.Sprintf(\"hello, %s\", name) // wave\n}\n```\n"
+
+const markdownSnippet = `@markdown.New(source)`
+
+templ Markdown() {
+	@componentPage("markdown") {
+		@prose() {
+			Markdown is parsed with goldmark (GFM enabled) and rendered as loom-styled
+			markup; fenced code blocks are highlighted server-side with chroma.
+		}
+		@example("Rendered document", markdownSnippet) {
+			<div class="w-full max-w-2xl">
+				@markdown.New(markdownSample)
+			</div>
+		}
+	}
+}

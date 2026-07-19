@@ -1,0 +1,35 @@
+package pages
+
+import "github.com/pietjan/loom/flash"
+
+const flashSnippet = `@flash.New(flash.Success, flash.Dismissible()) {
+	Your changes were saved.
+}
+@flash.New(flash.Warning, flash.Dismissible()) {
+	Your trial ends in 3 days.
+}
+@flash.New(flash.Danger) {
+	We couldn't reach the server.
+}`
+
+templ Flash() {
+	@componentPage("flash") {
+		@prose() {
+			Dismiss and auto-hide are pure CSS — the close button works without any
+			script.
+		}
+		@example("Severities", flashSnippet) {
+			<div class="w-full max-w-md space-y-3">
+				@flash.New(flash.Success, flash.Dismissible()) {
+					Your changes were saved.
+				}
+				@flash.New(flash.Warning, flash.Dismissible()) {
+					Your trial ends in 3 days.
+				}
+				@flash.New(flash.Danger) {
+					We couldn't reach the server.
+				}
+			</div>
+		}
+	}
+}

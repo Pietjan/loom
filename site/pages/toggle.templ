@@ -1,0 +1,13 @@
+package pages
+
+import "github.com/pietjan/loom/toggle"
+
+const toggleSnippet = `@toggle.New(toggle.Name("notify"), toggle.Label("Email notifications"), toggle.Checked())`
+
+templ Toggle() {
+	@componentPage("toggle") {
+		@example("Switch", toggleSnippet) {
+			@toggle.New(toggle.Name("notify"), toggle.Label("Email notifications"), toggle.Checked())
+		}
+	}
+}

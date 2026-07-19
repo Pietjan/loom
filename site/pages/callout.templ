@@ -1,0 +1,58 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/callout"
+	"github.com/pietjan/loom/icon"
+)
+
+const calloutSnippet = `@callout.New() {
+	@icon.New(icon.InformationCircle)
+	@callout.Heading() { Neutral }
+	@callout.Text() { Just so you know. }
+}
+@callout.New(callout.Warning) {
+	@icon.New(icon.ExclamationTriangle)
+	@callout.Heading() { Subscription expiring }
+	@callout.Text() { Renew before Friday to keep access. }
+}
+@callout.New(callout.Danger) {
+	@icon.New(icon.XCircle)
+	@callout.Heading() { Payment failed }
+	@callout.Text() { Your card was declined. }
+}`
+
+templ Callout() {
+	@componentPage("callout") {
+		@example("Severities", calloutSnippet) {
+			<div class="w-full space-y-3">
+				@callout.New() {
+					@icon.New(icon.InformationCircle)
+					@callout.Heading() {
+						Neutral
+					}
+					@callout.Text() {
+						Just so you know.
+					}
+				}
+				@callout.New(callout.Warning) {
+					@icon.New(icon.ExclamationTriangle)
+					@callout.Heading() {
+						Subscription expiring
+					}
+					@callout.Text() {
+						Renew before Friday to keep access.
+					}
+				}
+				@callout.New(callout.Danger) {
+					@icon.New(icon.XCircle)
+					@callout.Heading() {
+						Payment failed
+					}
+					@callout.Text() {
+						Your card was declined.
+					}
+				}
+			</div>
+		}
+	}
+}

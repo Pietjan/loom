@@ -1,0 +1,53 @@
+name: site
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: site/go.mod
+      - name: Install tailwindcss standalone
+        run: |
+          curl -sSL -o /usr/local/bin/tailwindcss \
+            https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.17/tailwindcss-linux-x64
+          chmod +x /usr/local/bin/tailwindcss
+      # The generated Tailwind entry file embeds an absolute path to the loom
+      # module, so CSS must be rebuilt on the runner rather than committed.
+      - name: Build CSS
+        working-directory: site
+        run: |
+          go run github.com/pietjan/loom/cmd/css -o css/input.css
+          cat css/site.css >> css/input.css
+          tailwindcss -i css/input.css -o static/styles.css --minify
+      - name: Render static site
+        working-directory: site
+        run: go run . build -o dist -base /loom/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

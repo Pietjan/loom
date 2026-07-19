@@ -1,0 +1,26 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/separator"
+	"github.com/pietjan/loom/text"
+)
+
+const separatorSnippet = `@text.New() { Above }
+@separator.New()
+@text.New() { Below }`
+
+templ Separator() {
+	@componentPage("separator") {
+		@example("Between content", separatorSnippet) {
+			<div class="w-full space-y-4">
+				@text.New() {
+					Above
+				}
+				@separator.New()
+				@text.New() {
+					Below
+				}
+			</div>
+		}
+	}
+}

@@ -1,0 +1,36 @@
+package pages
+
+import "github.com/pietjan/loom/accordion"
+
+const accordionSnippet = `@accordion.Root(accordion.Exclusive()) {
+	@accordion.Item(accordion.Title("How long does shipping take?"), accordion.Open()) {
+		Usually 3-5 business days within Europe.
+	}
+	@accordion.Item(accordion.Title("Can I return an item?")) {
+		Yes, within 30 days of delivery.
+	}
+}`
+
+templ Accordion() {
+	@componentPage("accordion") {
+		@prose() {
+			Items are details elements; accordion.Exclusive gives them a shared name so
+			the browser closes the others when one opens.
+		}
+		@example("Exclusive accordion", accordionSnippet) {
+			<div class="w-full max-w-md">
+				@accordion.Root(accordion.Exclusive()) {
+					@accordion.Item(accordion.Title("How long does shipping take?"), accordion.Open()) {
+						Usually 3-5 business days within Europe.
+					}
+					@accordion.Item(accordion.Title("Can I return an item?")) {
+						Yes, within 30 days of delivery.
+					}
+					@accordion.Item(accordion.Title("Do you ship worldwide?")) {
+						We ship to most countries.
+					}
+				}
+			</div>
+		}
+	}
+}

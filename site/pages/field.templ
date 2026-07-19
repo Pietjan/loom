@@ -1,0 +1,50 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/field"
+	"github.com/pietjan/loom/input"
+)
+
+const fieldSnippet = `@field.Root() {
+	@field.Label() { Email }
+	@input.New(input.Type("email"), input.Name("email"), input.Placeholder("you@example.com"))
+	@field.Description() { We never share it. }
+}`
+
+const fieldErrorSnippet = `@field.Root(field.Error("That address is already taken."), field.Required()) {
+	@field.Label() { Username }
+	@input.New(input.Name("username"), input.Value("pietjan"))
+}`
+
+templ Field() {
+	@componentPage("field") {
+		@prose() {
+			field.Root wires the label, control, description, and error together through
+			context — ids, for attributes, and aria-describedby come out right without
+			manual bookkeeping.
+		}
+		@example("Label and description", fieldSnippet) {
+			<div class="w-full max-w-md">
+				@field.Root() {
+					@field.Label() {
+						Email
+					}
+					@input.New(input.Type("email"), input.Name("email"), input.Placeholder("you@example.com"))
+					@field.Description() {
+						We never share it.
+					}
+				}
+			</div>
+		}
+		@example("Error state", fieldErrorSnippet) {
+			<div class="w-full max-w-md">
+				@field.Root(field.Error("That address is already taken."), field.Required()) {
+					@field.Label() {
+						Username
+					}
+					@input.New(input.Name("username"), input.Value("pietjan"))
+				}
+			</div>
+		}
+	}
+}

@@ -1,0 +1,64 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/header"
+	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/navbar"
+)
+
+const headerSnippet = `@header.New() {
+	@link.New("#", link.Ghost) {
+		@heading.New() { Acme Inc. }
+	}
+	@navbar.New(navbar.Label("Main")) {
+		@navbar.Item("#", navbar.Current()) { Home }
+		@navbar.Item("#", navbar.Badge("12")) { Inbox }
+	}
+	@header.Spacer()
+	@button.New(button.Ghost, button.Label("Settings")) {
+		@icon.New(icon.Cog6Tooth)
+	}
+}`
+
+templ Header() {
+	@componentPage("header") {
+		@prose() {
+			Add header.Sticky to pin it on scroll — this site's own header uses it.
+		}
+		@example("App bar", headerSnippet) {
+			<div class="w-full overflow-hidden rounded-lg border border-base-200 dark:border-base-600">
+				@header.New() {
+					@link.New("#", link.Ghost) {
+						@heading.New() {
+							Acme Inc.
+						}
+					}
+					@navbar.New(navbar.Label("Main")) {
+						@navbar.Item("#", navbar.Current()) {
+							@icon.New(icon.Home)
+							Home
+						}
+						@navbar.Item("#", navbar.Badge("12")) {
+							@icon.New(icon.Inbox)
+							Inbox
+						}
+						@navbar.Item("#") {
+							@icon.New(icon.DocumentText)
+							Documents
+						}
+					}
+					@header.Spacer()
+					@button.New(button.Ghost, button.Label("Settings")) {
+						@icon.New(icon.Cog6Tooth)
+					}
+				}
+				<div class="bg-base-50 p-6 text-sm text-base-500 dark:bg-base-900 dark:text-base-400">
+					Page content sits below the header.
+				</div>
+			</div>
+		}
+	}
+}

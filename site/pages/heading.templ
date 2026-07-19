@@ -1,0 +1,29 @@
+package pages
+
+import "github.com/pietjan/loom/heading"
+
+const headingSnippet = `@heading.New(heading.Level(2), heading.XL) { Extra large heading }
+@heading.New(heading.Level(3), heading.Large) { Large heading }
+@heading.New() { Base heading }`
+
+templ Heading() {
+	@componentPage("heading") {
+		@prose() {
+			The rendered heading level (h1–h6) and the visual size are independent, so
+			document structure never has to bend to the design.
+		}
+		@example("Sizes", headingSnippet) {
+			<div class="space-y-2 w-full">
+				@heading.New(heading.Level(2), heading.XL) {
+					Extra large heading
+				}
+				@heading.New(heading.Level(3), heading.Large) {
+					Large heading
+				}
+				@heading.New() {
+					Base heading
+				}
+			</div>
+		}
+	}
+}

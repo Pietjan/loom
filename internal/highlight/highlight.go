@@ -1,4 +1,7 @@
-package markdown
+// Package highlight fills html nodes with chroma token spans carrying
+// chroma's standard short classes (.k, .s, ...), colored by the
+// [data-ui="code"] rules in loom.css.
+package highlight
 
 import (
 	"github.com/alecthomas/chroma/v2"
@@ -9,24 +12,22 @@ import (
 	"github.com/pietjan/loom/internal/dom"
 )
 
-// highlightInto fills a <code> element with the highlighted source:
-// chroma token spans carrying chroma's standard short classes (.k, .s,
-// ...), colored by the [data-ui="markdown-code"] rules in loom.css. No
-// language, an unknown language, and a tokenizer error all degrade to a
-// plain text child — highlighting never breaks a page render.
-func highlightInto(code *html.Node, src, lang string) {
+// Into fills parent with the highlighted source. No language, an unknown
+// language, and a tokenizer error all degrade to a plain text child —
+// highlighting never breaks a page render.
+func Into(parent *html.Node, src, lang string) {
 	if lang == "" {
-		code.AppendChild(dom.Text(src))
+		parent.AppendChild(dom.Text(src))
 		return
 	}
-	lexer := lexers.Get(lang)
+	lexer := lexerFor(lang)
 	if lexer == nil {
-		code.AppendChild(dom.Text(src))
+		parent.AppendChild(dom.Text(src))
 		return
 	}
 	it, err := chroma.Coalesce(lexer).Tokenise(nil, src)
 	if err != nil {
-		code.AppendChild(dom.Text(src))
+		parent.AppendChild(dom.Text(src))
 		return
 	}
 	for _, tok := range it.Tokens() {
@@ -35,12 +36,23 @@ func highlightInto(code *html.Node, src, lang string) {
 			cls = "" // whitespace needs no span of its own
 		}
 		if cls == "" {
-			code.AppendChild(dom.Text(tok.Value))
+			parent.AppendChild(dom.Text(tok.Value))
 			continue
 		}
 		span := dom.El(atom.Span, dom.Attr("class", cls))
 		span.AppendChild(dom.Text(tok.Value))
-		code.AppendChild(span)
+		parent.AppendChild(span)
+	}
+}
+
+// lexerFor resolves a language to a lexer, preferring loom's richer templ
+// lexer over chroma's coarser built-in for templ and its aliases.
+func lexerFor(lang string) chroma.Lexer {
+	switch lang {
+	case "templ", "text/x-templ":
+		return templLexer
+	default:
+		return lexers.Get(lang)
 	}
 }
 

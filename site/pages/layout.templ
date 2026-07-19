@@ -1,0 +1,87 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/header"
+	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/navlist"
+	"github.com/pietjan/loom/sidebar"
+)
+
+// themeInitScript runs before first paint: it applies the stored theme (or the
+// system preference when none is stored), setting exactly one of .dark/.light on
+// <html>. loom's raw dark CSS keys off .dark and gates its prefers-color-scheme
+// rules behind :not(.light), so an explicit .light wins even on a dark OS. Emitted
+// via templ.Raw because templ treats the contents of a literal <script> as text.
+const themeInitScript = `<script>(function(){try{var s=localStorage.getItem('theme');` +
+	`var d=s?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;` +
+	`var c=document.documentElement.classList;c.toggle('dark',d);c.toggle('light',!d);}catch(e){}})();</script>`
+
+// themeToggleScript wires the header button: flip .dark/.light and persist.
+const themeToggleScript = `<script>document.querySelector('[data-theme-toggle]')` +
+	`.addEventListener('click',function(){` +
+	`var c=document.documentElement.classList;var d=!c.contains('dark');` +
+	`c.toggle('dark',d);c.toggle('light',!d);` +
+	`try{localStorage.setItem('theme',d?'dark':'light');}catch(e){}});</script>`
+
+templ layout(title, activeSlug string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ title }</title>
+			@templ.Raw(themeInitScript)
+			<link rel="preload" href={ href(ctx, "/static/fonts/geist-sans.woff2") } as="font" type="font/woff2" crossorigin/>
+			<link rel="stylesheet" href={ href(ctx, "/static/styles.css") }/>
+		</head>
+		<body class="bg-base-100/10 text-base-800 dark:bg-base-900 dark:text-base-100">
+			@header.New(header.Sticky()) {
+				@sidebar.Toggle()
+				@link.New(href(ctx, "/"), link.Ghost) {
+					@heading.New() {
+						loom
+					}
+				}
+				@header.Spacer()
+				@link.New("https://github.com/pietjan/loom", link.Ghost) {
+					@icon.New(icon.CodeBracket, icon.Class("size-5"))
+				}
+				@button.New(button.Ghost, button.Label("Toggle theme"), button.Attr("data-theme-toggle", "")) {
+					@icon.New(icon.Moon, icon.Class("size-5 dark:hidden"))
+					@icon.New(icon.Sun, icon.Class("size-5 hidden dark:inline"))
+				}
+			}
+			<div class="flex min-h-[calc(100vh-3.5rem)]">
+				@sidebar.New(sidebar.Class("lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:self-start lg:overflow-y-auto")) {
+					@navlist.New() {
+						@navlist.Item(href(ctx, "/"), navItemCurrent(activeSlug == "")...) {
+							@icon.New(icon.Home, icon.Mini)
+							Introduction
+						}
+					}
+					for _, cat := range Categories {
+						@navlist.New(navlist.Label(cat.Name)) {
+							@navlist.Heading() {
+								{ cat.Name }
+							}
+							for _, p := range cat.Pages {
+								@navlist.Item(href(ctx, "/components/"+p.Slug+"/"), navItemCurrent(p.Slug == activeSlug)...) {
+									{ p.Title }
+								}
+							}
+						}
+					}
+				}
+				<div class="flex-1 min-w-0">
+					<main class="mx-auto max-w-4xl space-y-10 p-8">
+						{ children... }
+					</main>
+				</div>
+			</div>
+			@templ.Raw(themeToggleScript)
+		</body>
+	</html>
+}

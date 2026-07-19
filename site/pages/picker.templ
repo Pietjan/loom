@@ -1,0 +1,52 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/field"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/picker"
+)
+
+const pickerSnippet = `@picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")) {
+	@picker.Item("cat") {
+		@icon.New(icon.Heart)
+		Cat
+	}
+	@picker.Item("dog") {
+		@icon.New(icon.Star)
+		Dog
+	}
+	@picker.Item("fish", picker.Disabled()) {
+		Fish (sold out)
+	}
+}`
+
+templ Picker() {
+	@componentPage("picker") {
+		@prose() {
+			The picker is a customizable select element: real form semantics with rich,
+			styleable options — including icons — and no script.
+		}
+		@example("Rich options", pickerSnippet) {
+			<div class="w-full max-w-md">
+				@field.Root() {
+					@field.Label() {
+						Favorite pet
+					}
+					@picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")) {
+						@picker.Item("cat") {
+							@icon.New(icon.Heart)
+							Cat
+						}
+						@picker.Item("dog") {
+							@icon.New(icon.Star)
+							Dog
+						}
+						@picker.Item("fish", picker.Disabled()) {
+							Fish (sold out)
+						}
+					}
+				}
+			</div>
+		}
+	}
+}

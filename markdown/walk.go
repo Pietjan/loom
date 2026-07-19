@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
+	"github.com/pietjan/loom/code"
 	"github.com/pietjan/loom/heading"
 	"github.com/pietjan/loom/internal/dom"
 	"github.com/pietjan/loom/link"
@@ -74,9 +75,9 @@ func (w *walker) block(n gast.Node, parent *html.Node) error {
 		if l := n.Language(w.source); l != nil {
 			lang = string(l)
 		}
-		parent.AppendChild(codeBlock(w.blockLines(n), lang))
+		return w.codeBlock(w.blockLines(n), lang, parent)
 	case *gast.CodeBlock:
-		parent.AppendChild(codeBlock(w.blockLines(n), ""))
+		return w.codeBlock(w.blockLines(n), "", parent)
 	case *gast.ThematicBreak:
 		hr, err := separator.Node(w.ctx, separator.Class("my-8"))
 		if err != nil {
@@ -133,12 +134,15 @@ func isTask(item gast.Node) bool {
 	return ok
 }
 
-func codeBlock(src, lang string) *html.Node {
-	pre := dom.El(atom.Pre, dom.Marker("markdown-code"), dom.Attr("class", codeBlockClass()))
-	code := dom.El(atom.Code)
-	highlightInto(code, src, lang)
-	pre.AppendChild(code)
-	return pre
+// codeBlock renders a fence through the code component (embeddable, like
+// heading and text), adding only markdown's block spacing on top.
+func (w *walker) codeBlock(src, lang string, parent *html.Node) error {
+	pre, err := code.Node(w.ctx, src, code.Language(lang), code.Class("mt-4 first:mt-0"))
+	if err != nil {
+		return err
+	}
+	parent.AppendChild(pre)
+	return nil
 }
 
 // blockLines concatenates a block node's raw source lines.

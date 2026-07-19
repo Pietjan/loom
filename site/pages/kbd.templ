@@ -1,0 +1,25 @@
+package pages
+
+import "github.com/pietjan/loom/kbd"
+
+const kbdSnippet = `Press
+@kbd.New() { ⌘ }
+@kbd.New() { K }
+to search.`
+
+templ Kbd() {
+	@componentPage("kbd") {
+		@example("Shortcut hint", kbdSnippet) {
+			<div class="flex items-center gap-1 text-sm text-base-500 dark:text-base-400">
+				Press
+				@kbd.New() {
+					⌘
+				}
+				@kbd.New() {
+					K
+				}
+				to search.
+			</div>
+		}
+	}
+}

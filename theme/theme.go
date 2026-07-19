@@ -45,7 +45,9 @@ const tmpl = `/*
     /* Dark accent tracks Tailwind's default dark: variant (media query),
      * and also a manual .dark class for apps using a class toggle. */
     @media (prefers-color-scheme: dark) {
-        :root {
+        /* :root:not(.light) — a real 0,2,0 selector, not :where(), so it
+         * beats the @theme :root light default; an explicit .light opts out. */
+        :root:not(.light) {
             --color-accent: var({{.Accent.Dark.Accent}});
             --color-accent-content: var({{.Accent.Dark.AccentContent}});
             --color-accent-foreground: var({{.Accent.Dark.AccentForeground}});

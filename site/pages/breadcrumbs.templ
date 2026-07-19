@@ -1,0 +1,27 @@
+package pages
+
+import "github.com/pietjan/loom/breadcrumbs"
+
+const breadcrumbsSnippet = `@breadcrumbs.New() {
+	@breadcrumbs.Item("#") { Home }
+	@breadcrumbs.Item("#") { Projects }
+	@breadcrumbs.Item("", breadcrumbs.Current()) { loom }
+}`
+
+templ Breadcrumbs() {
+	@componentPage("breadcrumbs") {
+		@example("Trail", breadcrumbsSnippet) {
+			@breadcrumbs.New() {
+				@breadcrumbs.Item("#") {
+					Home
+				}
+				@breadcrumbs.Item("#") {
+					Projects
+				}
+				@breadcrumbs.Item("", breadcrumbs.Current()) {
+					loom
+				}
+			}
+		}
+	}
+}

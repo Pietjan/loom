@@ -1,0 +1,43 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/input"
+	"github.com/pietjan/loom/inputgroup"
+)
+
+const inputgroupSnippet = `@inputgroup.New() {
+	@inputgroup.Addon() {
+		@icon.New(icon.MagnifyingGlass, icon.Mini)
+	}
+	@input.New(input.Name("q"), input.Placeholder("Search projects"))
+}
+@inputgroup.New() {
+	@inputgroup.Addon() { https:// }
+	@input.New(input.Name("site"), input.Value("acme"))
+	@inputgroup.Addon() { .com }
+}`
+
+templ Inputgroup() {
+	@componentPage("inputgroup") {
+		@example("Leading and trailing addons", inputgroupSnippet) {
+			<div class="w-full max-w-md space-y-4">
+				@inputgroup.New() {
+					@inputgroup.Addon() {
+						@icon.New(icon.MagnifyingGlass, icon.Mini)
+					}
+					@input.New(input.Name("q"), input.Placeholder("Search projects"))
+				}
+				@inputgroup.New() {
+					@inputgroup.Addon() {
+						https://
+					}
+					@input.New(input.Name("site"), input.Value("acme"))
+					@inputgroup.Addon() {
+						.com
+					}
+				}
+			</div>
+		}
+	}
+}

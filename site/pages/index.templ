@@ -1,0 +1,74 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/callout"
+	"github.com/pietjan/loom/code"
+	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/text"
+)
+
+const installSnippet = "go get github.com/pietjan/loom"
+
+// Built by concatenation because templ's parser would mistake a raw-string
+// line starting with "templ " for a template declaration.
+const quickstartSnippet = "import \"github.com/pietjan/loom/button\"\n\n" +
+	"templ save() {\n" +
+	"\t@button.New(button.Primary) {\n" +
+	"\t\tSave\n" +
+	"\t}\n" +
+	"}"
+
+const cssSnippet = `# generate the Tailwind entry file, then compile it
+go run github.com/pietjan/loom/cmd/css -o css/input.css
+tailwindcss -i css/input.css -o static/styles.css --minify`
+
+templ Index() {
+	@layout("loom — components for Go + templ", "") {
+		<div class="space-y-4">
+			@heading.New(heading.Level(1), heading.XL) {
+				loom
+			}
+			@text.New() {
+				Pre-styled components for Go + templ, powered by web platform primitives.
+			}
+			@callout.New() {
+				@icon.New(icon.InformationCircle)
+				@callout.Heading() {
+					No JavaScript required
+				}
+				@callout.Text() {
+					Modals, dropdowns, tabs, and sidebars work out of the box on web platform
+					primitives — the Popover API, invoker commands, the dialog element, and
+					exclusive details. Bring your own JavaScript to enhance them; you won't have
+					to fight the defaults to do it.
+				}
+			}
+		</div>
+		<section class="space-y-3">
+			<h2 class="text-lg font-semibold border-b border-base-200 pb-2 dark:border-base-600">Install</h2>
+			@code.New(installSnippet, code.Language("sh"))
+		</section>
+		<section class="space-y-3">
+			<h2 class="text-lg font-semibold border-b border-base-200 pb-2 dark:border-base-600">Use a component</h2>
+			@text.New() {
+				Every component is a plain Go package returning a templ component.
+			}
+			@code.New(quickstartSnippet, code.Language("templ"))
+		</section>
+		<section class="space-y-3">
+			<h2 class="text-lg font-semibold border-b border-base-200 pb-2 dark:border-base-600">Build the stylesheet</h2>
+			@text.New() {
+				Styling is Tailwind v4. The css command writes an entry file that pulls in the
+				theme and scans loom's packages for classes; the Tailwind CLI compiles it.
+			}
+			@code.New(cssSnippet, code.Language("sh"))
+		</section>
+		<div>
+			@link.New(href(ctx, "/components/button/")) {
+				Browse the components →
+			}
+		</div>
+	}
+}

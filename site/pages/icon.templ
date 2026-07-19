@@ -1,0 +1,25 @@
+package pages
+
+import "github.com/pietjan/loom/icon"
+
+const iconSnippet = `@icon.New(icon.Bell)
+@icon.New(icon.Bell, icon.Solid)
+@icon.New(icon.Bell, icon.Mini)
+@icon.New(icon.Bell, icon.Micro)
+@icon.New(icon.Heart, icon.Solid, icon.Class("text-red-500"))`
+
+templ Icon() {
+	@componentPage("icon") {
+		@prose() {
+			Every heroicon ships as a generated name constant, in the outline, solid,
+			mini (20px), and micro (16px) styles.
+		}
+		@example("Styles", iconSnippet) {
+			@icon.New(icon.Bell)
+			@icon.New(icon.Bell, icon.Solid)
+			@icon.New(icon.Bell, icon.Mini)
+			@icon.New(icon.Bell, icon.Micro)
+			@icon.New(icon.Heart, icon.Solid, icon.Class("text-red-500"))
+		}
+	}
+}

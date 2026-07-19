@@ -1,0 +1,32 @@
+package pages
+
+import "github.com/pietjan/loom/avatar"
+
+const avatarSnippet = `@avatar.New(avatar.Initials("OM"), avatar.Alt("Olivia Martin"))
+@avatar.New(avatar.Initials("GH"), avatar.Alt("Grace Hopper"), avatar.Online)
+@avatar.New(avatar.Initials("AL"), avatar.Alt("Ada Lovelace"), avatar.Busy, avatar.Large)
+@avatar.New(avatar.Initials("TD"), avatar.Alt("Truly Delta"), avatar.Small)`
+
+const avatarGroupSnippet = `@avatar.Group() {
+	@avatar.New(avatar.Initials("A"), avatar.Alt("Ada"))
+	@avatar.New(avatar.Initials("G"), avatar.Alt("Grace"))
+	@avatar.New(avatar.Initials("O"), avatar.Alt("Olivia"))
+}`
+
+templ Avatar() {
+	@componentPage("avatar") {
+		@example("Sizes and status", avatarSnippet) {
+			@avatar.New(avatar.Initials("OM"), avatar.Alt("Olivia Martin"))
+			@avatar.New(avatar.Initials("GH"), avatar.Alt("Grace Hopper"), avatar.Online)
+			@avatar.New(avatar.Initials("AL"), avatar.Alt("Ada Lovelace"), avatar.Busy, avatar.Large)
+			@avatar.New(avatar.Initials("TD"), avatar.Alt("Truly Delta"), avatar.Small)
+		}
+		@example("Group", avatarGroupSnippet) {
+			@avatar.Group() {
+				@avatar.New(avatar.Initials("A"), avatar.Alt("Ada"))
+				@avatar.New(avatar.Initials("G"), avatar.Alt("Grace"))
+				@avatar.New(avatar.Initials("O"), avatar.Alt("Olivia"))
+			}
+		}
+	}
+}

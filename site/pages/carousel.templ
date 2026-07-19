@@ -1,0 +1,42 @@
+package pages
+
+import "github.com/pietjan/loom/carousel"
+
+const carouselSnippet = `@carousel.New() {
+	@carousel.Slide() {
+		<div class="flex h-40 items-center justify-center rounded-lg bg-accent">Slide one</div>
+	}
+	@carousel.Slide() {
+		<div class="flex h-40 items-center justify-center rounded-lg bg-emerald-500">Slide two</div>
+	}
+}`
+
+templ Carousel() {
+	@componentPage("carousel") {
+		@prose() {
+			Slides scroll with CSS scroll-snap; swipe or scroll horizontally to move
+			between them.
+		}
+		@example("Slides", carouselSnippet) {
+			<div class="w-full max-w-lg">
+				@carousel.New() {
+					@carousel.Slide() {
+						<div class="flex h-40 items-center justify-center rounded-lg bg-accent text-2xl font-semibold text-accent-foreground">
+							Slide one
+						</div>
+					}
+					@carousel.Slide() {
+						<div class="flex h-40 items-center justify-center rounded-lg bg-emerald-500 text-2xl font-semibold text-white">
+							Slide two
+						</div>
+					}
+					@carousel.Slide() {
+						<div class="flex h-40 items-center justify-center rounded-lg bg-amber-500 text-2xl font-semibold text-white">
+							Slide three
+						</div>
+					}
+				}
+			</div>
+		}
+	}
+}

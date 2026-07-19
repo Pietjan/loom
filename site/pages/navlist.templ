@@ -1,0 +1,48 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/navlist"
+)
+
+const navlistSnippet = `@navlist.New(navlist.Label("Demo")) {
+	@navlist.Item("#", navlist.Current()) {
+		@icon.New(icon.Home, icon.Mini)
+		Dashboard
+	}
+	@navlist.Item("#") {
+		@icon.New(icon.ChartBar, icon.Mini)
+		Analytics
+	}
+	@navlist.Group(navlist.Title("Settings"), navlist.Open()) {
+		@navlist.Item("#") { Profile }
+		@navlist.Item("#") { Billing }
+	}
+}`
+
+templ Navlist() {
+	@componentPage("navlist") {
+		@example("With a collapsible group", navlistSnippet) {
+			<div class="w-64">
+				@navlist.New(navlist.Label("Demo")) {
+					@navlist.Item("#", navlist.Current()) {
+						@icon.New(icon.Home, icon.Mini)
+						Dashboard
+					}
+					@navlist.Item("#") {
+						@icon.New(icon.ChartBar, icon.Mini)
+						Analytics
+					}
+					@navlist.Group(navlist.Title("Settings"), navlist.Open()) {
+						@navlist.Item("#") {
+							Profile
+						}
+						@navlist.Item("#") {
+							Billing
+						}
+					}
+				}
+			</div>
+		}
+	}
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/pietjan/loom/carousel"
 	"github.com/pietjan/loom/chart"
 	"github.com/pietjan/loom/checkbox"
+	"github.com/pietjan/loom/code"
 	"github.com/pietjan/loom/description"
 	"github.com/pietjan/loom/dropdown"
 	"github.com/pietjan/loom/field"
@@ -59,6 +60,27 @@ const markdownSample = "# Release notes\n\n" +
 	"| Stage | Status |\n| :--- | ---: |\n| Parse | done |\n| Render | done |\n\n" +
 	"> Interactivity from web platform primitives, not JavaScript.\n\n" +
 	"```go\nfunc greet(name string) string {\n\treturn fmt.Sprintf(\"hello, %s\", name) // wave\n}\n```\n"
+
+const codeSample = "// Greet builds a friendly greeting.\n" +
+	"func Greet(name string) string {\n" +
+	"\tif name == \"\" {\n" +
+	"\t\tname = \"world\"\n" +
+	"\t}\n" +
+	"\treturn fmt.Sprintf(\"hello, %s\", name)\n" +
+	"}\n"
+
+const diffSample = "diff --git a/greet.go b/greet.go\n" +
+	"index 83db48f..bf269f4 100644\n" +
+	"--- a/greet.go\n" +
+	"+++ b/greet.go\n" +
+	"@@ -1,5 +1,8 @@\n" +
+	" func Greet(name string) string {\n" +
+	"-\treturn \"hello, \" + name\n" +
+	"+\tif name == \"\" {\n" +
+	"+\t\tname = \"world\"\n" +
+	"+\t}\n" +
+	"+\treturn fmt.Sprintf(\"hello, %s\", name)\n" +
+	" }\n"
 
 templ Index() {
 	@layout("loom showcase") {
@@ -370,6 +392,12 @@ templ Index() {
 		@section("Markdown") {
 			<div class="w-full max-w-2xl">
 				@markdown.New(markdownSample)
+			</div>
+		}
+		@section("Code") {
+			<div class="flex w-full max-w-2xl flex-col gap-4">
+				@code.New(codeSample, code.Language("go"))
+				@code.New(diffSample, code.Language("go"), code.Diff())
 			</div>
 		}
 		@section("Description list") {

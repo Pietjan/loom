@@ -7,6 +7,7 @@
     },
     "tailwindCSS.classFunctions": [
         "b.Add",
+        ".Class",
     ],
     "css.customData": [
         ".vscode/tailwind.css-data.json"

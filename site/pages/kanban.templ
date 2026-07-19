@@ -1,0 +1,104 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/avatar"
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/kanban"
+)
+
+const kanbanSnippet = `@kanban.New() {
+	@kanban.Column() {
+		@kanban.Header(kanban.Heading("Planned"), kanban.Count(3))
+		@kanban.Cards() {
+			@kanban.Card(kanban.Heading("Update privacy policy")) {
+				@kanban.CardHeader() {
+					@badge.New(badge.Blue, badge.Small) { UI }
+				}
+				@kanban.CardFooter() {
+					@avatar.Group() {
+						@avatar.New(avatar.Initials("PO"), avatar.Small)
+					}
+				}
+			}
+		}
+		@kanban.Footer() {
+			@button.New(button.Subtle, button.Small) { New card }
+		}
+	}
+}`
+
+templ Kanban() {
+	@componentPage("kanban") {
+		@prose() {
+			The kanban component is static board markup — bring your own interactivity
+			(links, forms, or a sprinkle of your framework of choice).
+		}
+		@example("Board", kanbanSnippet) {
+			<div class="w-full">
+				@kanban.New() {
+					@kanban.Column() {
+						@kanban.Header(kanban.Heading("Planned"), kanban.Count(3)) {
+							@button.New(button.Subtle, button.Small, button.Label("New card")) {
+								@icon.New(icon.Plus, icon.Mini)
+							}
+						}
+						@kanban.Cards() {
+							@kanban.Card(kanban.Heading("Update privacy policy in app")) {
+								@kanban.CardHeader() {
+									@badge.New(badge.Blue, badge.Small) {
+										UI
+									}
+									@badge.New(badge.Red, badge.Small) {
+										Bug
+									}
+								}
+								@kanban.CardFooter() {
+									@icon.New(icon.Bars3BottomLeft, icon.Micro)
+									<span class="ms-auto"></span>
+									@avatar.Group() {
+										@avatar.New(avatar.Initials("PO"), avatar.Small)
+										@avatar.New(avatar.Initials("JR"), avatar.Small)
+									}
+								}
+							}
+							@kanban.Card(kanban.Heading("Migrate icons to heroicons"))
+							@kanban.Card(kanban.Heading("Draft Q3 roadmap"))
+						}
+						@kanban.Footer() {
+							@button.New(button.Subtle, button.Small) {
+								@icon.New(icon.Plus, icon.Mini)
+								New card
+							}
+						}
+					}
+					@kanban.Column() {
+						@kanban.Header(kanban.Heading("In Progress"), kanban.Count(2), kanban.Subheading("Limit 3"))
+						@kanban.Cards() {
+							@kanban.Card(kanban.Heading("Charts reuse the tooltip overlay")) {
+								@kanban.CardFooter() {
+									@icon.New(icon.ChatBubbleLeft, icon.Micro)
+									<span class="text-xs">4</span>
+								}
+							}
+							@kanban.Card(kanban.Heading("Flux-style timeline")) {
+								@kanban.CardHeader() {
+									@badge.New(badge.Green, badge.Small) {
+										Component
+									}
+								}
+							}
+						}
+					}
+					@kanban.Column() {
+						@kanban.Header(kanban.Heading("Done"), kanban.Count(1))
+						@kanban.Cards() {
+							@kanban.Card(kanban.Heading("Ship header layout"))
+						}
+					}
+				}
+			</div>
+		}
+	}
+}

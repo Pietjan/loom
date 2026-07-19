@@ -1,0 +1,71 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/chart"
+	"github.com/pietjan/loom/text"
+)
+
+const chartAreaSnippet = `@chart.New(
+	chart.Title("Visitors per month"),
+	chart.Labels("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
+	chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}, chart.Colored(chart.Indigo)),
+	chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Colored(chart.Emerald)),
+	chart.Area(), chart.Smooth(), chart.Legend(),
+)`
+
+const chartBarsSnippet = `@chart.New(
+	chart.Title("Revenue per quarter"),
+	chart.Bars(),
+	chart.Labels("Q1", "Q2", "Q3", "Q4"),
+	chart.Series("2025", []float64{110, 140, 125, 180}, chart.Colored(chart.Indigo)),
+	chart.Series("2026", []float64{150, 170, 160, 210}, chart.Colored(chart.Blue)),
+	chart.Legend(),
+)`
+
+const chartSparklineSnippet = `@chart.New(chart.Sparkline(), chart.Series("Trend", []float64{4, 7, 5, 9, 8, 12, 10, 14}))`
+
+templ Chart() {
+	@componentPage("chart") {
+		@prose() {
+			Charts render server-side as SVG; hover tooltips reuse the tooltip styling
+			with no script.
+		}
+		@example("Area chart", chartAreaSnippet) {
+			<div class="w-full">
+				@chart.New(
+					chart.Title("Visitors per month"),
+					chart.Labels("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
+					chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}, chart.Colored(chart.Indigo)),
+					chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Colored(chart.Emerald)),
+					chart.Area(), chart.Smooth(), chart.Legend(),
+				)
+			</div>
+		}
+		@example("Bar chart", chartBarsSnippet) {
+			<div class="w-full">
+				@chart.New(
+					chart.Title("Revenue per quarter"),
+					chart.Bars(),
+					chart.Labels("Q1", "Q2", "Q3", "Q4"),
+					chart.Series("2025", []float64{110, 140, 125, 180}, chart.Colored(chart.Indigo)),
+					chart.Series("2026", []float64{150, 170, 160, 210}, chart.Colored(chart.Blue)),
+					chart.Legend(),
+				)
+			</div>
+		}
+		@example("Sparkline", chartSparklineSnippet) {
+			<div class="flex items-center gap-3">
+				@text.New() {
+					Sparkline:
+				}
+				<div class="w-40">
+					@chart.New(chart.Sparkline(), chart.Series("Trend", []float64{4, 7, 5, 9, 8, 12, 10, 14}))
+				</div>
+				@badge.New(badge.Green) {
+					+18%
+				}
+			</div>
+		}
+	}
+}

@@ -1,0 +1,39 @@
+package pages
+
+import "github.com/pietjan/loom/description"
+
+const descriptionSnippet = `@description.New() {
+	@description.Term() { Plan }
+	@description.Detail() { Pro }
+	@description.Term() { Renews }
+	@description.Detail() { March 1, 2026 }
+}`
+
+templ Description() {
+	@componentPage("description") {
+		@example("Label/value pairs", descriptionSnippet) {
+			<div class="w-full max-w-md">
+				@description.New() {
+					@description.Term() {
+						Plan
+					}
+					@description.Detail() {
+						Pro
+					}
+					@description.Term() {
+						Renews
+					}
+					@description.Detail() {
+						March 1, 2026
+					}
+					@description.Term() {
+						Seats
+					}
+					@description.Detail() {
+						8 of 10 used
+					}
+				}
+			</div>
+		}
+	}
+}

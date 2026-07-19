@@ -1,0 +1,31 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/field"
+	"github.com/pietjan/loom/fieldset"
+	"github.com/pietjan/loom/input"
+)
+
+const fieldsetSnippet = `@fieldset.New(fieldset.Legend("Shipping (disabled)"), fieldset.Disabled()) {
+	@field.Root() {
+		@field.Label() { Street }
+		@input.New(input.Name("street"))
+	}
+}`
+
+templ Fieldset() {
+	@componentPage("fieldset") {
+		@example("Disabled group", fieldsetSnippet) {
+			<div class="w-full max-w-md">
+				@fieldset.New(fieldset.Legend("Shipping (disabled)"), fieldset.Disabled()) {
+					@field.Root() {
+						@field.Label() {
+							Street
+						}
+						@input.New(input.Name("street"))
+					}
+				}
+			</div>
+		}
+	}
+}
