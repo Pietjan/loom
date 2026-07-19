@@ -16,14 +16,15 @@ import (
 
 const pickerSnippet = `@picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")) {
 	@picker.Item("cat") {
-		@icon.New(icon.Heart)
+		@icon.New(icon.Cat)
 		Cat
 	}
 	@picker.Item("dog") {
-		@icon.New(icon.Star)
+		@icon.New(icon.Dog)
 		Dog
 	}
 	@picker.Item("fish", picker.Disabled()) {
+		@icon.New(icon.Fish)
 		Fish (sold out)
 	}
 }`
@@ -165,7 +166,7 @@ func Picker() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.Heart).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.Cat).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -195,7 +196,7 @@ func Picker() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = icon.New(icon.Star).Render(ctx, templ_7745c5c3_Buffer)
+							templ_7745c5c3_Err = icon.New(icon.Dog).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -225,7 +226,11 @@ func Picker() templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "Fish (sold out)")
+							templ_7745c5c3_Err = icon.New(icon.Fish).Render(ctx, templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err != nil {
+								return templ_7745c5c3_Err
+							}
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " Fish (sold out)")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}

@@ -8,14 +8,15 @@ import (
 
 const pickerSnippet = `@picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")) {
 	@picker.Item("cat") {
-		@icon.New(icon.Heart)
+		@icon.New(icon.Cat)
 		Cat
 	}
 	@picker.Item("dog") {
-		@icon.New(icon.Star)
+		@icon.New(icon.Dog)
 		Dog
 	}
 	@picker.Item("fish", picker.Disabled()) {
+		@icon.New(icon.Fish)
 		Fish (sold out)
 	}
 }`
@@ -34,14 +35,15 @@ templ Picker() {
 					}
 					@picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")) {
 						@picker.Item("cat") {
-							@icon.New(icon.Heart)
+							@icon.New(icon.Cat)
 							Cat
 						}
 						@picker.Item("dog") {
-							@icon.New(icon.Star)
+							@icon.New(icon.Dog)
 							Dog
 						}
 						@picker.Item("fish", picker.Disabled()) {
+							@icon.New(icon.Fish)
 							Fish (sold out)
 						}
 					}

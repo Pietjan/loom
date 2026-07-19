@@ -58,9 +58,11 @@ func circleClasses(c Config) string {
 		return b.String()
 	}
 	b.Add("flex shrink-0 items-center justify-center rounded-full font-medium")
+	// The circle runs a size step ahead of its glyph so icons get a ring of
+	// breathing room rather than filling the disc edge to edge.
 	styles.Match(&b, c.Size, map[Size]string{
-		SizeBase:  "size-6 text-xs **:data-[ui=icon]:size-4",
-		SizeLarge: "size-8 text-sm **:data-[ui=icon]:size-5",
+		SizeBase:  "size-8 text-xs **:data-[ui=icon]:size-5",
+		SizeLarge: "size-10 text-sm **:data-[ui=icon]:size-6",
 	})
 	switch {
 	case c.Color != "":
@@ -105,8 +107,8 @@ func contentClasses(c Config) string {
 	b.Add("pb-6 group-last/tl:pb-0")
 	// Nudge the first text line level with the indicator circle.
 	styles.Match(&b, c.Size, map[Size]string{
-		SizeBase:  "pt-0.5",
-		SizeLarge: "pt-1.5",
+		SizeBase:  "pt-1.5",
+		SizeLarge: "pt-2.5",
 	})
 	return b.String()
 }

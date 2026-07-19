@@ -18,18 +18,22 @@ func classes(c Config) string {
 	return b.String()
 }
 
+// size also pins the icon size, overriding whatever variant the caller
+// passed. Icon's own size utility is wrapped in :where(), so these win
+// without specificity games. The 24px box of an extra-small button has no
+// room for a 20px glyph, hence the step down.
 func size(b *styles.Builder, c Config) {
 	switch c.Size {
 	case SizeSmall:
-		b.Add("h-8 text-sm rounded-md")
+		b.Add("h-8 text-sm rounded-md [&_[data-ui=icon]]:size-5")
 		b.If(c.square, "w-8")
 		b.If(!c.square, "px-3")
 	case SizeExtraSmall:
-		b.Add("h-6 text-xs rounded-md")
+		b.Add("h-6 text-xs rounded-md [&_[data-ui=icon]]:size-4")
 		b.If(c.square, "w-6")
 		b.If(!c.square, "px-2")
 	default:
-		b.Add("h-10 text-sm rounded-lg")
+		b.Add("h-10 text-sm rounded-lg [&_[data-ui=icon]]:size-5")
 		b.If(c.square, "w-10")
 		b.If(!c.square, "px-4")
 	}

@@ -18,7 +18,7 @@ func TestCustomizableSelectMarkup(t *testing.T) {
 		picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")),
 		testutil.Sequence(
 			testutil.WithChildren(picker.Item("cat"), testutil.Sequence(
-				icon.New(icon.Heart, icon.ExtraSmall), testutil.Text("Cat"))),
+				icon.New(icon.Cat, icon.ExtraSmall), testutil.Text("Cat"))),
 			testutil.WithChildren(picker.Item("dog"), testutil.Text("Dog")),
 		),
 	)
