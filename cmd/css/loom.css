@@ -181,14 +181,21 @@
     }
 
     /* Native-widget glyphs. Drawn here (not as Tailwind arbitrary values)
-     * because data-URI images don't survive the class scanner. The white
-     * glyph on the accent surface follows the platform convention
-     * (Tailwind forms plugin does the same). */
-    [data-ui="checkbox"]:checked {
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="white" d="M12.207 4.793a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L6.5 9.086l4.293-4.293a1 1 0 0 1 1.414 0z"/></svg>');
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
+     * because data-URI images don't survive the class scanner. The
+     * checkmark is a mask filled with --color-accent-foreground rather
+     * than a hardcoded white glyph: neutral accents invert in dark mode
+     * (white surface, dark foreground), and amber/yellow/lime already sit
+     * dark-on-light in both modes — a white checkmark vanishes on both. */
+    [data-ui="checkbox"]:checked::after {
+        content: "";
+        display: block;
+        inline-size: 100%;
+        block-size: 100%;
+        background-color: var(--color-accent-foreground);
+        mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12.207 4.793a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L6.5 9.086l4.293-4.293a1 1 0 0 1 1.414 0z"/></svg>');
+        mask-size: 100% 100%;
+        mask-position: center;
+        mask-repeat: no-repeat;
     }
 
     /* Radio dot: a scaled inner circle via radial gradient, sized in em so
