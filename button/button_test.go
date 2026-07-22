@@ -90,6 +90,68 @@ func TestDisabled(t *testing.T) {
 	}
 }
 
+func TestHrefRendersAnchor(t *testing.T) {
+	out := testutil.Render(t, withChildren(button.New(button.Primary, button.Href("/signup")), textChild("Join")))
+	tree := testutil.Parse(t, out)
+	a := dom.Find(tree, dom.ByMarker("button"))
+	if a.DataAtom != atom.A {
+		t.Fatalf("expected <a>, got <%s>", a.Data)
+	}
+	if got := dom.GetAttr(a, "href"); got != "/signup" {
+		t.Fatalf("href: %q", got)
+	}
+	if dom.HasAttr(a, "type") {
+		t.Fatal("anchor must not carry a type attribute")
+	}
+	// Variant styling is shared with the <button> form.
+	if !strings.Contains(dom.GetAttr(a, "class"), "bg-accent") {
+		t.Fatalf("primary styling missing: %s", dom.GetAttr(a, "class"))
+	}
+}
+
+func TestHrefExternal(t *testing.T) {
+	c := button.New(button.Href("https://example.com"), button.External())
+	out := testutil.Render(t, withChildren(c, textChild("Docs")))
+	tree := testutil.Parse(t, out)
+	a := dom.Find(tree, dom.ByMarker("button"))
+	if got := dom.GetAttr(a, "target"); got != "_blank" {
+		t.Fatalf("target: %q", got)
+	}
+	if got := dom.GetAttr(a, "rel"); got != "noopener noreferrer" {
+		t.Fatalf("rel: %q", got)
+	}
+}
+
+func TestDisabledHrefIsInertSpan(t *testing.T) {
+	c := button.New(button.Href("/signup"), button.Disabled())
+	out := testutil.Render(t, withChildren(c, textChild("Join")))
+	tree := testutil.Parse(t, out)
+	n := dom.Find(tree, dom.ByMarker("button"))
+	if n.DataAtom != atom.Span {
+		t.Fatalf("expected inert <span>, got <%s>", n.Data)
+	}
+	if dom.HasAttr(n, "href") {
+		t.Fatal("disabled link button must not keep its href")
+	}
+	if got := dom.GetAttr(n, "aria-disabled"); got != "true" {
+		t.Fatalf("aria-disabled: %q", got)
+	}
+}
+
+func TestHrefWithTypeIsRejected(t *testing.T) {
+	c := button.New(button.Href("/signup"), button.Submit)
+	if err := testutil.RenderErr(withChildren(c, textChild("Join"))); !errors.Is(err, button.ErrHrefWithType) {
+		t.Fatalf("expected ErrHrefWithType, got %v", err)
+	}
+}
+
+func TestHrefIconOnlyRequiresAccessibleName(t *testing.T) {
+	c := button.New(button.Href("/close"))
+	if err := testutil.RenderErr(withChildren(c, icon.New(icon.X))); !errors.Is(err, button.ErrNoAccessibleName) {
+		t.Fatalf("expected ErrNoAccessibleName, got %v", err)
+	}
+}
+
 func TestGroup(t *testing.T) {
 	buttons := testutil.Sequence(
 		withChildren(button.New(), textChild("One")),

@@ -25,6 +25,13 @@ const buttonIconsSnippet = `@button.New(button.Label("Notifications")) {
 	With icon
 }`
 
+const buttonLinkSnippet = `@button.New(button.Primary, button.Href("/docs")) { Get started }
+@button.New(button.Href("https://github.com"), button.External()) {
+	@icon.New(icon.ArrowUpRight)
+	Source
+}
+@button.New(button.Href("/docs"), button.Disabled()) { Unavailable }`
+
 const buttonGroupSnippet = `@button.Group() {
 	@button.New() { Years }
 	@button.New() { Months }
@@ -78,6 +85,23 @@ templ Button() {
 			@button.New(button.Primary) {
 				@icon.New(icon.Plus)
 				With icon
+			}
+		}
+		@example("Links", buttonLinkSnippet) {
+			@prose() {
+				button.Href renders an anchor instead of a button, so navigation keeps
+				middle-click and "open in new tab". A disabled one renders as an inert
+				span rather than a dead link.
+			}
+			@button.New(button.Primary, button.Href("/")) {
+				Get started
+			}
+			@button.New(button.Href("https://github.com/pietjan/loom"), button.External()) {
+				@icon.New(icon.ArrowUpRight)
+				Source
+			}
+			@button.New(button.Href("/docs"), button.Disabled()) {
+				Unavailable
 			}
 		}
 		@example("Button group", buttonGroupSnippet) {

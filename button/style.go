@@ -6,7 +6,13 @@ func classes(c Config) string {
 	var b styles.Builder
 
 	b.Add("relative inline-flex items-center justify-center gap-2 font-medium whitespace-nowrap")
+	// no-underline because an Href button renders as an <a>, which the
+	// surrounding prose styles may underline; harmless on a <button>.
+	b.Add("no-underline")
+	// aria-disabled mirrors the :disabled rules for the link form — a
+	// <span>/<a> never matches :disabled.
 	b.Add("disabled:opacity-75 disabled:cursor-default disabled:pointer-events-none")
+	b.Add("aria-disabled:opacity-75 aria-disabled:cursor-default aria-disabled:pointer-events-none")
 
 	size(&b, c)
 	background(&b, c)

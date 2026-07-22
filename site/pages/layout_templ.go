@@ -196,7 +196,7 @@ func layout(title, activeSlug string) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = link.New("https://github.com/pietjan/loom", link.Ghost).Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = button.New(button.Ghost, button.Small, button.Label("Source code"), button.Href("https://github.com/pietjan/loom"), button.External()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -230,7 +230,7 @@ func layout(title, activeSlug string) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = button.New(button.Ghost, button.Label("Toggle theme"), button.Attr("data-theme-toggle", "")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = button.New(button.Ghost, button.Small, button.Label("Toggle theme"), button.Attr("data-theme-toggle", "")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

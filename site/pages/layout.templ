@@ -46,10 +46,10 @@ templ layout(title, activeSlug string) {
 					}
 				}
 				@header.Spacer()
-				@link.New("https://github.com/pietjan/loom", link.Ghost) {
+				@button.New(button.Ghost, button.Small, button.Label("Source code"), button.Href("https://github.com/pietjan/loom"), button.External()) {
 					@icon.New(icon.Code, icon.Class("size-5"))
 				}
-				@button.New(button.Ghost, button.Label("Toggle theme"), button.Attr("data-theme-toggle", "")) {
+				@button.New(button.Ghost, button.Small, button.Label("Toggle theme"), button.Attr("data-theme-toggle", "")) {
 					@icon.New(icon.Moon, icon.Class("size-5 dark:hidden"))
 					@icon.New(icon.Sun, icon.Class("size-5 hidden dark:inline"))
 				}
