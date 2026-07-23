@@ -11,18 +11,14 @@ type xy struct {
 	x, y float64
 }
 
-// Text/box sizing. There is no DOM to measure against on the server, so box
-// widths come from a deterministic estimate: a fixed average glyph advance
-// per rune plus padding. Approximate for proportional fonts and unwrapped in
-// v1, but stable and reproducible — which is what golden tests require.
+// Node box metrics, kept on loom's compact scale: text-xs labels in a box
+// about as tall as a small button (h-8), padded like a medium badge.
 const (
-	fontSize   = 14.0 // body font-size (matches content text-[14px])
-	lineHeight = 20.0 // per-line height for size inference
-	glyphAdv   = 8.0  // ~0.57em average advance
-	padX       = 16.0 // horizontal box padding
-	padY       = 11.0 // vertical box padding
-	minNodeW   = 56.0 // floor so short labels aren't cramped
-	dummySize  = 8.0  // routing-dummy box extent
+	fontSize  = 12.0 // label font-size (matches content text-xs)
+	padX      = 12.0 // horizontal box padding
+	padY      = 8.0  // vertical box padding
+	minNodeW  = 48.0 // floor so short labels aren't cramped
+	dummySize = 8.0  // routing-dummy box extent
 )
 
 // fmtCoord renders an SVG coordinate with sub-pixel precision but no
@@ -67,7 +63,7 @@ func borderPoint(cx, cy, w, h float64, t xy) xy {
 // arrowhead returns the three-point polygon (tip + two base corners) for an
 // arrow at the end of the polyline, pointing along its final segment.
 func arrowhead(pts []xy) string {
-	const length, halfWidth = 9.0, 5.0
+	const length, halfWidth = 8.0, 4.0
 	tip := pts[len(pts)-1]
 	prev := pts[len(pts)-2]
 	dx, dy := tip.x-prev.x, tip.y-prev.y

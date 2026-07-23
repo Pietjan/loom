@@ -30,9 +30,10 @@ func canvasClasses() string {
 	return b.String()
 }
 
+// Strokes are 1px to match loom's borders, which are `border` everywhere.
 func nodeShapeClasses(t Tone) string {
 	var b styles.Builder
-	b.Add("fill-white stroke-[1.5] dark:fill-base-800")
+	b.Add("fill-white stroke-1 dark:fill-base-800")
 	styles.Match(&b, t, toneStroke)
 	return b.String()
 }
@@ -42,13 +43,13 @@ func nodeShapeClasses(t Tone) string {
 func contentClasses(bare bool) string {
 	var b styles.Builder
 	b.Add("absolute flex items-center justify-center text-center leading-tight")
-	b.If(!bare, "px-2 text-[14px] font-medium text-base-700 dark:text-base-100")
+	b.If(!bare, "px-2 text-xs font-medium text-base-700 dark:text-base-100")
 	return b.String()
 }
 
 func edgeClasses() string {
 	var b styles.Builder
-	b.Add("fill-none stroke-base-300 stroke-[1.5] dark:stroke-base-600")
+	b.Add("fill-none stroke-base-300 stroke-1 dark:stroke-base-600")
 	return b.String()
 }
 
@@ -60,6 +61,6 @@ func arrowClasses() string {
 
 func edgeLabelClasses() string {
 	var b styles.Builder
-	b.Add("fill-base-500 text-[12px] select-none dark:fill-base-400")
+	b.Add("fill-base-500 text-[11px] select-none dark:fill-base-400")
 	return b.String()
 }

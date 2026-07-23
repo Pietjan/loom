@@ -335,7 +335,7 @@ func drawShape(n collected, b box) *html.Node {
 			dom.Attr("points", diamondPoints(b.x, b.y, b.w, b.h)),
 			dom.Attr("class", nodeShapeClasses(n.tone)))
 	}
-	rx := "8"
+	rx := "6" // rounded-md, loom's radius for compact elements
 	if n.shape == stadium {
 		rx = fmtCoord(b.h / 2)
 	}

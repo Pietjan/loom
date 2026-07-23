@@ -8,9 +8,9 @@ import (
 
 // Layout tuning (SVG user units).
 const (
-	layerGap = 56.0 // gap between layers along the flow axis
-	nodeGap  = 36.0 // gap between nodes within a layer along the cross axis
-	margin   = 20.0 // padding around the whole drawing
+	layerGap = 40.0 // gap between layers along the flow axis
+	nodeGap  = 28.0 // gap between nodes within a layer along the cross axis
+	margin   = 16.0 // padding around the whole drawing
 	sweeps   = 8    // crossing-reduction and coordinate-alignment iterations
 )
 
