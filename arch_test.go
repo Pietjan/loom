@@ -25,7 +25,7 @@ const module = "github.com/pietjan/loom"
 var l1 = []string{
 	"icon", "button", "badge", "heading", "text", "separator", "link", "card", "callout", "chart", "tooltip",
 	"avatar", "breadcrumbs", "progress", "skeleton", "pagination", "stat", "timeline", "description", "kbd", "kanban",
-	"carousel", "flash", "markdown", "code",
+	"carousel", "flash", "markdown", "code", "diagram",
 }
 
 var l2 = []string{

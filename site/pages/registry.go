@@ -50,6 +50,7 @@ func init() {
 			{Slug: "table", Title: "Table", Description: "Semantic data tables with styled header and rows.", Body: Table},
 			{Slug: "stat", Title: "Stat", Description: "KPI tiles with label, value, and a trend slot.", Body: Stat},
 			{Slug: "chart", Title: "Chart", Description: "Server-rendered SVG line, area, bar, and sparkline charts.", Body: Chart},
+			{Slug: "diagram", Title: "Diagram", Description: "Server-rendered SVG flowcharts with automatic layered layout — no JavaScript.", Body: Diagram},
 			{Slug: "timeline", Title: "Timeline", Description: "Vertical and horizontal event timelines with composable indicators.", Body: Timeline},
 			{Slug: "kanban", Title: "Kanban", Description: "Static kanban board markup: columns, cards, headers, footers.", Body: Kanban},
 			{Slug: "description", Title: "Description", Description: "Definition lists for label and value pairs.", Body: Description},

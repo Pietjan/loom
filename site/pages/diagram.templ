@@ -1,0 +1,88 @@
+package pages
+
+import "github.com/pietjan/loom/diagram"
+
+const diagramFlowSnippet = `@diagram.New(
+	diagram.Node("open", "Open PR"),
+	diagram.Node("review", "Review"),
+	diagram.Node("test", "CI"),
+	diagram.Node("merge", "Merge"),
+	diagram.Edge("open", "review"),
+	diagram.Edge("open", "test"),
+	diagram.Edge("review", "merge"),
+	diagram.Edge("test", "merge"),
+)`
+
+const diagramDecisionSnippet = `@diagram.New(
+	diagram.Node("start", "Start", diagram.Stadium()),
+	diagram.Node("ok", "Tests pass?", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)),
+	diagram.Node("ship", "Ship", diagram.WithTone(diagram.ToneEmerald)),
+	diagram.Node("fix", "Fix", diagram.WithTone(diagram.ToneRose)),
+	diagram.Edge("start", "ok"),
+	diagram.Edge("ok", "ship", diagram.Label("yes")),
+	diagram.Edge("ok", "fix", diagram.Label("no")),
+	diagram.Edge("fix", "ok"),
+)`
+
+const diagramPipelineSnippet = `@diagram.New(
+	diagram.Dir(diagram.LeftRight),
+	diagram.Node("build", "Build"),
+	diagram.Node("test", "Test"),
+	diagram.Node("stage", "Stage"),
+	diagram.Node("prod", "Prod"),
+	diagram.Edge("build", "test"),
+	diagram.Edge("test", "stage"),
+	diagram.Edge("stage", "prod"),
+)`
+
+templ Diagram() {
+	@componentPage("diagram") {
+		@prose() {
+			Diagrams render server-side as SVG. Describe nodes and edges; the component
+			breaks cycles, assigns layers, and places everything automatically — no
+			JavaScript, no layout hints.
+		}
+		@example("Flowchart", diagramFlowSnippet) {
+			<div class="w-full max-w-md mx-auto">
+				@diagram.New(
+					diagram.Node("open", "Open PR"),
+					diagram.Node("review", "Review"),
+					diagram.Node("test", "CI"),
+					diagram.Node("merge", "Merge"),
+					diagram.Edge("open", "review"),
+					diagram.Edge("open", "test"),
+					diagram.Edge("review", "merge"),
+					diagram.Edge("test", "merge"),
+				)
+			</div>
+		}
+		@example("Decision, shapes, and tones", diagramDecisionSnippet) {
+			<div class="w-full max-w-md mx-auto">
+				@diagram.New(
+					diagram.Node("start", "Start", diagram.Stadium()),
+					diagram.Node("ok", "Tests pass?", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)),
+					diagram.Node("ship", "Ship", diagram.WithTone(diagram.ToneEmerald)),
+					diagram.Node("fix", "Fix", diagram.WithTone(diagram.ToneRose)),
+					diagram.Edge("start", "ok"),
+					diagram.Edge("ok", "ship", diagram.Label("yes")),
+					diagram.Edge("ok", "fix", diagram.Label("no")),
+					diagram.Edge("fix", "ok"),
+				)
+			</div>
+		}
+		@example("Left-to-right pipeline", diagramPipelineSnippet) {
+			<div class="w-full">
+				@diagram.New(
+					diagram.Dir(diagram.LeftRight),
+					diagram.Node("build", "Build"),
+					diagram.Node("test", "Test"),
+					diagram.Node("stage", "Stage"),
+					diagram.Node("prod", "Prod"),
+					diagram.Edge("build", "test"),
+					diagram.Edge("test", "stage"),
+					diagram.Edge("stage", "prod"),
+				)
+			</div>
+		}
+	}
+}
