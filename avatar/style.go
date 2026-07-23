@@ -39,6 +39,6 @@ func groupClasses() string {
 	var b styles.Builder
 	// Overlap avatars and give each a ring so the stack reads clearly.
 	b.Add("flex items-center -space-x-2")
-	b.Add("[&>[data-ui=avatar]]:ring-2 [&>[data-ui=avatar]]:ring-white dark:[&>[data-ui=avatar]]:ring-base-800")
+	b.Add("*:data-[ui=avatar]:ring-2 *:data-[ui=avatar]:ring-white dark:*:data-[ui=avatar]:ring-base-800")
 	return b.String()
 }

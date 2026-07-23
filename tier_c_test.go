@@ -121,8 +121,8 @@ func TestFlashDismissibleAndRole(t *testing.T) {
 	if got := dom.GetAttr(root, "role"); got != "status" {
 		t.Fatalf("success flash role=%q, want status", got)
 	}
-	if !strings.Contains(dom.GetAttr(root, "class"), "has-[:checked]:hidden") {
-		t.Fatal("dismissible flash needs the has-[:checked] hide hook")
+	if !strings.Contains(dom.GetAttr(root, "class"), "has-checked:hidden") {
+		t.Fatal("dismissible flash needs the has-checked hide hook")
 	}
 	if dom.Find(root, func(n *html.Node) bool { return n.Data == "input" && dom.GetAttr(n, "type") == "checkbox" }) == nil {
 		t.Fatal("dismissible flash needs a checkbox")

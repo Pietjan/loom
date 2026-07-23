@@ -110,8 +110,8 @@ func classes(c Config) string {
 	// Grid: icon column + content column; heading and text stack in the
 	// second column, the icon spans rows.
 	b.Add("grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-lg border p-4")
-	b.Add("[&>[data-ui=icon]]:row-span-2 [&>[data-ui=icon]]:mt-0.5 [&>[data-ui=icon]]:size-5")
-	b.Add("[&>[data-ui=callout-heading]]:col-start-2 [&>[data-ui=callout-text]]:col-start-2")
+	b.Add("*:data-[ui=icon]:row-span-2 *:data-[ui=icon]:mt-0.5 *:data-[ui=icon]:size-5")
+	b.Add("*:data-[ui=callout-heading]:col-start-2 *:data-[ui=callout-text]:col-start-2")
 	styles.Match(&b, c.Tone, map[Tone]string{
 		ToneNeutral: "border-base-200 bg-base-50 text-base-800 dark:border-base-600 dark:bg-base-700 dark:text-base-100",
 		ToneInfo:    "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200",

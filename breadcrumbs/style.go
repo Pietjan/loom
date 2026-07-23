@@ -12,7 +12,7 @@ func itemClasses() string {
 	var b styles.Builder
 	b.Add("inline-flex items-center gap-1.5")
 	// A chevron separator before every item except the first.
-	b.Add("[&:not(:first-child)]:before:content-['/'] [&:not(:first-child)]:before:text-base-300 dark:[&:not(:first-child)]:before:text-base-600")
+	b.Add("not-first:before:content-['/'] not-first:before:text-base-300 dark:not-first:before:text-base-600")
 	return b.String()
 }
 

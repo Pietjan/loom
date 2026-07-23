@@ -20,14 +20,21 @@
 	src: url("fonts/geist-sans.woff2") format("woff2");
 }
 @font-face {
-	font-family: "Intel One Mono";
+	font-family: "IBM Plex Mono";
 	font-style: normal;
-	font-weight: 100 900;
+	font-weight: 400;
 	font-display: swap;
-	src: url("fonts/intel-one-mono.woff2") format("woff2");
+	src: url("fonts/ibm-plex-mono-400.woff2") format("woff2");
+}
+@font-face {
+	font-family: "IBM Plex Mono";
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("fonts/ibm-plex-mono-700.woff2") format("woff2");
 }
 
 @theme {
 	--font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-	--font-mono: "Intel One Mono", ui-monospace, SFMono-Regular, monospace;
+	--font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 }

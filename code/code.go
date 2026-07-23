@@ -122,7 +122,7 @@ func diffCode(src, lang string) *html.Node {
 func classes(c Config) string {
 	var b styles.Builder
 	b.Add("overflow-x-auto rounded-2xl border")
-	b.Add("font-mono text-sm font-medium leading-loose tracking-wide")
+	b.Add("font-mono text-xs font-semibold leading-loose tracking-wide")
 	b.Add("border-base-200 bg-base-50 dark:border-white/10 dark:bg-base-800")
 	b.Add("text-[#424258] dark:text-[#EEFFFF]")
 	// Diff mode moves horizontal padding onto the lines so their

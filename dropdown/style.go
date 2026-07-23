@@ -24,7 +24,7 @@ func itemClasses() string {
 	b.Add("text-base-800 dark:text-base-100")
 	b.Add("hover:bg-base-800/5 dark:hover:bg-white/10")
 	b.Add("focus-visible:bg-base-800/5 dark:focus-visible:bg-white/10")
-	b.Add("[&_[data-ui=icon]]:size-4 [&_[data-ui=icon]]:text-base-400")
+	b.Add("**:data-[ui=icon]:size-4 **:data-[ui=icon]:text-base-400")
 	return b.String()
 }
 
