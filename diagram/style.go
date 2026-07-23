@@ -28,9 +28,12 @@ func nodeShapeClasses(t Tone) string {
 	return b.String()
 }
 
-func nodeLabelClasses() string {
+// contentClasses styles the HTML wrapper inside a node's foreignObject. Bare
+// nodes get only centering — their body brings its own chrome and type.
+func contentClasses(bare bool) string {
 	var b styles.Builder
-	b.Add("fill-base-700 text-[14px] font-medium select-none dark:fill-base-100")
+	b.Add("flex h-full w-full items-center justify-center text-center leading-tight")
+	b.If(!bare, "px-2 text-[14px] font-medium text-base-700 dark:text-base-100")
 	return b.String()
 }
 

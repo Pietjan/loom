@@ -1,87 +1,129 @@
 package pages
 
-import "github.com/pietjan/loom/diagram"
+import (
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/diagram"
+	"github.com/pietjan/loom/icon"
+)
 
 const diagramFlowSnippet = `@diagram.New(
-	diagram.Node("open", "Open PR"),
-	diagram.Node("review", "Review"),
-	diagram.Node("test", "CI"),
-	diagram.Node("merge", "Merge"),
 	diagram.Edge("open", "review"),
 	diagram.Edge("open", "test"),
 	diagram.Edge("review", "merge"),
 	diagram.Edge("test", "merge"),
-)`
+) {
+	@diagram.Node("open") { Open PR }
+	@diagram.Node("review") { Review }
+	@diagram.Node("test") { CI }
+	@diagram.Node("merge") { Merge }
+}`
 
 const diagramDecisionSnippet = `@diagram.New(
-	diagram.Node("start", "Start", diagram.Stadium()),
-	diagram.Node("ok", "Tests pass?", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)),
-	diagram.Node("ship", "Ship", diagram.WithTone(diagram.ToneEmerald)),
-	diagram.Node("fix", "Fix", diagram.WithTone(diagram.ToneRose)),
 	diagram.Edge("start", "ok"),
 	diagram.Edge("ok", "ship", diagram.Label("yes")),
 	diagram.Edge("ok", "fix", diagram.Label("no")),
 	diagram.Edge("fix", "ok"),
-)`
+) {
+	@diagram.Node("start", diagram.Stadium()) { Start }
+	@diagram.Node("ok", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)) { Tests pass? }
+	@diagram.Node("ship", diagram.WithTone(diagram.ToneEmerald)) { Ship }
+	@diagram.Node("fix", diagram.WithTone(diagram.ToneRose)) { Fix }
+}`
 
-const diagramPipelineSnippet = `@diagram.New(
-	diagram.Dir(diagram.LeftRight),
-	diagram.Node("build", "Build"),
-	diagram.Node("test", "Test"),
-	diagram.Node("stage", "Stage"),
-	diagram.Node("prod", "Prod"),
-	diagram.Edge("build", "test"),
-	diagram.Edge("test", "stage"),
-	diagram.Edge("stage", "prod"),
-)`
+const diagramRichSnippet = `@diagram.New(
+	diagram.Edge("plan", "build"),
+	diagram.Edge("build", "done"),
+) {
+	@diagram.Node("plan", diagram.Size(150, 52)) {
+		@icon.New(icon.Compass)
+		Plan
+	}
+	@diagram.Node("build", diagram.Size(150, 52)) {
+		@icon.New(icon.Hammer)
+		Build
+	}
+	@diagram.Node("done", diagram.Size(150, 52)) {
+		@badge.New(badge.Green) { Shipped }
+	}
+}`
 
 templ Diagram() {
 	@componentPage("diagram") {
 		@prose() {
-			Diagrams render server-side as SVG. Describe nodes and edges; the component
-			breaks cycles, assigns layers, and places everything automatically — no
-			JavaScript, no layout hints.
+			Diagrams render server-side as SVG. Declare nodes as children — each body is
+			any templ component — and wire them with edges; the component breaks cycles,
+			assigns layers, and places everything automatically, no JavaScript.
 		}
 		@example("Flowchart", diagramFlowSnippet) {
-			<div class="w-full max-w-md mx-auto">
+			<div class="mx-auto max-w-md">
 				@diagram.New(
-					diagram.Node("open", "Open PR"),
-					diagram.Node("review", "Review"),
-					diagram.Node("test", "CI"),
-					diagram.Node("merge", "Merge"),
 					diagram.Edge("open", "review"),
 					diagram.Edge("open", "test"),
 					diagram.Edge("review", "merge"),
 					diagram.Edge("test", "merge"),
-				)
+				) {
+					@diagram.Node("open") {
+						Open PR
+					}
+					@diagram.Node("review") {
+						Review
+					}
+					@diagram.Node("test") {
+						CI
+					}
+					@diagram.Node("merge") {
+						Merge
+					}
+				}
 			</div>
 		}
 		@example("Decision, shapes, and tones", diagramDecisionSnippet) {
-			<div class="w-full max-w-md mx-auto">
+			<div class="mx-auto max-w-md">
 				@diagram.New(
-					diagram.Node("start", "Start", diagram.Stadium()),
-					diagram.Node("ok", "Tests pass?", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)),
-					diagram.Node("ship", "Ship", diagram.WithTone(diagram.ToneEmerald)),
-					diagram.Node("fix", "Fix", diagram.WithTone(diagram.ToneRose)),
 					diagram.Edge("start", "ok"),
 					diagram.Edge("ok", "ship", diagram.Label("yes")),
 					diagram.Edge("ok", "fix", diagram.Label("no")),
 					diagram.Edge("fix", "ok"),
-				)
+				) {
+					@diagram.Node("start", diagram.Stadium()) {
+						Start
+					}
+					@diagram.Node("ok", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)) {
+						Tests pass?
+					}
+					@diagram.Node("ship", diagram.WithTone(diagram.ToneEmerald)) {
+						Ship
+					}
+					@diagram.Node("fix", diagram.WithTone(diagram.ToneRose)) {
+						Fix
+					}
+				}
 			</div>
 		}
-		@example("Left-to-right pipeline", diagramPipelineSnippet) {
-			<div class="w-full">
+		@example("Component bodies", diagramRichSnippet) {
+			<div class="mx-auto max-w-md">
 				@diagram.New(
-					diagram.Dir(diagram.LeftRight),
-					diagram.Node("build", "Build"),
-					diagram.Node("test", "Test"),
-					diagram.Node("stage", "Stage"),
-					diagram.Node("prod", "Prod"),
-					diagram.Edge("build", "test"),
-					diagram.Edge("test", "stage"),
-					diagram.Edge("stage", "prod"),
-				)
+					diagram.Edge("plan", "build"),
+					diagram.Edge("build", "done"),
+				) {
+					@diagram.Node("plan", diagram.Size(150, 52)) {
+						<span class="inline-flex items-center gap-2">
+							@icon.New(icon.Compass)
+							Plan
+						</span>
+					}
+					@diagram.Node("build", diagram.Size(150, 52)) {
+						<span class="inline-flex items-center gap-2">
+							@icon.New(icon.Hammer)
+							Build
+						</span>
+					}
+					@diagram.Node("done", diagram.Size(150, 52), diagram.Bare()) {
+						@badge.New(badge.Green) {
+							Shipped
+						}
+					}
+				}
 			</div>
 		}
 	}

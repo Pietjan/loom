@@ -16,29 +16,14 @@ type xy struct {
 // per rune plus padding. Approximate for proportional fonts and unwrapped in
 // v1, but stable and reproducible — which is what golden tests require.
 const (
-	fontSize  = 14.0 // label font-size (matches nodeLabelClasses text-[14px])
-	glyphAdv  = 8.0  // ~0.57em average advance
-	padX      = 16.0 // horizontal box padding
-	padY      = 11.0 // vertical box padding
-	minNodeW  = 56.0 // floor so short labels aren't cramped
-	dummySize = 8.0  // routing-dummy box extent
+	fontSize   = 14.0 // body font-size (matches content text-[14px])
+	lineHeight = 20.0 // per-line height for size inference
+	glyphAdv   = 8.0  // ~0.57em average advance
+	padX       = 16.0 // horizontal box padding
+	padY       = 11.0 // vertical box padding
+	minNodeW   = 56.0 // floor so short labels aren't cramped
+	dummySize  = 8.0  // routing-dummy box extent
 )
-
-// nodeSize estimates the drawn box size for a node's label and shape.
-func nodeSize(n node) (w, h float64) {
-	w = float64(len([]rune(n.label)))*glyphAdv + 2*padX
-	if w < minNodeW {
-		w = minNodeW
-	}
-	h = fontSize + 2*padY
-	if n.shape == diamond {
-		// Text inscribed in a rhombus needs the box grown to keep the label
-		// clear of the slanted edges.
-		w *= 1.5
-		h *= 1.7
-	}
-	return w, h
-}
 
 // fmtCoord renders an SVG coordinate with sub-pixel precision but no
 // float-drift noise (mirrors chart's fmtCoord).

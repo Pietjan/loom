@@ -14,12 +14,15 @@ const (
 	sweeps   = 8    // crossing-reduction and coordinate-alignment iterations
 )
 
-// box is a drawn node.
+// layoutNode is a node reduced to what layout needs: its id and box size.
+type layoutNode struct {
+	id   string
+	w, h float64
+}
+
+// box is a positioned node box.
 type box struct {
 	x, y, w, h float64
-	label      string
-	shape      shape
-	tone       Tone
 }
 
 // routed is a drawn edge: a border-to-border polyline (arrow at the last
@@ -38,7 +41,7 @@ type laid struct {
 
 // vertex is a layout node: a real node (node >= 0) or a routing dummy.
 type vertex struct {
-	node        int // index into cfg.nodes, or -1 for a dummy
+	node        int // index into the node slice, or -1 for a dummy
 	layer       int
 	order       int
 	bw, bh      float64 // box size in screen space
@@ -49,20 +52,20 @@ type vertex struct {
 // layout runs the full Sugiyama pipeline. Every phase iterates slices in
 // insertion order and tie-breaks by index — never map iteration — so the
 // output is deterministic and golden files don't flake.
-func layout(cfg Config) (laid, error) {
-	if len(cfg.nodes) == 0 {
+func layout(nodes []layoutNode, edges []edge, dir Direction) (laid, error) {
+	if len(nodes) == 0 {
 		return laid{}, ErrNoNodes
 	}
 
 	// 1. Index and validate.
-	index := make(map[string]int, len(cfg.nodes))
-	for i, n := range cfg.nodes {
+	index := make(map[string]int, len(nodes))
+	for i, n := range nodes {
 		if _, dup := index[n.id]; dup {
 			return laid{}, fmt.Errorf("diagram: duplicate node id %q", n.id)
 		}
 		index[n.id] = i
 	}
-	for _, e := range cfg.edges {
+	for _, e := range edges {
 		if _, ok := index[e.from]; !ok {
 			return laid{}, fmt.Errorf("diagram: edge references unknown node %q", e.from)
 		}
@@ -74,22 +77,21 @@ func layout(cfg Config) (laid, error) {
 		}
 	}
 
-	reversed := breakCycles(cfg, index)
-	layer := assignLayers(cfg, index, reversed)
+	reversed := breakCycles(edges, index, len(nodes))
+	layer := assignLayers(edges, index, reversed, len(nodes))
 
-	// 2. Build vertices for real nodes, sized from their labels.
-	verts := make([]vertex, len(cfg.nodes))
-	for i := range cfg.nodes {
-		w, h := nodeSize(cfg.nodes[i])
-		verts[i] = vertex{node: i, layer: layer[i], bw: w, bh: h}
+	// 2. Build vertices for real nodes with their declared sizes.
+	verts := make([]vertex, len(nodes))
+	for i := range nodes {
+		verts[i] = vertex{node: i, layer: layer[i], bw: nodes[i].w, bh: nodes[i].h}
 	}
 
 	// 3. Dummy nodes: split every edge into single-layer segments so ordering
 	// and routing only ever compare adjacent layers. edgeChains[ei] lists the
 	// vertex indices from the lower layer to the higher layer.
-	edgeChains := make([][]int, len(cfg.edges))
+	edgeChains := make([][]int, len(edges))
 	var segs [][2]int // {upper, lower} vertex indices, upper.layer+1 == lower.layer
-	for ei, e := range cfg.edges {
+	for ei, e := range edges {
 		lo, hi := index[e.from], index[e.to]
 		if reversed[ei] {
 			lo, hi = hi, lo
@@ -125,7 +127,6 @@ func layout(cfg Config) (laid, error) {
 		}
 	}
 
-	// Adjacency in each direction, for ordering and coordinate alignment.
 	up := make([][]int, len(verts))
 	down := make([][]int, len(verts))
 	for _, s := range segs {
@@ -134,25 +135,25 @@ func layout(cfg Config) (laid, error) {
 	}
 
 	reduceCrossings(layers, verts, up, down)
-	assignCoords(cfg, layers, verts, up, down)
+	assignCoords(dir, layers, verts, up, down)
 
 	// 5. Map abstract (flow, cross) to (x, y) per direction.
 	for vi := range verts {
-		if cfg.dir == LeftRight {
+		if dir == LeftRight {
 			verts[vi].x, verts[vi].y = verts[vi].flow, verts[vi].cross
 		} else {
 			verts[vi].x, verts[vi].y = verts[vi].cross, verts[vi].flow
 		}
 	}
 
-	return assemble(cfg, verts, edgeChains, reversed), nil
+	return assemble(len(nodes), verts, edgeChains, reversed, edges), nil
 }
 
 // breakCycles marks the back edges of a greedy DFS (in node insertion order)
 // so the graph layers as a DAG; their drawn direction is restored later.
-func breakCycles(cfg Config, index map[string]int) []bool {
-	out := make([][]int, len(cfg.nodes)) // out[u] = edge indices leaving u
-	for ei, e := range cfg.edges {
+func breakCycles(edges []edge, index map[string]int, n int) []bool {
+	out := make([][]int, n) // out[u] = edge indices leaving u
+	for ei, e := range edges {
 		out[index[e.from]] = append(out[index[e.from]], ei)
 	}
 	const (
@@ -160,13 +161,13 @@ func breakCycles(cfg Config, index map[string]int) []bool {
 		gray
 		black
 	)
-	state := make([]int, len(cfg.nodes))
-	reversed := make([]bool, len(cfg.edges))
+	state := make([]int, n)
+	reversed := make([]bool, len(edges))
 	var dfs func(u int)
 	dfs = func(u int) {
 		state[u] = gray
 		for _, ei := range out[u] {
-			switch v := index[cfg.edges[ei].to]; state[v] {
+			switch v := index[edges[ei].to]; state[v] {
 			case white:
 				dfs(v)
 			case gray:
@@ -175,7 +176,7 @@ func breakCycles(cfg Config, index map[string]int) []bool {
 		}
 		state[u] = black
 	}
-	for u := range cfg.nodes {
+	for u := 0; u < n; u++ {
 		if state[u] == white {
 			dfs(u)
 		}
@@ -185,10 +186,10 @@ func breakCycles(cfg Config, index map[string]int) []bool {
 
 // assignLayers gives each node a longest-path layer on the acyclic graph
 // (edges flipped where reversed points them backward).
-func assignLayers(cfg Config, index map[string]int, reversed []bool) []int {
-	adj := make([][]int, len(cfg.nodes))
-	indeg := make([]int, len(cfg.nodes))
-	for ei, e := range cfg.edges {
+func assignLayers(edges []edge, index map[string]int, reversed []bool, n int) []int {
+	adj := make([][]int, n)
+	indeg := make([]int, n)
+	for ei, e := range edges {
 		s, d := index[e.from], index[e.to]
 		if reversed[ei] {
 			s, d = d, s
@@ -196,9 +197,9 @@ func assignLayers(cfg Config, index map[string]int, reversed []bool) []int {
 		adj[s] = append(adj[s], d)
 		indeg[d]++
 	}
-	layer := make([]int, len(cfg.nodes))
+	layer := make([]int, n)
 	var queue []int
-	for u := range cfg.nodes {
+	for u := 0; u < n; u++ {
 		if indeg[u] == 0 {
 			queue = append(queue, u)
 		}
@@ -292,7 +293,7 @@ func weightedMedian(pos []float64) float64 {
 func countCrossings(layers [][]int, verts []vertex, down [][]int) int {
 	total := 0
 	for L := 0; L+1 < len(layers); L++ {
-		var targets []int // lower-layer orders, grouped by ascending upper order
+		var targets []int
 		for _, vi := range layers[L] {
 			ds := append([]int(nil), down[vi]...)
 			sort.Slice(ds, func(a, b int) bool { return verts[ds[a]].order < verts[ds[b]].order })
@@ -314,15 +315,15 @@ func countCrossings(layers [][]int, verts []vertex, down [][]int) int {
 // assignCoords sets each vertex's flow coordinate (from its layer) and cross
 // coordinate (packed, then iteratively aligned toward neighbors without
 // overlap).
-func assignCoords(cfg Config, layers [][]int, verts []vertex, up, down [][]int) {
+func assignCoords(dir Direction, layers [][]int, verts []vertex, up, down [][]int) {
 	flowExtent := func(vi int) float64 {
-		if cfg.dir == LeftRight {
+		if dir == LeftRight {
 			return verts[vi].bw
 		}
 		return verts[vi].bh
 	}
 	crossExtent := func(vi int) float64 {
-		if cfg.dir == LeftRight {
+		if dir == LeftRight {
 			return verts[vi].bh
 		}
 		return verts[vi].bw
@@ -391,9 +392,6 @@ func assignCoords(cfg Config, layers [][]int, verts []vertex, up, down [][]int) 
 		}
 	}
 
-	// Down-sweeps align to parents, up-sweeps to children; alternating both
-	// balances splits and merges. A final both-sided pass settles whichever
-	// end the last directional sweep left stale.
 	both := make([][]int, len(verts))
 	for vi := range verts {
 		both[vi] = append(append([]int(nil), up[vi]...), down[vi]...)
@@ -418,7 +416,7 @@ func assignCoords(cfg Config, layers [][]int, verts []vertex, up, down [][]int) 
 
 // assemble translates the drawing to the origin, computes the viewBox, and
 // builds the boxes and border-trimmed edge polylines.
-func assemble(cfg Config, verts []vertex, edgeChains [][]int, reversed []bool) laid {
+func assemble(nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool, edges []edge) laid {
 	minX, minY := math.Inf(1), math.Inf(1)
 	maxX, maxY := math.Inf(-1), math.Inf(-1)
 	for i := range verts {
@@ -432,14 +430,14 @@ func assemble(cfg Config, verts []vertex, edgeChains [][]int, reversed []bool) l
 		verts[i].y += dy
 	}
 
-	boxes := make([]box, len(cfg.nodes))
-	for i := range cfg.nodes {
+	boxes := make([]box, nodeCount)
+	for i := 0; i < nodeCount; i++ {
 		v := verts[i]
-		boxes[i] = box{x: v.x, y: v.y, w: v.bw, h: v.bh, label: cfg.nodes[i].label, shape: cfg.nodes[i].shape, tone: cfg.nodes[i].tone}
+		boxes[i] = box{x: v.x, y: v.y, w: v.bw, h: v.bh}
 	}
 
-	edges := make([]routed, len(cfg.edges))
-	for ei := range cfg.edges {
+	routedEdges := make([]routed, len(edges))
+	for ei := range edges {
 		chain := edgeChains[ei]
 		pts := make([]xy, len(chain))
 		for k, vi := range chain {
@@ -453,14 +451,14 @@ func assemble(cfg Config, verts []vertex, edgeChains [][]int, reversed []bool) l
 				pts[l], pts[r] = pts[r], pts[l]
 			}
 		}
-		edges[ei] = routed{pts: pts, label: cfg.edges[ei].label}
+		routedEdges[ei] = routed{pts: pts, label: edges[ei].label}
 	}
 
 	return laid{
 		W:     maxX - minX + 2*margin,
 		H:     maxY - minY + 2*margin,
 		boxes: boxes,
-		edges: edges,
+		edges: routedEdges,
 	}
 }
 

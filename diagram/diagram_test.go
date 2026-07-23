@@ -6,20 +6,31 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/a-h/templ"
+
 	"github.com/pietjan/loom/diagram"
 	"github.com/pietjan/loom/internal/dom"
 	"github.com/pietjan/loom/internal/testutil"
 )
 
+// node builds a text-bodied node component.
+func node(id, text string, opts ...diagram.NodeOption) templ.Component {
+	return testutil.WithChildren(diagram.Node(id, opts...), testutil.Text(text))
+}
+
+// diag renders a diagram with the given node children and options.
+func diag(t *testing.T, nodes []templ.Component, opts ...diagram.Option) string {
+	t.Helper()
+	return testutil.Render(t, testutil.WithChildren(diagram.New(opts...), testutil.Sequence(nodes...)))
+}
+
 func TestFlowchartBasics(t *testing.T) {
-	out := testutil.Render(t, diagram.New(
+	out := diag(t,
+		[]templ.Component{node("a", "Start"), node("b", "Verify"), node("c", "Done")},
 		diagram.Title("Signup flow"),
-		diagram.Node("a", "Start"),
-		diagram.Node("b", "Verify"),
-		diagram.Node("c", "Done"),
 		diagram.Edge("a", "b"),
 		diagram.Edge("b", "c"),
-	))
+	)
 
 	for _, want := range []string{
 		`data-ui="diagram"`,
@@ -29,6 +40,7 @@ func TestFlowchartBasics(t *testing.T) {
 		`data-ui="diagram-node"`,
 		`data-ui="diagram-edge"`,
 		`data-ui="diagram-arrow"`,
+		`<foreignObject`,
 		`>Start<`, `>Verify<`, `>Done<`,
 	} {
 		if !strings.Contains(out, want) {
@@ -36,8 +48,10 @@ func TestFlowchartBasics(t *testing.T) {
 		}
 	}
 
-	// The accessible name is on aria-label only — a <title> would show as a
-	// native hover tooltip (same rationale as chart).
+	// The helper attrs a Node stashes for the post-pass must not leak.
+	if strings.Contains(out, "data-node-id") {
+		t.Errorf("internal data-node-* attribute leaked into output")
+	}
 	if strings.Contains(out, "<title") {
 		t.Errorf("diagram should not emit <title>")
 	}
@@ -54,34 +68,45 @@ func TestFlowchartBasics(t *testing.T) {
 	}
 }
 
-// TestLinearFlowsDownward checks the core layout invariant: in a top-bottom
-// chain, each node sits strictly below the previous one (increasing y).
+// TestRichBody: a node body may be any markup; it renders inside the
+// foreignObject untouched.
+func TestRichBody(t *testing.T) {
+	out := diag(t, []templ.Component{
+		testutil.WithChildren(diagram.Node("a"), testutil.Text("Bold")),
+		node("b", "Plain"),
+	}, diagram.Edge("a", "b"))
+
+	if !strings.Contains(out, ">Bold<") {
+		t.Errorf("node body not rendered: %s", out)
+	}
+	if !strings.Contains(out, "<foreignObject") {
+		t.Errorf("body should render inside a foreignObject")
+	}
+}
+
+// TestLinearFlowsDownward: in a top-bottom chain each node sits strictly below
+// the previous one.
 func TestLinearFlowsDownward(t *testing.T) {
-	out := testutil.Render(t, diagram.New(
-		diagram.Node("a", "A"),
-		diagram.Node("b", "B"),
-		diagram.Node("c", "C"),
-		diagram.Edge("a", "b"),
-		diagram.Edge("b", "c"),
-	))
-	ys := rectYs(t, out)
+	out := diag(t,
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Edge("a", "b"), diagram.Edge("b", "c"),
+	)
+	ys := shapeYs(t, out)
 	if len(ys) != 3 {
-		t.Fatalf("want 3 node rects, got %d", len(ys))
+		t.Fatalf("want 3 node shapes, got %d", len(ys))
 	}
 	if !(ys[0] < ys[1] && ys[1] < ys[2]) {
 		t.Errorf("linear chain not top-to-bottom: %v", ys)
 	}
 }
 
-// TestLeftRightFlow: the same chain laid left-to-right is wider than tall,
-// where top-bottom is taller than wide.
+// TestLeftRightFlow: the same chain is wider than tall left-to-right, taller
+// than wide top-to-bottom.
 func TestLeftRightFlow(t *testing.T) {
-	nodes := []diagram.Option{
-		diagram.Node("a", "A"), diagram.Node("b", "B"), diagram.Node("c", "C"),
-		diagram.Edge("a", "b"), diagram.Edge("b", "c"),
-	}
-	tb := viewBox(t, testutil.Render(t, diagram.New(nodes...)))
-	lr := viewBox(t, testutil.Render(t, diagram.New(append(nodes, diagram.Dir(diagram.LeftRight))...)))
+	nodes := []templ.Component{node("a", "A"), node("b", "B"), node("c", "C")}
+	edges := []diagram.Option{diagram.Edge("a", "b"), diagram.Edge("b", "c")}
+	tb := viewBox(t, diag(t, nodes, edges...))
+	lr := viewBox(t, diag(t, nodes, append(edges, diagram.Dir(diagram.LeftRight))...))
 
 	if !(tb.h > tb.w) {
 		t.Errorf("top-bottom chain should be taller than wide, got %vx%v", tb.w, tb.h)
@@ -91,51 +116,78 @@ func TestLeftRightFlow(t *testing.T) {
 	}
 }
 
-// TestBranchSpreads: a branch (A→B, A→C) puts B and C on the same layer but at
-// different cross positions, so their boxes don't coincide.
+// TestBranchSpreads: a branch puts siblings on the same layer at different
+// cross positions.
 func TestBranchSpreads(t *testing.T) {
-	out := testutil.Render(t, diagram.New(
-		diagram.Node("a", "A"),
-		diagram.Node("b", "B"),
-		diagram.Node("c", "C"),
-		diagram.Node("d", "D"),
-		diagram.Edge("a", "b"),
-		diagram.Edge("a", "c"),
-		diagram.Edge("b", "d"),
-		diagram.Edge("c", "d"),
-	))
-	xs := rectXs(t, out)
-	// B and C are the 2nd and 3rd rects; they must have different x.
+	out := diag(t,
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")},
+		diagram.Edge("a", "b"), diagram.Edge("a", "c"),
+		diagram.Edge("b", "d"), diagram.Edge("c", "d"),
+	)
+	xs := shapeXs(t, out)
 	if xs[1] == xs[2] {
 		t.Errorf("branch nodes overlap at x=%v", xs[1])
 	}
 }
 
-// TestCycleTerminates: a cycle must lay out (cycle-breaking) rather than
-// recurse forever, and still draw an arrow per edge.
+// TestCycleTerminates: a cycle lays out (via cycle-breaking) and still draws an
+// arrow per edge.
 func TestCycleTerminates(t *testing.T) {
-	out := testutil.Render(t, diagram.New(
-		diagram.Node("a", "A"),
-		diagram.Node("b", "B"),
-		diagram.Node("c", "C"),
-		diagram.Edge("a", "b"),
-		diagram.Edge("b", "c"),
-		diagram.Edge("c", "a"),
-	))
+	out := diag(t,
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Edge("a", "b"), diagram.Edge("b", "c"), diagram.Edge("c", "a"),
+	)
 	tree := testutil.NewTree(t, out)
 	if n := len(dom.FindAll(tree.Root, dom.ByMarker("diagram-arrow"))); n != 3 {
 		t.Errorf("arrows = %d, want 3", n)
 	}
 }
 
-// TestDeterministic: identical configs render byte-identical output (guards
-// against accidental map iteration in the layout).
+// TestBareOmitsChrome: Bare() suppresses the shape behind the body.
+func TestBareOmitsChrome(t *testing.T) {
+	plain := diag(t, []templ.Component{node("a", "A"), node("b", "B")}, diagram.Edge("a", "b"))
+	bare := diag(t, []templ.Component{
+		node("a", "A", diagram.Bare()),
+		node("b", "B", diagram.Bare()),
+	}, diagram.Edge("a", "b"))
+
+	if !strings.Contains(plain, "<rect") {
+		t.Errorf("default node should draw a rect")
+	}
+	if strings.Contains(bare, "<rect") {
+		t.Errorf("bare node should not draw a rect: %s", bare)
+	}
+}
+
+// TestSizeOverride: an explicit Size wins over inference.
+func TestSizeOverride(t *testing.T) {
+	out := diag(t, []templ.Component{
+		node("a", "x", diagram.Size(240, 120)),
+		node("b", "y"),
+	}, diagram.Edge("a", "b"))
+	tree := testutil.NewTree(t, out)
+	rects := dom.FindAll(tree.Root, dom.ByMarker("diagram-node"))
+	found := false
+	for _, g := range rects {
+		for c := g.FirstChild; c != nil; c = c.NextSibling {
+			if c.Data == "rect" && dom.GetAttr(c, "width") == "240" {
+				found = true
+			}
+		}
+	}
+	if !found {
+		t.Errorf("explicit Size(240,120) not applied")
+	}
+}
+
+// TestDeterministic: identical inputs render byte-identical output.
 func TestDeterministic(t *testing.T) {
 	build := func() string {
-		return testutil.Render(t, diagram.New(
-			diagram.Node("a", "A"), diagram.Node("b", "B"), diagram.Node("c", "C"), diagram.Node("d", "D"),
-			diagram.Edge("a", "b"), diagram.Edge("a", "c"), diagram.Edge("b", "d"), diagram.Edge("c", "d"),
-		))
+		return diag(t,
+			[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")},
+			diagram.Edge("a", "b"), diagram.Edge("a", "c"),
+			diagram.Edge("b", "d"), diagram.Edge("c", "d"),
+		)
 	}
 	if build() != build() {
 		t.Error("diagram output is not deterministic")
@@ -146,77 +198,51 @@ func TestFailsLoudly(t *testing.T) {
 	if err := testutil.RenderErr(diagram.New()); !errors.Is(err, diagram.ErrNoNodes) {
 		t.Fatalf("expected ErrNoNodes, got %v", err)
 	}
-	err := testutil.RenderErr(diagram.New(
-		diagram.Node("a", "A"),
-		diagram.Edge("a", "ghost"),
-	))
-	if err == nil || !strings.Contains(err.Error(), "ghost") {
+	unknown := testutil.WithChildren(
+		diagram.New(diagram.Edge("a", "ghost")),
+		node("a", "A"),
+	)
+	if err := testutil.RenderErr(unknown); err == nil || !strings.Contains(err.Error(), "ghost") {
 		t.Fatalf("expected unknown-node error naming ghost, got %v", err)
 	}
-	err = testutil.RenderErr(diagram.New(
-		diagram.Node("a", "A"),
-		diagram.Node("a", "again"),
-	))
-	if err == nil || !strings.Contains(err.Error(), "duplicate") {
+	dup := testutil.WithChildren(
+		diagram.New(),
+		testutil.Sequence(node("a", "A"), node("a", "again")),
+	)
+	if err := testutil.RenderErr(dup); err == nil || !strings.Contains(err.Error(), "duplicate") {
 		t.Fatalf("expected duplicate id error, got %v", err)
 	}
 }
 
 func TestGolden(t *testing.T) {
-	testutil.Golden(t, "diagram-linear", diagram.New(
-		diagram.Node("a", "Start"),
-		diagram.Node("b", "Middle"),
-		diagram.Node("c", "End"),
-		diagram.Edge("a", "b"),
-		diagram.Edge("b", "c"),
-	))
-	testutil.Golden(t, "diagram-branch", diagram.New(
-		diagram.Node("a", "Open"),
-		diagram.Node("b", "Review"),
-		diagram.Node("c", "Test"),
-		diagram.Node("d", "Merge"),
-		diagram.Edge("a", "b"),
-		diagram.Edge("a", "c"),
-		diagram.Edge("b", "d"),
-		diagram.Edge("c", "d"),
-	))
-	testutil.Golden(t, "diagram-tree", diagram.New(
-		diagram.Node("root", "Root"),
-		diagram.Node("l", "Left"),
-		diagram.Node("r", "Right"),
-		diagram.Node("ll", "L1"),
-		diagram.Node("lr", "L2"),
-		diagram.Edge("root", "l"),
-		diagram.Edge("root", "r"),
-		diagram.Edge("l", "ll"),
-		diagram.Edge("l", "lr"),
-	))
-	testutil.Golden(t, "diagram-decision", diagram.New(
-		diagram.Node("start", "Start", diagram.Stadium()),
-		diagram.Node("ok", "OK?", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)),
-		diagram.Node("yes", "Ship", diagram.WithTone(diagram.ToneEmerald)),
-		diagram.Node("no", "Fix", diagram.WithTone(diagram.ToneRose)),
+	g := func(name string, nodes []templ.Component, opts ...diagram.Option) {
+		testutil.Golden(t, name, testutil.WithChildren(diagram.New(opts...), testutil.Sequence(nodes...)))
+	}
+	g("diagram-linear",
+		[]templ.Component{node("a", "Start"), node("b", "Middle"), node("c", "End")},
+		diagram.Edge("a", "b"), diagram.Edge("b", "c"))
+	g("diagram-branch",
+		[]templ.Component{node("a", "Open"), node("b", "Review"), node("c", "Test"), node("d", "Merge")},
+		diagram.Edge("a", "b"), diagram.Edge("a", "c"),
+		diagram.Edge("b", "d"), diagram.Edge("c", "d"))
+	g("diagram-decision",
+		[]templ.Component{
+			node("start", "Start", diagram.Stadium()),
+			node("ok", "OK?", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)),
+			node("yes", "Ship", diagram.WithTone(diagram.ToneEmerald)),
+			node("no", "Fix", diagram.WithTone(diagram.ToneRose)),
+		},
 		diagram.Edge("start", "ok"),
 		diagram.Edge("ok", "yes", diagram.Label("yes")),
 		diagram.Edge("ok", "no", diagram.Label("no")),
-		diagram.Edge("no", "ok"),
-	))
-	testutil.Golden(t, "diagram-lr", diagram.New(
+		diagram.Edge("no", "ok"))
+	g("diagram-lr",
+		[]templ.Component{node("a", "Build"), node("b", "Test"), node("c", "Deploy")},
 		diagram.Dir(diagram.LeftRight),
-		diagram.Node("a", "Build"),
-		diagram.Node("b", "Test"),
-		diagram.Node("c", "Deploy"),
-		diagram.Edge("a", "b"),
-		diagram.Edge("b", "c"),
-	))
-	testutil.Golden(t, "diagram-cycle", diagram.New(
-		diagram.Node("a", "A"),
-		diagram.Node("b", "B"),
-		diagram.Node("c", "C"),
-		diagram.Edge("a", "b"),
-		diagram.Edge("b", "c"),
-		diagram.Edge("c", "a"),
-	))
+		diagram.Edge("a", "b"), diagram.Edge("b", "c"))
+	g("diagram-cycle",
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Edge("a", "b"), diagram.Edge("b", "c"), diagram.Edge("c", "a"))
 }
 
 // --- helpers ---
@@ -225,8 +251,7 @@ type dims struct{ w, h float64 }
 
 func viewBox(t *testing.T, out string) dims {
 	t.Helper()
-	tree := testutil.NewTree(t, out)
-	svg := tree.One("diagram")
+	svg := testutil.NewTree(t, out).One("diagram")
 	f := strings.Fields(dom.GetAttr(svg, "viewBox"))
 	if len(f) != 4 {
 		t.Fatalf("bad viewBox %q", dom.GetAttr(svg, "viewBox"))
@@ -234,10 +259,12 @@ func viewBox(t *testing.T, out string) dims {
 	return dims{w: atof(t, f[2]), h: atof(t, f[3])}
 }
 
-func rectYs(t *testing.T, out string) []float64 { return rectAttr(t, out, "y") }
-func rectXs(t *testing.T, out string) []float64 { return rectAttr(t, out, "x") }
+func shapeYs(t *testing.T, out string) []float64 { return shapeAttr(t, out, "y") }
+func shapeXs(t *testing.T, out string) []float64 { return shapeAttr(t, out, "x") }
 
-func rectAttr(t *testing.T, out, attr string) []float64 {
+// shapeAttr reads the x/y of each node's rect (center-derived), skipping the
+// foreignObject so only the drawn shape is measured.
+func shapeAttr(t *testing.T, out, attr string) []float64 {
 	t.Helper()
 	tree := testutil.NewTree(t, out)
 	var vals []float64
