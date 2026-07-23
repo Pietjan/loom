@@ -13,10 +13,13 @@
 //		@diagram.Node("ship") { @card.New() { Ship it 🚀 } }
 //	}
 //
-// A node's body is real HTML rendered inside an SVG <foreignObject>, so it
-// scales with the diagram and can hold anything — an icon and label, a badge,
-// a card. By default each node gets loom's box chrome (rounded border, fill,
-// tone); diagram.Bare() drops it for a body that brings its own.
+// The result has two layers inside a stage of the diagram's natural size: an
+// SVG holding the connectors and each node's chrome, and the node bodies as
+// plain HTML positioned over it. Bodies stay real HTML — not <foreignObject>,
+// whose overflow handling is inconsistent across browsers — so a body can hold
+// anything (an icon and label, a badge, a card) and is never clipped. By
+// default each node gets loom's box chrome; diagram.Bare() drops it for a body
+// that brings its own.
 //
 // Linear pipelines and trees are DAG subsets handled for free; cycles lay out
 // and keep their drawn direction; diagram.Dir(diagram.LeftRight) flips the
@@ -25,8 +28,11 @@
 // Sizing, honestly: the server can't measure rendered HTML, so a node's box is
 // inferred from its content's text (widest line × a fixed glyph advance, line
 // count for height) — good for labels and small chips, approximate for rich
-// bodies. diagram.Size(w, h) overrides it, and content overflows the box
-// rather than clipping, so an off estimate degrades gracefully.
+// bodies. diagram.Size(w, h) overrides it. The box is what layout reserves and
+// what edges attach to; a body bigger than its box overflows visibly rather
+// than clipping, so an off estimate degrades gracefully instead of losing
+// content. The stage is a fixed pixel size (the SVG and HTML must not scale
+// apart) — wrap it in an overflow-x-auto container on narrow screens.
 package diagram
 
 import (
@@ -265,22 +271,42 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 	return emit(cfg, nodes, l), nil
 }
 
+// emit builds the two-layer result: an SVG holding the edges and node chrome,
+// and the node bodies as real HTML positioned over it. Bodies stay HTML (not
+// <foreignObject>) so oversized content overflows reliably instead of being
+// clipped — foreignObject's overflow handling is inconsistent across browsers.
+// The stage is a fixed pixel size so the SVG and the HTML never scale apart.
 func emit(cfg Config, nodes []collected, l laid) *html.Node {
-	svg := dom.El(atom.Svg,
+	stage := dom.El(atom.Div,
 		dom.Marker("diagram"),
-		dom.Attr("viewBox", fmt.Sprintf("0 0 %s %s", fmtCoord(l.W), fmtCoord(l.H))),
 		dom.Attr("role", "img"))
-	dom.SetAttr(svg, "aria-label", ariaLabel(cfg, nodes))
+	dom.SetAttr(stage, "aria-label", ariaLabel(cfg, nodes))
 
+	svg := dom.El(atom.Svg,
+		dom.Marker("diagram-canvas"),
+		dom.Attr("viewBox", fmt.Sprintf("0 0 %s %s", fmtCoord(l.W), fmtCoord(l.H))),
+		dom.Attr("width", fmtCoord(l.W)),
+		dom.Attr("height", fmtCoord(l.H)),
+		dom.Attr("aria-hidden", "true"),
+		dom.Attr("class", canvasClasses()))
 	for _, e := range l.edges {
 		drawEdge(svg, e)
 	}
 	for i, n := range nodes {
-		svg.AppendChild(drawNode(n, l.boxes[i]))
+		if shape := drawShape(n, l.boxes[i]); shape != nil {
+			svg.AppendChild(shape)
+		}
+	}
+	stage.AppendChild(svg)
+
+	for i, n := range nodes {
+		stage.AppendChild(nodeBody(n, l.boxes[i]))
 	}
 
-	cfg.Apply(svg, rootClasses())
-	return svg
+	cfg.Apply(stage, rootClasses())
+	// Structural sizing goes on last so it can't be dropped by user attrs.
+	dom.SetAttr(stage, "style", fmt.Sprintf("width: %spx; height: %spx", fmtCoord(l.W), fmtCoord(l.H)))
+	return stage
 }
 
 func ariaLabel(cfg Config, nodes []collected) string {
@@ -297,45 +323,43 @@ func ariaLabel(cfg Config, nodes []collected) string {
 	return b.String()
 }
 
-func drawNode(n collected, b box) *html.Node {
-	g := dom.CustomEl("g", dom.Marker("diagram-node"))
-
-	if !n.bare {
-		switch n.shape {
-		case diamond:
-			g.AppendChild(dom.CustomEl("polygon",
-				dom.Attr("points", diamondPoints(b.x, b.y, b.w, b.h)),
-				dom.Attr("class", nodeShapeClasses(n.tone))))
-		default:
-			rx := "8"
-			if n.shape == stadium {
-				rx = fmtCoord(b.h / 2)
-			}
-			g.AppendChild(dom.CustomEl("rect",
-				dom.Attr("x", fmtCoord(b.x-b.w/2)),
-				dom.Attr("y", fmtCoord(b.y-b.h/2)),
-				dom.Attr("width", fmtCoord(b.w)),
-				dom.Attr("height", fmtCoord(b.h)),
-				dom.Attr("rx", rx),
-				dom.Attr("class", nodeShapeClasses(n.tone))))
-		}
+// drawShape returns the node's chrome for the SVG layer, or nil when the node
+// is Bare (its body brings its own).
+func drawShape(n collected, b box) *html.Node {
+	if n.bare {
+		return nil
 	}
-
-	// The body renders as HTML inside a foreignObject so it scales with the
-	// SVG. overflow=visible lets a body larger than its inferred box spill
-	// instead of clipping.
-	fo := dom.CustomEl("foreignObject",
+	if n.shape == diamond {
+		return dom.CustomEl("polygon",
+			dom.Marker("diagram-shape"),
+			dom.Attr("points", diamondPoints(b.x, b.y, b.w, b.h)),
+			dom.Attr("class", nodeShapeClasses(n.tone)))
+	}
+	rx := "8"
+	if n.shape == stadium {
+		rx = fmtCoord(b.h / 2)
+	}
+	return dom.CustomEl("rect",
+		dom.Marker("diagram-shape"),
 		dom.Attr("x", fmtCoord(b.x-b.w/2)),
 		dom.Attr("y", fmtCoord(b.y-b.h/2)),
 		dom.Attr("width", fmtCoord(b.w)),
 		dom.Attr("height", fmtCoord(b.h)),
-		dom.Attr("overflow", "visible"))
-	wrap := dom.El(atom.Div, dom.Attr("class", contentClasses(n.bare)))
-	moveChildren(n.body, wrap)
-	fo.AppendChild(wrap)
-	g.AppendChild(fo)
+		dom.Attr("rx", rx),
+		dom.Attr("class", nodeShapeClasses(n.tone)))
+}
 
-	return g
+// nodeBody positions the node's rendered body over its box as plain HTML.
+// The box is the layout size, but nothing clips: content larger than the box
+// simply overflows it.
+func nodeBody(n collected, b box) *html.Node {
+	div := dom.El(atom.Div,
+		dom.Marker("diagram-node"),
+		dom.Attr("class", contentClasses(n.bare)))
+	dom.SetAttr(div, "style", fmt.Sprintf("left: %spx; top: %spx; width: %spx; height: %spx",
+		fmtCoord(b.x-b.w/2), fmtCoord(b.y-b.h/2), fmtCoord(b.w), fmtCoord(b.h)))
+	moveChildren(n.body, div)
+	return div
 }
 
 func drawEdge(svg *html.Node, e routed) {

@@ -15,9 +15,18 @@ var toneStroke = map[Tone]string{
 	ToneRose:    "stroke-rose-400 dark:stroke-rose-500",
 }
 
+// rootClasses styles the stage: a positioned box of the diagram's natural
+// size that the SVG layer and the node bodies are placed inside.
 func rootClasses() string {
 	var b styles.Builder
-	b.Add("block w-full h-auto")
+	b.Add("relative")
+	return b.String()
+}
+
+// canvasClasses pins the edge/chrome SVG to the stage, behind the bodies.
+func canvasClasses() string {
+	var b styles.Builder
+	b.Add("absolute inset-0 overflow-visible")
 	return b.String()
 }
 
@@ -28,11 +37,11 @@ func nodeShapeClasses(t Tone) string {
 	return b.String()
 }
 
-// contentClasses styles the HTML wrapper inside a node's foreignObject. Bare
-// nodes get only centering — their body brings its own chrome and type.
+// contentClasses positions and centers a node's body over its box. Bare nodes
+// get only layout — their body brings its own chrome and type.
 func contentClasses(bare bool) string {
 	var b styles.Builder
-	b.Add("flex h-full w-full items-center justify-center text-center leading-tight")
+	b.Add("absolute flex items-center justify-center text-center leading-tight")
 	b.If(!bare, "px-2 text-[14px] font-medium text-base-700 dark:text-base-100")
 	return b.String()
 }

@@ -55,7 +55,7 @@ templ Diagram() {
 			assigns layers, and places everything automatically, no JavaScript.
 		}
 		@example("Flowchart", diagramFlowSnippet) {
-			<div class="mx-auto max-w-md">
+			<div class="w-full overflow-x-auto">
 				@diagram.New(
 					diagram.Edge("open", "review"),
 					diagram.Edge("open", "test"),
@@ -78,7 +78,7 @@ templ Diagram() {
 			</div>
 		}
 		@example("Decision, shapes, and tones", diagramDecisionSnippet) {
-			<div class="mx-auto max-w-md">
+			<div class="w-full overflow-x-auto">
 				@diagram.New(
 					diagram.Edge("start", "ok"),
 					diagram.Edge("ok", "ship", diagram.Label("yes")),
@@ -101,7 +101,7 @@ templ Diagram() {
 			</div>
 		}
 		@example("Component bodies", diagramRichSnippet) {
-			<div class="mx-auto max-w-md">
+			<div class="w-full overflow-x-auto">
 				@diagram.New(
 					diagram.Edge("plan", "build"),
 					diagram.Edge("build", "done"),

@@ -37,10 +37,11 @@ func TestFlowchartBasics(t *testing.T) {
 		`role="img"`,
 		`aria-label="Signup flow"`,
 		`viewBox="0 0 `,
+		`data-ui="diagram-canvas"`,
 		`data-ui="diagram-node"`,
+		`data-ui="diagram-shape"`,
 		`data-ui="diagram-edge"`,
 		`data-ui="diagram-arrow"`,
-		`<foreignObject`,
 		`>Start<`, `>Verify<`, `>Done<`,
 	} {
 		if !strings.Contains(out, want) {
@@ -79,8 +80,10 @@ func TestRichBody(t *testing.T) {
 	if !strings.Contains(out, ">Bold<") {
 		t.Errorf("node body not rendered: %s", out)
 	}
-	if !strings.Contains(out, "<foreignObject") {
-		t.Errorf("body should render inside a foreignObject")
+	// Bodies must be plain HTML, never wrapped in a foreignObject (whose
+	// overflow handling clips content in some browsers).
+	if strings.Contains(out, "foreignObject") {
+		t.Errorf("node bodies must not render inside a foreignObject")
 	}
 }
 
@@ -166,13 +169,10 @@ func TestSizeOverride(t *testing.T) {
 		node("b", "y"),
 	}, diagram.Edge("a", "b"))
 	tree := testutil.NewTree(t, out)
-	rects := dom.FindAll(tree.Root, dom.ByMarker("diagram-node"))
 	found := false
-	for _, g := range rects {
-		for c := g.FirstChild; c != nil; c = c.NextSibling {
-			if c.Data == "rect" && dom.GetAttr(c, "width") == "240" {
-				found = true
-			}
+	for _, s := range dom.FindAll(tree.Root, dom.ByMarker("diagram-shape")) {
+		if dom.GetAttr(s, "width") == "240" && dom.GetAttr(s, "height") == "120" {
+			found = true
 		}
 	}
 	if !found {
@@ -251,7 +251,7 @@ type dims struct{ w, h float64 }
 
 func viewBox(t *testing.T, out string) dims {
 	t.Helper()
-	svg := testutil.NewTree(t, out).One("diagram")
+	svg := testutil.NewTree(t, out).One("diagram-canvas")
 	f := strings.Fields(dom.GetAttr(svg, "viewBox"))
 	if len(f) != 4 {
 		t.Fatalf("bad viewBox %q", dom.GetAttr(svg, "viewBox"))
@@ -262,17 +262,14 @@ func viewBox(t *testing.T, out string) dims {
 func shapeYs(t *testing.T, out string) []float64 { return shapeAttr(t, out, "y") }
 func shapeXs(t *testing.T, out string) []float64 { return shapeAttr(t, out, "x") }
 
-// shapeAttr reads the x/y of each node's rect (center-derived), skipping the
-// foreignObject so only the drawn shape is measured.
+// shapeAttr reads the x/y of each node's drawn rect chrome, in document order.
 func shapeAttr(t *testing.T, out, attr string) []float64 {
 	t.Helper()
 	tree := testutil.NewTree(t, out)
 	var vals []float64
-	for _, g := range dom.FindAll(tree.Root, dom.ByMarker("diagram-node")) {
-		for c := g.FirstChild; c != nil; c = c.NextSibling {
-			if c.Data == "rect" {
-				vals = append(vals, atof(t, dom.GetAttr(c, attr)))
-			}
+	for _, s := range dom.FindAll(tree.Root, dom.ByMarker("diagram-shape")) {
+		if s.Data == "rect" {
+			vals = append(vals, atof(t, dom.GetAttr(s, attr)))
 		}
 	}
 	return vals
