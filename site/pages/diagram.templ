@@ -28,13 +28,13 @@ const diagramSchemaSnippet = `// A node body is any markup — here each table i
 	diagram.Edge("users", "orders", diagram.Label("1:N")),
 	diagram.Edge("products", "orders", diagram.Label("1:N")),
 ) {
-	@diagram.Node("users", diagram.Bare(), diagram.Size(150, 108)) {
+	@diagram.Node("users", diagram.Bare()) {
 		@schemaTable("users", "id", "email", "created_at")
 	}
-	@diagram.Node("products", diagram.Bare(), diagram.Size(150, 108)) {
+	@diagram.Node("products", diagram.Bare()) {
 		@schemaTable("products", "id", "name", "price_cents")
 	}
-	@diagram.Node("orders", diagram.Bare(), diagram.Size(150, 126)) {
+	@diagram.Node("orders", diagram.Bare()) {
 		@schemaTable("orders", "id", "user_id", "product_id", "qty")
 	}
 }`
@@ -94,22 +94,22 @@ templ Diagram() {
 					diagram.Edge("web2", "cache"),
 					diagram.Edge("cache", "db"),
 				) {
-					@diagram.Node("net", diagram.Stadium(), diagram.Size(120, 42)) {
+					@diagram.Node("net", diagram.Stadium()) {
 						@netNode("Internet", icon.Globe)
 					}
-					@diagram.Node("lb", diagram.WithTone(diagram.ToneAccent), diagram.Size(148, 42)) {
+					@diagram.Node("lb", diagram.WithTone(diagram.ToneAccent)) {
 						@netNode("Load balancer", icon.ArrowsSplit)
 					}
-					@diagram.Node("web1", diagram.Size(110, 42)) {
+					@diagram.Node("web1") {
 						@netNode("web-1", icon.Browsers)
 					}
-					@diagram.Node("web2", diagram.Size(110, 42)) {
+					@diagram.Node("web2") {
 						@netNode("web-2", icon.Browsers)
 					}
-					@diagram.Node("cache", diagram.WithTone(diagram.ToneAmber), diagram.Size(110, 42)) {
+					@diagram.Node("cache", diagram.WithTone(diagram.ToneAmber)) {
 						@netNode("Redis", icon.Lightning)
 					}
-					@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald), diagram.Size(126, 42)) {
+					@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)) {
 						@netNode("Postgres", icon.Database)
 					}
 				}
@@ -121,13 +121,13 @@ templ Diagram() {
 					diagram.Edge("users", "orders", diagram.Label("1:N")),
 					diagram.Edge("products", "orders", diagram.Label("1:N")),
 				) {
-					@diagram.Node("users", diagram.Bare(), diagram.Size(150, 108)) {
+					@diagram.Node("users", diagram.Bare()) {
 						@schemaTable("users", "id", "email", "created_at")
 					}
-					@diagram.Node("products", diagram.Bare(), diagram.Size(150, 108)) {
+					@diagram.Node("products", diagram.Bare()) {
 						@schemaTable("products", "id", "name", "price_cents")
 					}
-					@diagram.Node("orders", diagram.Bare(), diagram.Size(150, 126)) {
+					@diagram.Node("orders", diagram.Bare()) {
 						@schemaTable("orders", "id", "user_id", "product_id", "qty")
 					}
 				}

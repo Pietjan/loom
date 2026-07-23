@@ -162,6 +162,40 @@ func TestBareOmitsChrome(t *testing.T) {
 	}
 }
 
+// TestMeasuresTailwindBoxModel: a bare node's box is computed from the
+// Tailwind classes on its body — padding, border and monospace advance are all
+// known values, so the result is exact rather than estimated.
+func TestMeasuresTailwindBoxModel(t *testing.T) {
+	// 10 mono chars at 11px (0.6em advance) = 66, + px-2.5 (20) + border (2).
+	body := `<div class="border px-2.5 py-1 font-mono text-[11px]">abcdefghij</div>`
+	out := diag(t, []templ.Component{
+		testutil.WithChildren(diagram.Node("a", diagram.Bare()), testutil.Text(body)),
+		node("b", "B"),
+	}, diagram.Edge("a", "b"))
+
+	w := nodeStyleVal(t, out, 0, "width")
+	if w != 88 {
+		t.Errorf("measured width = %v, want 88 (66 text + 20 padding + 2 border)", w)
+	}
+}
+
+// TestMonospaceScalesExactly: monospace advance is a constant, so doubling the
+// characters doubles the text contribution.
+func TestMonospaceScalesExactly(t *testing.T) {
+	box := func(text string) float64 {
+		body := `<div class="font-mono text-[11px]">` + text + `</div>`
+		out := diag(t, []templ.Component{
+			testutil.WithChildren(diagram.Node("a", diagram.Bare()), testutil.Text(body)),
+			node("b", "B"),
+		}, diagram.Edge("a", "b"))
+		return nodeStyleVal(t, out, 0, "width")
+	}
+	five, ten := box("aaaaa"), box("aaaaaaaaaa")
+	if ten-five != five {
+		t.Errorf("mono width not linear: 5 chars = %v, 10 chars = %v", five, ten)
+	}
+}
+
 // TestSizeOverride: an explicit Size wins over inference.
 func TestSizeOverride(t *testing.T) {
 	out := diag(t, []templ.Component{
@@ -273,6 +307,23 @@ func shapeAttr(t *testing.T, out, attr string) []float64 {
 		}
 	}
 	return vals
+}
+
+// nodeStyleVal reads a numeric px value out of the nth node body's style.
+func nodeStyleVal(t *testing.T, out string, n int, prop string) float64 {
+	t.Helper()
+	nodes := dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-node"))
+	if n >= len(nodes) {
+		t.Fatalf("node %d out of range (%d nodes)", n, len(nodes))
+	}
+	for _, decl := range strings.Split(dom.GetAttr(nodes[n], "style"), ";") {
+		k, v, ok := strings.Cut(decl, ":")
+		if ok && strings.TrimSpace(k) == prop {
+			return atof(t, strings.TrimSuffix(strings.TrimSpace(v), "px"))
+		}
+	}
+	t.Fatalf("no %s in style %q", prop, dom.GetAttr(nodes[n], "style"))
+	return 0
 }
 
 func atof(t *testing.T, s string) float64 {

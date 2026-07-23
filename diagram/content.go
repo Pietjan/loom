@@ -5,8 +5,6 @@ import (
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
-
-	"github.com/pietjan/loom/internal/dom"
 )
 
 // contentLines flattens a node's rendered body into visual text lines: text is
@@ -47,23 +45,25 @@ func contentLines(n *html.Node) []string {
 	return lines
 }
 
-// inferSize estimates a node's box from its rendered content: the widest text
-// line sets the width, the line count sets the height, and any inline icons add
-// a little width. Deterministic but approximate — no server-side font metrics —
-// so Size(w,h) overrides it when exactness matters.
-func inferSize(lines []string, content *html.Node) (w, h float64) {
-	maxRunes := 0
-	for _, ln := range lines {
-		if r := len([]rune(ln)); r > maxRunes {
-			maxRunes = r
-		}
+// inferSize measures a node's box from its rendered content by walking the
+// markup and resolving the Tailwind classes on it (see measure.go) — padding,
+// borders, gaps, fixed sizes, font sizes and line heights are all known
+// values, so this is a real box-model calculation rather than a guess. Only
+// proportional glyph advances remain estimated; monospace is exact.
+//
+// A bare node's body brings its own chrome, so the box is exactly the measured
+// content. A default node is padded so its label isn't flush to the border.
+func inferSize(content *html.Node, bare bool) (w, h float64) {
+	base := style{fontSize: fontSize, lineHeight: fontSize * 1.25} // matches contentClasses
+	w, h = measureChildren(content, base)
+	if bare {
+		return w, h
 	}
-	icons := len(dom.FindAll(content, dom.ByTag(atom.Svg)))
-	w = float64(maxRunes)*glyphAdv + 2*padX + float64(icons)*(fontSize+6)
+	w += 2 * padX
+	h += 2 * padY
 	if w < minNodeW {
 		w = minNodeW
 	}
-	h = float64(len(lines))*lineHeight + 2*padY
 	if min := fontSize + 2*padY; h < min {
 		h = min
 	}

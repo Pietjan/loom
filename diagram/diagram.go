@@ -250,7 +250,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 		if w := dom.GetAttr(el, attrW); w != "" {
 			c.w, c.h = atof(w), atof(dom.GetAttr(el, attrH))
 		} else {
-			c.w, c.h = inferSize(c.lines, el)
+			c.w, c.h = inferSize(el, c.bare)
 			if c.shape == diamond {
 				// A rhombus needs a bigger box to keep the body clear of its
 				// slanted edges — only when we inferred the size.

@@ -36,13 +36,13 @@ const diagramSchemaSnippet = `// A node body is any markup — here each table i
 	diagram.Edge("users", "orders", diagram.Label("1:N")),
 	diagram.Edge("products", "orders", diagram.Label("1:N")),
 ) {
-	@diagram.Node("users", diagram.Bare(), diagram.Size(150, 108)) {
+	@diagram.Node("users", diagram.Bare()) {
 		@schemaTable("users", "id", "email", "created_at")
 	}
-	@diagram.Node("products", diagram.Bare(), diagram.Size(150, 108)) {
+	@diagram.Node("products", diagram.Bare()) {
 		@schemaTable("products", "id", "name", "price_cents")
 	}
-	@diagram.Node("orders", diagram.Bare(), diagram.Size(150, 126)) {
+	@diagram.Node("orders", diagram.Bare()) {
 		@schemaTable("orders", "id", "user_id", "product_id", "qty")
 	}
 }`
@@ -283,7 +283,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("net", diagram.Stadium(), diagram.Size(120, 42)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("net", diagram.Stadium()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -309,7 +309,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("lb", diagram.WithTone(diagram.ToneAccent), diagram.Size(148, 42)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("lb", diagram.WithTone(diagram.ToneAccent)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -335,7 +335,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("web1", diagram.Size(110, 42)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var13), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("web1").Render(templ.WithChildren(ctx, templ_7745c5c3_Var13), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -361,7 +361,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("web2", diagram.Size(110, 42)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var14), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("web2").Render(templ.WithChildren(ctx, templ_7745c5c3_Var14), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -387,7 +387,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("cache", diagram.WithTone(diagram.ToneAmber), diagram.Size(110, 42)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("cache", diagram.WithTone(diagram.ToneAmber)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -413,7 +413,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("db", diagram.WithTone(diagram.ToneEmerald), diagram.Size(126, 42)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var16), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var16), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -491,7 +491,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("users", diagram.Bare(), diagram.Size(150, 108)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var19), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("users", diagram.Bare()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var19), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -517,7 +517,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("products", diagram.Bare(), diagram.Size(150, 108)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("products", diagram.Bare()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -543,7 +543,7 @@ func Diagram() templ.Component {
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("orders", diagram.Bare(), diagram.Size(150, 126)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var21), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("orders", diagram.Bare()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var21), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
