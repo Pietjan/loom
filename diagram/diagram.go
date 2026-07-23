@@ -104,9 +104,10 @@ type edge struct {
 // supplied as children, not options.
 type Config struct {
 	opts.Common
-	dir   Direction
-	title string
-	edges []edge
+	dir    Direction
+	title  string
+	direct bool
+	edges  []edge
 }
 
 // Option configures a diagram.
@@ -120,6 +121,10 @@ var (
 
 // Dir sets the flow direction (default TopBottom).
 func Dir(d Direction) Option { return func(c *Config) { c.dir = d } }
+
+// Direct draws edges as straight point-to-point lines instead of the default
+// right-angled routing.
+func Direct() Option { return func(c *Config) { c.direct = true } }
 
 // Title sets the accessible name (aria-label). Without one, the node bodies'
 // text is joined. Like chart, no <title> is emitted (it would show as a native
@@ -264,7 +269,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 		layoutNodes[i] = layoutNode{id: c.id, w: c.w, h: c.h}
 	}
 
-	l, err := layout(layoutNodes, cfg.edges, cfg.dir)
+	l, err := layout(layoutNodes, cfg.edges, cfg.dir, cfg.direct)
 	if err != nil {
 		return nil, err
 	}
@@ -365,7 +370,7 @@ func nodeBody(n collected, b box) *html.Node {
 func drawEdge(svg *html.Node, e routed) {
 	svg.AppendChild(dom.CustomEl("path",
 		dom.Marker("diagram-edge"),
-		dom.Attr("d", polyline(e.pts)),
+		dom.Attr("d", roundedPath(e.pts, cornerRadius)),
 		dom.Attr("class", edgeClasses())))
 	svg.AppendChild(dom.CustomEl("polygon",
 		dom.Marker("diagram-arrow"),

@@ -52,7 +52,7 @@ type vertex struct {
 // layout runs the full Sugiyama pipeline. Every phase iterates slices in
 // insertion order and tie-breaks by index — never map iteration — so the
 // output is deterministic and golden files don't flake.
-func layout(nodes []layoutNode, edges []edge, dir Direction) (laid, error) {
+func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool) (laid, error) {
 	if len(nodes) == 0 {
 		return laid{}, ErrNoNodes
 	}
@@ -146,7 +146,7 @@ func layout(nodes []layoutNode, edges []edge, dir Direction) (laid, error) {
 		}
 	}
 
-	return assemble(len(nodes), verts, edgeChains, reversed, edges), nil
+	return assemble(dir, direct, len(nodes), verts, edgeChains, reversed, edges), nil
 }
 
 // breakCycles marks the back edges of a greedy DFS (in node insertion order)
@@ -416,7 +416,7 @@ func assignCoords(dir Direction, layers [][]int, verts []vertex, up, down [][]in
 
 // assemble translates the drawing to the origin, computes the viewBox, and
 // builds the boxes and border-trimmed edge polylines.
-func assemble(nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool, edges []edge) laid {
+func assemble(dir Direction, direct bool, nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool, edges []edge) laid {
 	minX, minY := math.Inf(1), math.Inf(1)
 	maxX, maxY := math.Inf(-1), math.Inf(-1)
 	for i := range verts {
@@ -444,8 +444,16 @@ func assemble(nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool
 			pts[k] = xy{verts[vi].x, verts[vi].y}
 		}
 		src, dst := verts[chain[0]], verts[chain[len(chain)-1]]
-		pts[0] = borderPoint(src.x, src.y, src.bw, src.bh, pts[1])
-		pts[len(pts)-1] = borderPoint(dst.x, dst.y, dst.bw, dst.bh, pts[len(pts)-2])
+		if direct {
+			pts[0] = borderPoint(src.x, src.y, src.bw, src.bh, pts[1])
+			pts[len(pts)-1] = borderPoint(dst.x, dst.y, dst.bw, dst.bh, pts[len(pts)-2])
+		} else {
+			// Leave and arrive square to the box face, then step between
+			// waypoints with right angles.
+			pts[0] = faceExit(src, dir)
+			pts[len(pts)-1] = faceEntry(dst, dir)
+			pts = orthoRoute(pts, dir)
+		}
 		if reversed[ei] {
 			for l, r := 0, len(pts)-1; l < r; l, r = l+1, r-1 {
 				pts[l], pts[r] = pts[r], pts[l]
@@ -460,6 +468,51 @@ func assemble(nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool
 		boxes: boxes,
 		edges: routedEdges,
 	}
+}
+
+// faceExit is the centre of the box face an edge leaves along the flow axis.
+func faceExit(v vertex, dir Direction) xy {
+	if dir == LeftRight {
+		return xy{v.x + v.bw/2, v.y}
+	}
+	return xy{v.x, v.y + v.bh/2}
+}
+
+// faceEntry is the centre of the box face an edge arrives at.
+func faceEntry(v vertex, dir Direction) xy {
+	if dir == LeftRight {
+		return xy{v.x - v.bw/2, v.y}
+	}
+	return xy{v.x, v.y - v.bh/2}
+}
+
+// orthoRoute turns a list of waypoints into an axis-aligned path: where two
+// consecutive stops differ on the cross axis, it inserts an elbow halfway
+// along the flow axis, so the edge steps across with right angles.
+func orthoRoute(stops []xy, dir Direction) []xy {
+	// Offsets below this are snapped straight: an elbow for a sub-pixel
+	// misalignment reads as a wobble, not a corner.
+	const align = 2.0
+
+	out := []xy{stops[0]}
+	for _, b := range stops[1:] {
+		a := out[len(out)-1]
+		if dir == LeftRight {
+			if math.Abs(a.y-b.y) > align {
+				mid := (a.x + b.x) / 2
+				out = append(out, xy{mid, a.y}, xy{mid, b.y})
+			} else {
+				b.y = a.y
+			}
+		} else if math.Abs(a.x-b.x) > align {
+			mid := (a.y + b.y) / 2
+			out = append(out, xy{a.x, mid}, xy{b.x, mid})
+		} else {
+			b.x = a.x
+		}
+		out = append(out, b)
+	}
+	return dedupe(out)
 }
 
 func snapshot(layers [][]int) [][]int {
