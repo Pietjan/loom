@@ -196,6 +196,38 @@ func TestMonospaceScalesExactly(t *testing.T) {
 	}
 }
 
+// TestEdgeLabelsAreHoverDots: a labelled edge gets a dot on the line whose
+// label is revealed by loom's CSS-only tooltip, not printed onto the diagram.
+func TestEdgeLabelsAreHoverDots(t *testing.T) {
+	out := diag(t,
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Edge("a", "b", diagram.Label("yes")),
+		diagram.Edge("a", "c"), // unlabelled: no dot
+	)
+	tree := testutil.NewTree(t, out)
+
+	dots := dom.FindAll(tree.Root, dom.ByMarker("diagram-edge-dot"))
+	if len(dots) != 1 {
+		t.Fatalf("dots = %d, want 1 (only the labelled edge)", len(dots))
+	}
+	// Reachable by keyboard, and described by the tooltip it opens.
+	if dom.GetAttr(dots[0], "tabindex") != "0" {
+		t.Error("dot must be focusable so the tooltip's focus path works")
+	}
+	if dom.GetAttr(dots[0], "aria-describedby") == "" {
+		t.Error("dot should be described by its tooltip")
+	}
+
+	tips := dom.FindAll(tree.Root, dom.ByMarker("tooltip-content"))
+	if len(tips) != 1 || tips[0].FirstChild == nil || tips[0].FirstChild.Data != "yes" {
+		t.Errorf("tooltip should carry the label, got %v", tips)
+	}
+	// The label must not also be painted onto the canvas.
+	if strings.Contains(out, "diagram-edge-label") {
+		t.Error("label should not be drawn as SVG text any more")
+	}
+}
+
 // TestSizeOverride: an explicit Size wins over inference.
 func TestSizeOverride(t *testing.T) {
 	out := diag(t, []templ.Component{

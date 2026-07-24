@@ -59,8 +59,12 @@ func arrowClasses() string {
 	return b.String()
 }
 
-func edgeLabelClasses() string {
+// dotClasses styles the marker sitting on a labelled edge: a small hollow dot
+// in the same white-fill/base-border language as the node chrome, so it reads
+// as part of the diagram rather than a stray point.
+func dotClasses() string {
 	var b styles.Builder
-	b.Add("fill-base-500 text-[11px] select-none dark:fill-base-400")
+	b.Add("block size-2.5 rounded-full border border-base-300 bg-white")
+	b.Add("dark:border-base-600 dark:bg-base-800")
 	return b.String()
 }

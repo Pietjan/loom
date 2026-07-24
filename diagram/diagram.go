@@ -55,6 +55,7 @@ import (
 	"github.com/pietjan/loom/internal/dom"
 	"github.com/pietjan/loom/internal/opts"
 	"github.com/pietjan/loom/internal/render"
+	"github.com/pietjan/loom/tooltip"
 )
 
 // ErrNoNodes is returned when the diagram has no nodes.
@@ -280,7 +281,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	return emit(cfg, nodes, l), nil
+	return emit(ctx, cfg, nodes, l)
 }
 
 // emit builds the two-layer result: an SVG holding the edges and node chrome,
@@ -288,7 +289,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 // <foreignObject>) so oversized content overflows reliably instead of being
 // clipped — foreignObject's overflow handling is inconsistent across browsers.
 // The stage is a fixed pixel size so the SVG and the HTML never scale apart.
-func emit(cfg Config, nodes []collected, l laid) *html.Node {
+func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Node, error) {
 	stage := dom.El(atom.Div,
 		dom.Marker("diagram"),
 		dom.Attr("role", "img"))
@@ -315,10 +316,41 @@ func emit(cfg Config, nodes []collected, l laid) *html.Node {
 		stage.AppendChild(nodeBody(n, l.boxes[i]))
 	}
 
+	// A labelled edge gets a dot on the line rather than always-on text: the
+	// dot is the affordance, and loom's CSS-only tooltip reveals the label on
+	// hover or keyboard focus. Still no JavaScript.
+	for _, e := range l.edges {
+		if e.label == "" {
+			continue
+		}
+		tip, err := edgeTip(ctx, e)
+		if err != nil {
+			return nil, err
+		}
+		stage.AppendChild(tip)
+	}
+
 	cfg.Apply(stage, rootClasses())
 	// Structural sizing goes on last so it can't be dropped by user attrs.
 	dom.SetAttr(stage, "style", fmt.Sprintf("width: %spx; height: %spx", fmtCoord(l.W), fmtCoord(l.H)))
-	return stage
+	return stage, nil
+}
+
+// edgeTip builds the hoverable dot that reveals an edge's label, placed at the
+// midpoint of the routed line.
+func edgeTip(ctx context.Context, e routed) (*html.Node, error) {
+	// tabindex makes the dot focusable so the tooltip's :focus-within path can
+	// fire — otherwise the label would be unreachable by keyboard.
+	dot := render.Component(func(context.Context) (*html.Node, error) {
+		return dom.El(atom.Span, dom.Marker("diagram-edge-dot"),
+			dom.Attr("tabindex", "0"),
+			dom.Attr("class", dotClasses())), nil
+	})
+	mid := midpoint(e.pts)
+	return tooltip.Node(templ.WithChildren(ctx, dot),
+		tooltip.Text(e.label),
+		tooltip.Class("absolute -translate-x-1/2 -translate-y-1/2 p-1"),
+		tooltip.Attr("style", fmt.Sprintf("left: %spx; top: %spx", fmtCoord(mid.x), fmtCoord(mid.y))))
 }
 
 func ariaLabel(cfg Config, nodes []collected) string {
@@ -383,19 +415,6 @@ func drawEdge(svg *html.Node, e routed) {
 		dom.Marker("diagram-arrow"),
 		dom.Attr("points", arrowhead(e.pts)),
 		dom.Attr("class", arrowClasses())))
-
-	if e.label != "" {
-		mid := midpoint(e.pts)
-		text := dom.CustomEl("text",
-			dom.Marker("diagram-edge-label"),
-			dom.Attr("x", fmtCoord(mid.x)),
-			dom.Attr("y", fmtCoord(mid.y)),
-			dom.Attr("text-anchor", "middle"),
-			dom.Attr("dominant-baseline", "central"),
-			dom.Attr("class", edgeLabelClasses()))
-		text.AppendChild(dom.Text(e.label))
-		svg.AppendChild(text)
-	}
 }
 
 // moveChildren reparents src's children onto dst.
