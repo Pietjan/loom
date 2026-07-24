@@ -259,6 +259,15 @@ func TestGolden(t *testing.T) {
 		[]templ.Component{node("a", "Open"), node("b", "Review"), node("c", "Test"), node("d", "Merge")},
 		diagram.Edge("a", "b"), diagram.Edge("a", "c"),
 		diagram.Edge("b", "d"), diagram.Edge("c", "d"))
+	// A tree exercises parent-centering: each parent should settle over the
+	// midpoint of its children, which no other golden covers.
+	g("diagram-tree",
+		[]templ.Component{
+			node("root", "Root"), node("l", "Left"), node("r", "Right"),
+			node("ll", "L1"), node("lr", "L2"),
+		},
+		diagram.Edge("root", "l"), diagram.Edge("root", "r"),
+		diagram.Edge("l", "ll"), diagram.Edge("l", "lr"))
 	g("diagram-decision",
 		[]templ.Component{
 			node("start", "Start", diagram.Stadium()),

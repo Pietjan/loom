@@ -25,6 +25,13 @@
 // and keep their drawn direction; diagram.Dir(diagram.LeftRight) flips the
 // flow axis.
 //
+// Naming note: this package deliberately deviates from loom's convention of
+// exporting Node(ctx, ...) as the raw-node render entry. Here Node(id, ...) is
+// the node constructor the builder API needs — it returns a templ.Component
+// whose children are the body — so the render function is unexported (build).
+// diagram is an L1, non-embeddable component, and tests and the site only use
+// New(), so nothing needs a diagram.Node(ctx, ...).
+//
 // Sizing, honestly: the server can't measure rendered HTML, so a node's box is
 // inferred from its content's text (widest line × a fixed glyph advance, line
 // count for height) — good for labels and small chips, approximate for rich
