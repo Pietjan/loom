@@ -134,6 +134,36 @@ func TestBranchSpreads(t *testing.T) {
 	}
 }
 
+// TestParentCentersOverChildren: coordinate assignment puts a parent exactly
+// on the midpoint of its children — including a root whose two children are a
+// two-child subtree and a wider childless sibling, which the earlier averaging
+// sweep left visibly off-center.
+func TestParentCentersOverChildren(t *testing.T) {
+	out := diag(t,
+		[]templ.Component{
+			node("root", "Root"), node("l", "Left"), node("r", "Right"),
+			node("ll", "L1"), node("lr", "L2"),
+		},
+		diagram.Edge("root", "l"), diagram.Edge("root", "r"),
+		diagram.Edge("l", "ll"), diagram.Edge("l", "lr"),
+	)
+	c := shapeCenters(t, out) // document order: root, l, r, ll, lr
+	if len(c) != 5 {
+		t.Fatalf("want 5 node shapes, got %d", len(c))
+	}
+	for _, tc := range []struct {
+		what         string
+		parent, a, b int
+	}{
+		{"root over Left and Right", 0, 1, 2},
+		{"Left over its two children", 1, 3, 4},
+	} {
+		if want := (c[tc.a] + c[tc.b]) / 2; math.Abs(c[tc.parent]-want) > 0.01 {
+			t.Errorf("%s: center = %v, want %v", tc.what, c[tc.parent], want)
+		}
+	}
+}
+
 // TestCycleTerminates: a cycle lays out (via cycle-breaking) and still draws an
 // arrow per edge.
 func TestCycleTerminates(t *testing.T) {
@@ -380,6 +410,17 @@ func viewBox(t *testing.T, out string) dims {
 
 func shapeYs(t *testing.T, out string) []float64 { return shapeAttr(t, out, "y") }
 func shapeXs(t *testing.T, out string) []float64 { return shapeAttr(t, out, "x") }
+
+// shapeCenters reads the horizontal center of each node's rect chrome.
+func shapeCenters(t *testing.T, out string) []float64 {
+	t.Helper()
+	xs, ws := shapeAttr(t, out, "x"), shapeAttr(t, out, "width")
+	c := make([]float64, len(xs))
+	for i := range xs {
+		c[i] = xs[i] + ws[i]/2
+	}
+	return c
+}
 
 // shapeAttr reads the x/y of each node's drawn rect chrome, in document order.
 func shapeAttr(t *testing.T, out, attr string) []float64 {

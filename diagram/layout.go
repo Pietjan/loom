@@ -11,7 +11,7 @@ const (
 	defaultLayerGap = 40.0 // gap between layers along the flow axis
 	defaultNodeGap  = 28.0 // gap between nodes within a layer along the cross axis
 	defaultMargin   = 16.0 // padding around the whole drawing
-	sweeps          = 8    // crossing-reduction and coordinate-alignment iterations
+	sweeps          = 8    // crossing-reduction iterations
 )
 
 // gaps is the resolved spacing configuration for one render.
@@ -319,8 +319,7 @@ func countCrossings(layers [][]int, verts []vertex, down [][]int) int {
 }
 
 // assignCoords sets each vertex's flow coordinate (from its layer) and cross
-// coordinate (packed, then iteratively aligned toward neighbors without
-// overlap).
+// coordinate (Brandes–Köpf).
 func assignCoords(dir Direction, sp gaps, layers [][]int, verts []vertex, up, down [][]int) {
 	flowExtent := func(vi int) float64 {
 		if dir == LeftRight {
@@ -351,72 +350,273 @@ func assignCoords(dir Direction, sp gaps, layers [][]int, verts []vertex, up, do
 		flow += thick + sp.layer
 	}
 
-	// Cross: initial left-to-right packing within each layer.
-	for L := range layers {
-		c := 0.0
-		for _, vi := range layers[L] {
-			c += crossExtent(vi) / 2
-			verts[vi].cross = c
-			c += crossExtent(vi)/2 + sp.node
+	brandesKopf(layers, verts, up, down, crossExtent, sp.node)
+}
+
+// brandesKopf assigns cross coordinates with Brandes and Köpf's algorithm
+// ("Fast and Simple Horizontal Coordinate Assignment", GD 2002).
+//
+// Each vertex is aligned with a median neighbor, chaining vertices into blocks
+// that share one coordinate; the blocks are then compacted against the minimum
+// gap. That runs four times — aligning against the layer above and against the
+// one below, packing toward each side of the cross axis — and the four
+// candidates are averaged, so no single pass's directional bias survives. Long
+// edges come out straight and a parent settles on the true midpoint of its
+// children, which the naive averaging sweep only approximated.
+func brandesKopf(layers [][]int, verts []vertex, up, down [][]int, size func(int) float64, gap float64) {
+	// Two nodes can be joined by several edges (a 2-cycle leaves a pair of
+	// parallel segments). That is one alignment candidate, not several, or the
+	// duplicate drags the median onto itself.
+	up, down = distinct(up), distinct(down)
+	marked := markConflicts(layers, verts, up)
+
+	var cand [4][]float64
+	for i := range cand {
+		upward, rightward := i&1 != 0, i&2 != 0
+
+		// Feed the core one normalized view: layers ordered from the fixed
+		// end, each layer ordered from the side we pack toward.
+		ls := make([][]int, len(layers))
+		for L, layer := range layers {
+			at := L
+			if upward {
+				at = len(layers) - 1 - L
+			}
+			ls[at] = append([]int(nil), layer...)
+			if rightward {
+				reverseInts(ls[at])
+			}
+		}
+		nbr := up
+		if upward {
+			nbr = down
+		}
+
+		cand[i] = alignAndCompact(ls, nbr, verts, marked, upward, size, gap)
+		if rightward {
+			for v := range cand[i] {
+				cand[i][v] = -cand[i][v] // mirror back into the real axis
+			}
 		}
 	}
+	balance(cand, verts, size)
+}
 
-	// Alignment: pull each vertex toward the average of the given neighbors,
-	// enforce the min gap, then recenter the layer's block onto the centroid
-	// of the desired positions. The recentring cancels the directional bias
-	// of the min-gap sweep, so two siblings that both want the same slot end
-	// up straddling it symmetrically (a parent lands centered over them).
-	align := func(ls []int, nbr [][]int) {
-		desired := make([]float64, len(ls))
-		for i, vi := range ls {
-			desired[i] = verts[vi].cross
-			if ns := nbr[vi]; len(ns) > 0 {
-				sum := 0.0
-				for _, n := range ns {
-					sum += verts[n].cross
+// markConflicts finds type-1 conflicts: a crossing between an inner segment
+// (both ends routing dummies, i.e. a long edge passing through) and an
+// ordinary one. The ordinary segment is marked so alignment never follows it,
+// which is what keeps long edges drawn straight.
+func markConflicts(layers [][]int, verts []vertex, up [][]int) map[[2]int]bool {
+	pos := make([]int, len(verts))
+	for _, layer := range layers {
+		for k, v := range layer {
+			pos[v] = k
+		}
+	}
+	dummy := func(v int) bool { return verts[v].node < 0 }
+	innerUpper := func(v int) int {
+		if !dummy(v) {
+			return -1
+		}
+		for _, u := range up[v] {
+			if dummy(u) {
+				return u
+			}
+		}
+		return -1
+	}
+
+	marked := map[[2]int]bool{}
+	for i := 1; i+1 < len(layers); i++ {
+		lower := layers[i+1]
+		k0, l := 0, 0
+		for l1, v := range lower {
+			inner := innerUpper(v)
+			// Scan up to each inner segment (and to the layer's end): every
+			// segment landing outside the window those two bound crosses one.
+			if inner < 0 && l1 != len(lower)-1 {
+				continue
+			}
+			k1 := len(layers[i]) - 1
+			if inner >= 0 {
+				k1 = pos[inner]
+			}
+			for ; l <= l1; l++ {
+				for _, u := range up[lower[l]] {
+					if k := pos[u]; k < k0 || k > k1 {
+						marked[[2]int{u, lower[l]}] = true
+					}
 				}
-				desired[i] = sum / float64(len(ns))
 			}
-			verts[vi].cross = desired[i]
+			k0 = k1
 		}
-		for i := 1; i < len(ls); i++ {
-			min := verts[ls[i-1]].cross + crossExtent(ls[i-1])/2 + sp.node + crossExtent(ls[i])/2
-			if verts[ls[i]].cross < min {
-				verts[ls[i]].cross = min
+	}
+	return marked
+}
+
+// alignAndCompact runs one of the four passes. ls holds the layers in
+// processing order, each ordered from the side being packed toward; nbr[v]
+// lists v's neighbors in the preceding processing layer. It returns one
+// coordinate per vertex, still in the mirrored frame when packing rightward.
+func alignAndCompact(ls [][]int, nbr [][]int, verts []vertex, marked map[[2]int]bool, upward bool, size func(int) float64, gap float64) []float64 {
+	n := len(verts)
+	pos := make([]int, n)  // index within the vertex's layer
+	home := make([]int, n) // which layer of ls the vertex is in
+	for L, layer := range ls {
+		for k, v := range layer {
+			pos[v], home[v] = k, L
+		}
+	}
+	// marked is keyed in the graph's own direction, so flip when aligning up.
+	conflict := func(u, v int) bool {
+		if upward {
+			return marked[[2]int{v, u}]
+		}
+		return marked[[2]int{u, v}]
+	}
+
+	// Alignment: each vertex tries to join its median neighbor's block, but
+	// only if that keeps the aligned pairs non-crossing (r) and skips conflicts.
+	root, align := make([]int, n), make([]int, n)
+	for v := range verts {
+		root[v], align[v] = v, v
+	}
+	for L := 1; L < len(ls); L++ {
+		r := -1
+		for _, v := range ls[L] {
+			ns := append([]int(nil), nbr[v]...)
+			if len(ns) == 0 {
+				continue
 			}
-		}
-		var wantSum, gotSum float64
-		for i, vi := range ls {
-			wantSum += desired[i]
-			gotSum += verts[vi].cross
-		}
-		if n := len(ls); n > 0 {
-			shift := (wantSum - gotSum) / float64(n)
-			for _, vi := range ls {
-				verts[vi].cross += shift
+			sort.Slice(ns, func(a, b int) bool { return pos[ns[a]] < pos[ns[b]] })
+			for _, m := range [2]int{(len(ns) - 1) / 2, len(ns) / 2} {
+				if align[v] != v {
+					break
+				}
+				u := ns[m]
+				if conflict(u, v) || r >= pos[u] {
+					continue
+				}
+				align[u], root[v], align[v] = v, root[u], root[u]
+				r = pos[u]
 			}
 		}
 	}
 
-	both := make([][]int, len(verts))
-	for vi := range verts {
-		both[vi] = append(append([]int(nil), up[vi]...), down[vi]...)
+	// Compaction: place each block as far toward the packing side as its
+	// in-layer predecessors allow. Blocks that end up in separate classes are
+	// reconciled afterwards by their sink's accumulated shift.
+	sink, shift := make([]int, n), make([]float64, n)
+	x, placed := make([]float64, n), make([]bool, n)
+	for v := range verts {
+		sink[v], shift[v] = v, math.Inf(1)
 	}
-	for it := 0; it < sweeps; it++ {
-		if it%2 == 0 {
-			for L := 1; L < len(layers); L++ {
-				align(layers[L], up)
+	var place func(v int)
+	place = func(v int) {
+		if placed[v] {
+			return
+		}
+		placed[v] = true
+		for w := v; ; {
+			if p := pos[w]; p > 0 {
+				pred := ls[home[w]][p-1]
+				u := root[pred]
+				place(u)
+				if sink[v] == v {
+					sink[v] = sink[u]
+				}
+				delta := (size(pred)+size(w))/2 + gap
+				if sink[v] != sink[u] {
+					shift[sink[u]] = math.Min(shift[sink[u]], x[v]-x[u]-delta)
+				} else {
+					x[v] = math.Max(x[v], x[u]+delta)
+				}
 			}
-		} else {
-			for L := len(layers) - 2; L >= 0; L-- {
-				align(layers[L], down)
+			if w = align[w]; w == v {
+				break
 			}
 		}
 	}
-	for i := 0; i < sweeps; i++ {
-		for L := range layers {
-			align(layers[L], both)
+	for v := range verts {
+		if root[v] == v {
+			place(v)
 		}
+	}
+
+	out := make([]float64, n)
+	for v := range verts {
+		out[v] = x[root[v]]
+		if s := shift[sink[root[v]]]; !math.IsInf(s, 1) {
+			out[v] += s
+		}
+	}
+	return out
+}
+
+// balance shifts the four candidates onto the narrowest one and gives each
+// vertex the average of its two middle values. Averaging order statistics of
+// assignments that each respect the min gap preserves the min gap.
+func balance(cand [4][]float64, verts []vertex, size func(int) float64) {
+	span := func(c []float64, pad bool) (lo, hi float64) {
+		lo, hi = math.Inf(1), math.Inf(-1)
+		for v, x := range c {
+			half := 0.0
+			if pad {
+				half = size(v) / 2
+			}
+			lo, hi = math.Min(lo, x-half), math.Max(hi, x+half)
+		}
+		return lo, hi
+	}
+
+	best, narrowest := 0, math.Inf(1)
+	for i, c := range cand {
+		lo, hi := span(c, true)
+		if hi-lo < narrowest {
+			narrowest, best = hi-lo, i
+		}
+	}
+
+	lo, hi := span(cand[best], false)
+	for i, c := range cand {
+		l, h := span(c, false)
+		// A pass packed toward the high side keeps its far edge, one packed
+		// toward the low side its near edge.
+		d := lo - l
+		if i&2 != 0 {
+			d = hi - h
+		}
+		for v := range c {
+			c[v] += d
+		}
+	}
+
+	for v := range verts {
+		vals := [4]float64{cand[0][v], cand[1][v], cand[2][v], cand[3][v]}
+		sort.Float64s(vals[:])
+		verts[v].cross = (vals[1] + vals[2]) / 2
+	}
+}
+
+// distinct copies an adjacency list with repeated neighbors collapsed,
+// keeping first-seen order.
+func distinct(adj [][]int) [][]int {
+	out := make([][]int, len(adj))
+	for v, ns := range adj {
+		seen := make(map[int]bool, len(ns))
+		for _, n := range ns {
+			if !seen[n] {
+				seen[n] = true
+				out[v] = append(out[v], n)
+			}
+		}
+	}
+	return out
+}
+
+func reverseInts(s []int) {
+	for l, r := 0, len(s)-1; l < r; l, r = l+1, r-1 {
+		s[l], s[r] = s[r], s[l]
 	}
 }
 
