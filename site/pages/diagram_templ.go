@@ -43,11 +43,11 @@ const diagramSchemaSnippet = `// A node body is any markup — here each table i
 	diagram.Edge("items", "products", diagram.Label("product_id")),
 	diagram.Edge("products", "categories", diagram.Label("category_id")),
 ) {
-	@diagram.Node("teams", diagram.Bare()) {
-		@schemaTable("teams", "id", "name", "owner_id")
-	}
 	@diagram.Node("users", diagram.Bare()) {
 		@schemaTable("users", "id", "email", "team_id")
+	}
+	@diagram.Node("teams", diagram.Bare()) {
+		@schemaTable("teams", "id", "name", "owner_id")
 	}
 	// ... categories, products, orders, items
 }`
@@ -1026,13 +1026,13 @@ func Diagram() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = schemaTable("teams", "id", "name", "owner_id").Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = schemaTable("users", "id", "email", "team_id").Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("teams", diagram.Bare()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var37), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("users", diagram.Bare()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var37), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1052,13 +1052,13 @@ func Diagram() templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = schemaTable("users", "id", "email", "team_id").Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = schemaTable("teams", "id", "name", "owner_id").Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						return nil
 					})
-					templ_7745c5c3_Err = diagram.Node("users", diagram.Bare()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var38), templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = diagram.Node("teams", diagram.Bare()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var38), templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

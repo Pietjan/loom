@@ -35,11 +35,11 @@ const diagramSchemaSnippet = `// A node body is any markup — here each table i
 	diagram.Edge("items", "products", diagram.Label("product_id")),
 	diagram.Edge("products", "categories", diagram.Label("category_id")),
 ) {
-	@diagram.Node("teams", diagram.Bare()) {
-		@schemaTable("teams", "id", "name", "owner_id")
-	}
 	@diagram.Node("users", diagram.Bare()) {
 		@schemaTable("users", "id", "email", "team_id")
+	}
+	@diagram.Node("teams", diagram.Bare()) {
+		@schemaTable("teams", "id", "name", "owner_id")
 	}
 	// ... categories, products, orders, items
 }`
@@ -276,11 +276,11 @@ templ Diagram() {
 					diagram.Edge("items", "products", diagram.Label("product_id")),
 					diagram.Edge("products", "categories", diagram.Label("category_id")),
 				) {
-					@diagram.Node("teams", diagram.Bare()) {
-						@schemaTable("teams", "id", "name", "owner_id")
-					}
 					@diagram.Node("users", diagram.Bare()) {
 						@schemaTable("users", "id", "email", "team_id")
+					}
+					@diagram.Node("teams", diagram.Bare()) {
+						@schemaTable("teams", "id", "name", "owner_id")
 					}
 					@diagram.Node("categories", diagram.Bare()) {
 						@schemaTable("categories", "id", "name")
