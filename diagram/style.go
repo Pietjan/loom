@@ -94,13 +94,15 @@ func arrowOpenClasses() string {
 	return b.String()
 }
 
-// dotClasses styles the marker sitting on a labelled edge, matching chart's
+// dotClasses styles the marker sitting on a labelled edge, following chart's
 // data points: a solid dot in the line's own colour, ringed in the surface
-// colour so it reads as sitting on the line rather than crossing it. Chart
-// draws r=3.5 with a 1.5 stroke; this is the HTML equivalent.
+// colour so it reads as sitting on the line rather than crossing it. Sized off
+// the spacing scale instead of in raw pixels, so it lands a little under
+// chart's r=3.5 point — which suits a marker you hover for a label rather than
+// a value to read off the line.
 func dotClasses() string {
 	var b styles.Builder
-	b.Add("block size-[7px] rounded-full bg-base-300 ring-[1.5px] ring-white")
+	b.Add("block size-1.25 rounded-full bg-base-300 ring ring-white")
 	b.Add("dark:bg-base-600 dark:ring-base-800")
 	return b.String()
 }
