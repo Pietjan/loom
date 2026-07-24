@@ -137,25 +137,133 @@ func borderPoint(cx, cy, w, h float64, t xy) xy {
 	return xy{cx + dx*s, cy + dy*s}
 }
 
-// arrowhead returns the three-point polygon (tip + two base corners) for an
-// arrow at the end of the polyline, pointing along its final segment.
-func arrowhead(pts []xy) string {
-	const length, halfWidth = 8.0, 4.0
-	tip := pts[len(pts)-1]
+// Arrowhead dimensions along and across the final segment.
+const arrowLen, arrowHalf = 8.0, 4.0
+
+// arrowGeom resolves the frame an arrowhead is built in: the tip (the
+// polyline's last point, sitting on the node border), the unit vector pointing
+// toward the tip, and the unit perpendicular.
+func arrowGeom(pts []xy) (tip, u, perp xy) {
+	tip = pts[len(pts)-1]
 	prev := pts[len(pts)-2]
 	dx, dy := tip.x-prev.x, tip.y-prev.y
 	d := math.Hypot(dx, dy)
 	if d == 0 {
 		d = 1
 	}
-	ux, uy := dx/d, dy/d                       // unit vector along the segment
-	bx, by := tip.x-ux*length, tip.y-uy*length // base center
-	px, py := -uy, ux                          // perpendicular
-	return strings.Join([]string{
-		fmtCoord(tip.x) + "," + fmtCoord(tip.y),
-		fmtCoord(bx+px*halfWidth) + "," + fmtCoord(by+py*halfWidth),
-		fmtCoord(bx-px*halfWidth) + "," + fmtCoord(by-py*halfWidth),
-	}, " ")
+	u = xy{dx / d, dy / d}
+	perp = xy{-u.y, u.x}
+	return
+}
+
+// points formats a list of points as an SVG "x,y x,y ..." attribute.
+func points(ps ...xy) string {
+	parts := make([]string, len(ps))
+	for i, p := range ps {
+		parts[i] = fmtCoord(p.x) + "," + fmtCoord(p.y)
+	}
+	return strings.Join(parts, " ")
+}
+
+// arrowTriangle is the filled/hollow arrowhead: tip plus the two base corners.
+func arrowTriangle(pts []xy) string {
+	tip, u, perp := arrowGeom(pts)
+	base := xy{tip.x - u.x*arrowLen, tip.y - u.y*arrowLen}
+	return points(tip, add(base, perp, arrowHalf), add(base, perp, -arrowHalf))
+}
+
+// arrowBarb is the open arrowhead: two strokes meeting at the tip, drawn as a
+// three-point polyline (base corner, tip, base corner) with no fill.
+func arrowBarb(pts []xy) string {
+	tip, u, perp := arrowGeom(pts)
+	base := xy{tip.x - u.x*arrowLen, tip.y - u.y*arrowLen}
+	return points(add(base, perp, arrowHalf), tip, add(base, perp, -arrowHalf))
+}
+
+// arrowDiamondPts is the diamond arrowhead: tip, the two side corners at the
+// midpoint, and the back corner a full length behind the tip.
+func arrowDiamondPts(pts []xy) string {
+	tip, u, perp := arrowGeom(pts)
+	mid := xy{tip.x - u.x*arrowLen/2, tip.y - u.y*arrowLen/2}
+	back := xy{tip.x - u.x*arrowLen, tip.y - u.y*arrowLen}
+	return points(tip, add(mid, perp, arrowHalf), back, add(mid, perp, -arrowHalf))
+}
+
+// arrowDot is the round arrowhead: a disc whose leading edge meets the tip.
+func arrowDot(pts []xy) (cx, cy, r float64) {
+	tip, u, _ := arrowGeom(pts)
+	r = arrowHalf
+	return tip.x - u.x*r, tip.y - u.y*r, r
+}
+
+// add offsets p by d units along unit vector v.
+func add(p, v xy, d float64) xy { return xy{p.x + v.x*d, p.y + v.y*d} }
+
+// headInset is how far an arrowhead of the given shape reaches back from the
+// tip — where the shaft should stop so it meets the head cleanly instead of
+// running under it.
+func headInset(head arrowShape) float64 {
+	switch head {
+	case arrowOpen:
+		// The barb is two open strokes; the shaft runs all the way to the tip.
+		return 0
+	case arrowDiamond, arrowRound:
+		// Both narrow to a point (diamond) or curve (dot) at the back, so a
+		// full trim would leave the shaft meeting a vanishing edge. Stop short
+		// of the base so the shaft overlaps into the filled body and reads as
+		// joined rather than detached.
+		return arrowLen - headOverlap
+	default:
+		// The triangle's base is flat and full width, so the shaft meets it
+		// squarely a full arrow length back.
+		return arrowLen
+	}
+}
+
+// headOverlap is how far the shaft runs past a pointed head's back extremity
+// into its body, hiding the seam where the two meet.
+const headOverlap = 2.0
+
+// trimShaft returns the polyline shortened at whichever end(s) carry an
+// arrowhead, so the drawn line stops at the head's base. The arrowheads are
+// still built from the untrimmed points, so the tips stay on the node borders.
+func trimShaft(pts []xy, ends arrowEnds, head arrowShape) []xy {
+	inset := headInset(head)
+	if inset == 0 || ends == arrowNone {
+		return pts
+	}
+	out := append([]xy(nil), pts...)
+	if ends == arrowTo || ends == arrowBoth {
+		pullBack(out, inset)
+	}
+	if ends == arrowBoth {
+		reverseXY(out)
+		pullBack(out, inset)
+		reverseXY(out)
+	}
+	return out
+}
+
+// pullBack moves the last point of pts back toward the previous one by d,
+// clamped so it can't cross that point and invert the final segment.
+func pullBack(pts []xy, d float64) {
+	n := len(pts)
+	if n < 2 {
+		return
+	}
+	prev, last := pts[n-2], pts[n-1]
+	if seg := dist(prev, last); seg == 0 {
+		return
+	} else if d > seg {
+		d = seg
+	}
+	pts[n-1] = toward(last, prev, d)
+}
+
+func reverseXY(s []xy) {
+	for l, r := 0, len(s)-1; l < r; l, r = l+1, r-1 {
+		s[l], s[r] = s[r], s[l]
+	}
 }
 
 // diamondPoints returns the four-point polygon for a decision node.

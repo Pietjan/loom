@@ -23,9 +23,18 @@
 //
 // Linear pipelines and trees are DAG subsets handled for free; cycles lay out
 // and keep their drawn direction; diagram.Dir(diagram.LeftRight) flips the
-// flow axis. Spacing is tunable with diagram.Gap(layer, node) and
+// flow axis. Each box face carries at most two edge ports, one per drawn
+// direction, so an outgoing shaft is never laid over an incoming arrowhead;
+// same-direction edges share a port and fan or join from one point.
+// diagram.Ports(diagram.PortsSpread) instead gives every edge its own port.
+// Spacing is tunable with diagram.Gap(layer, node) and
 // diagram.Margin(n); a labelled edge gets a dot on the line whose label a
-// CSS-only tooltip reveals on hover or focus.
+// CSS-only tooltip reveals on hover or focus. diagram.Dashed() and
+// diagram.Dotted() break an edge's line while leaving its arrowhead solid;
+// diagram.NoArrow() drops the arrowhead for a plain connector and
+// diagram.BiDirectional() adds one at the source end too. The arrowhead's
+// shape is diagram.HollowArrow(), OpenArrow(), DiamondArrow(), or DotArrow(),
+// defaulting to a filled triangle.
 //
 // Naming note: this package deliberately deviates from loom's convention of
 // exporting Node(ctx, ...) as the raw-node render entry. Here Node(id, ...) is
@@ -73,6 +82,18 @@ const (
 	LeftRight
 )
 
+// PortMode chooses how edges sharing a box face attach to it.
+type PortMode int
+
+const (
+	// PortsShared gives each face at most two ports, one per drawn direction:
+	// same-direction edges share, fanning or joining from one point (default).
+	PortsShared PortMode = iota
+	// PortsSpread gives every edge its own port, spread along the face and
+	// ordered by its neighbour — busier, but each connection is distinct.
+	PortsSpread
+)
+
 // Tone accents a node's outline.
 type Tone int
 
@@ -105,9 +126,41 @@ const (
 	attrH     = "data-node-h"
 )
 
+// lineStyle is an edge's stroke pattern.
+type lineStyle int
+
+const (
+	lineSolid  lineStyle = iota // continuous (default)
+	lineDashed                  // evenly broken
+	lineDotted                  // round dots
+)
+
+// arrowEnds says which ends of an edge carry an arrowhead.
+type arrowEnds int
+
+const (
+	arrowTo   arrowEnds = iota // head at the target only (default)
+	arrowNone                  // a plain connector, no heads
+	arrowBoth                  // heads at both ends
+)
+
+// arrowShape is an arrowhead's silhouette.
+type arrowShape int
+
+const (
+	arrowSolid   arrowShape = iota // filled triangle (default)
+	arrowHollow                    // outlined triangle
+	arrowOpen                      // barb (two strokes, no fill)
+	arrowDiamond                   // filled diamond
+	arrowRound                     // filled dot
+)
+
 type edge struct {
 	from, to string
 	label    string
+	style    lineStyle
+	arrows   arrowEnds
+	head     arrowShape
 }
 
 // Config holds diagram-level options (edges, direction, title). Nodes are
@@ -121,6 +174,7 @@ type Config struct {
 	gapNode   float64
 	margin    float64
 	marginSet bool
+	ports     PortMode
 	edges     []edge
 }
 
@@ -155,6 +209,10 @@ func Dir(d Direction) Option { return func(c *Config) { c.dir = d } }
 // right-angled routing.
 func Direct() Option { return func(c *Config) { c.direct = true } }
 
+// Ports selects how edges sharing a box face attach to it (default
+// PortsShared). PortsSpread gives every edge its own attachment point.
+func Ports(m PortMode) Option { return func(c *Config) { c.ports = m } }
+
 // Gap sets the spacing between layers (along the flow axis) and between
 // sibling nodes within a layer. Zero or negative keeps the default.
 func Gap(layer, node int) Option {
@@ -185,6 +243,33 @@ func Title(s string) Option { return func(c *Config) { c.title = s } }
 
 // Label puts a caption on an edge.
 func Label(text string) EdgeOption { return func(e *edge) { e.label = text } }
+
+// Dashed draws an edge as a dashed line instead of a solid one.
+func Dashed() EdgeOption { return func(e *edge) { e.style = lineDashed } }
+
+// Dotted draws an edge as a dotted line instead of a solid one.
+func Dotted() EdgeOption { return func(e *edge) { e.style = lineDotted } }
+
+// NoArrow draws an edge as a plain connector with no arrowhead — an
+// undirected association rather than a flow.
+func NoArrow() EdgeOption { return func(e *edge) { e.arrows = arrowNone } }
+
+// BiDirectional puts an arrowhead on both ends of an edge, for a two-way
+// relationship.
+func BiDirectional() EdgeOption { return func(e *edge) { e.arrows = arrowBoth } }
+
+// HollowArrow draws the arrowhead as an outlined (unfilled) triangle.
+func HollowArrow() EdgeOption { return func(e *edge) { e.head = arrowHollow } }
+
+// OpenArrow draws the arrowhead as an open barb — two strokes meeting at the
+// tip, with no fill.
+func OpenArrow() EdgeOption { return func(e *edge) { e.head = arrowOpen } }
+
+// DiamondArrow draws the arrowhead as a filled diamond.
+func DiamondArrow() EdgeOption { return func(e *edge) { e.head = arrowDiamond } }
+
+// DotArrow draws the arrowhead as a filled dot.
+func DotArrow() EdgeOption { return func(e *edge) { e.head = arrowRound } }
 
 // EdgeOption configures an edge.
 type EdgeOption = func(*edge)
@@ -318,10 +403,10 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 			dom.DelAttr(el, a)
 		}
 		nodes[i] = c
-		layoutNodes[i] = layoutNode{id: c.id, w: c.w, h: c.h}
+		layoutNodes[i] = layoutNode{id: c.id, w: c.w, h: c.h, shape: c.shape}
 	}
 
-	l, err := layout(layoutNodes, cfg.edges, cfg.dir, cfg.direct, cfg.gaps())
+	l, err := layout(layoutNodes, cfg.edges, cfg.dir, cfg.direct, cfg.ports, cfg.gaps())
 	if err != nil {
 		return nil, err
 	}
@@ -451,14 +536,82 @@ func nodeBody(n collected, b box) *html.Node {
 }
 
 func drawEdge(svg *html.Node, e routed, radius float64) {
-	svg.AppendChild(dom.CustomEl("path",
+	// The shaft stops at the arrowhead base (trimShaft), while the heads below
+	// are built from the untrimmed points so their tips stay on the borders.
+	path := dom.CustomEl("path",
 		dom.Marker("diagram-edge"),
-		dom.Attr("d", roundedPath(e.pts, radius)),
-		dom.Attr("class", edgeClasses())))
-	svg.AppendChild(dom.CustomEl("polygon",
-		dom.Marker("diagram-arrow"),
-		dom.Attr("points", arrowhead(e.pts)),
-		dom.Attr("class", arrowClasses())))
+		dom.Attr("d", roundedPath(trimShaft(e.pts, e.arrows, e.head), radius)),
+		dom.Attr("class", edgeClasses()))
+	// The dash pattern is an SVG presentation attribute, not a Tailwind
+	// utility: there is no stroke-dasharray class, and the arrowhead below
+	// stays solid so only the shaft is broken.
+	if dash, cap := dashPattern(e.style); dash != "" {
+		dom.SetAttr(path, "stroke-dasharray", dash)
+		if cap != "" {
+			dom.SetAttr(path, "stroke-linecap", cap)
+		}
+	}
+	svg.AppendChild(path)
+
+	// The head sits at whichever end(s) the edge asks for. An arrowhead points
+	// along a polyline's final segment, so the tail head is drawn from the
+	// reversed points; a plain connector draws neither.
+	if e.arrows == arrowTo || e.arrows == arrowBoth {
+		svg.AppendChild(arrowHead(e.pts, e.head))
+	}
+	if e.arrows == arrowBoth {
+		svg.AppendChild(arrowHead(reversePts(e.pts), e.head))
+	}
+}
+
+// arrowHead builds the arrowhead element at the end of a polyline in the
+// requested shape. The solid, diamond, and dot heads are filled in the line's
+// colour and so cover the shaft passing under them; the hollow head is filled
+// with the surface colour to the same effect; the open barb leaves the shaft
+// showing, which is the look it's meant to have.
+func arrowHead(pts []xy, shape arrowShape) *html.Node {
+	switch shape {
+	case arrowHollow:
+		return dom.CustomEl("polygon",
+			dom.Marker("diagram-arrow"),
+			dom.Attr("points", arrowTriangle(pts)),
+			dom.Attr("class", arrowHollowClasses()))
+	case arrowOpen:
+		return dom.CustomEl("polyline",
+			dom.Marker("diagram-arrow"),
+			dom.Attr("points", arrowBarb(pts)),
+			dom.Attr("stroke-linecap", "round"),
+			dom.Attr("stroke-linejoin", "round"),
+			dom.Attr("class", arrowOpenClasses()))
+	case arrowDiamond:
+		return dom.CustomEl("polygon",
+			dom.Marker("diagram-arrow"),
+			dom.Attr("points", arrowDiamondPts(pts)),
+			dom.Attr("class", arrowClasses()))
+	case arrowRound:
+		cx, cy, r := arrowDot(pts)
+		return dom.CustomEl("circle",
+			dom.Marker("diagram-arrow"),
+			dom.Attr("cx", fmtCoord(cx)),
+			dom.Attr("cy", fmtCoord(cy)),
+			dom.Attr("r", fmtCoord(r)),
+			dom.Attr("class", arrowClasses()))
+	default: // arrowSolid
+		return dom.CustomEl("polygon",
+			dom.Marker("diagram-arrow"),
+			dom.Attr("points", arrowTriangle(pts)),
+			dom.Attr("class", arrowClasses()))
+	}
+}
+
+// reversePts returns pts in reverse order, so an end-of-line helper lands on
+// the start instead.
+func reversePts(pts []xy) []xy {
+	out := make([]xy, len(pts))
+	for i, p := range pts {
+		out[len(pts)-1-i] = p
+	}
+	return out
 }
 
 // moveChildren reparents src's children onto dst.

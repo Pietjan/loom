@@ -19,10 +19,12 @@ type gaps struct {
 	layer, node, margin float64
 }
 
-// layoutNode is a node reduced to what layout needs: its id and box size.
+// layoutNode is a node reduced to what layout needs: its id, box size, and
+// silhouette (so ports can follow a non-rectangular outline).
 type layoutNode struct {
-	id   string
-	w, h float64
+	id    string
+	w, h  float64
+	shape shape
 }
 
 // box is a positioned node box.
@@ -31,10 +33,13 @@ type box struct {
 }
 
 // routed is a drawn edge: a border-to-border polyline (arrow at the last
-// point) plus an optional label.
+// point) plus an optional label, stroke style, and arrowhead placement/shape.
 type routed struct {
-	pts   []xy
-	label string
+	pts    []xy
+	label  string
+	style  lineStyle
+	arrows arrowEnds
+	head   arrowShape
 }
 
 // laid is the finished layout ready for SVG emission.
@@ -51,6 +56,7 @@ type vertex struct {
 	layer       int
 	order       int
 	bw, bh      float64 // box size in screen space
+	shape       shape   // silhouette (rounded for dummies), for port geometry
 	flow, cross float64 // abstract center coordinates
 	x, y        float64 // final center after direction mapping
 }
@@ -58,7 +64,7 @@ type vertex struct {
 // layout runs the full Sugiyama pipeline. Every phase iterates slices in
 // insertion order and tie-breaks by index — never map iteration — so the
 // output is deterministic and golden files don't flake.
-func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, sp gaps) (laid, error) {
+func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, ports PortMode, sp gaps) (laid, error) {
 	if len(nodes) == 0 {
 		return laid{}, ErrNoNodes
 	}
@@ -89,7 +95,7 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, sp gap
 	// 2. Build vertices for real nodes with their declared sizes.
 	verts := make([]vertex, len(nodes))
 	for i := range nodes {
-		verts[i] = vertex{node: i, layer: layer[i], bw: nodes[i].w, bh: nodes[i].h}
+		verts[i] = vertex{node: i, layer: layer[i], bw: nodes[i].w, bh: nodes[i].h, shape: nodes[i].shape}
 	}
 
 	// 3. Dummy nodes: split every edge into single-layer segments so ordering
@@ -152,7 +158,7 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, sp gap
 		}
 	}
 
-	return assemble(dir, direct, sp, len(nodes), verts, edgeChains, reversed, edges), nil
+	return assemble(dir, direct, ports, sp, len(nodes), verts, edgeChains, reversed, edges), nil
 }
 
 // breakCycles marks the back edges of a greedy DFS (in node insertion order)
@@ -622,7 +628,7 @@ func reverseInts(s []int) {
 
 // assemble translates the drawing to the origin, computes the viewBox, and
 // builds the boxes and border-trimmed edge polylines.
-func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool, edges []edge) laid {
+func assemble(dir Direction, direct bool, ports PortMode, sp gaps, nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool, edges []edge) laid {
 	minX, minY := math.Inf(1), math.Inf(1)
 	maxX, maxY := math.Inf(-1), math.Inf(-1)
 	for i := range verts {
@@ -642,6 +648,11 @@ func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex
 		boxes[i] = box{x: v.x, y: v.y, w: v.bw, h: v.bh}
 	}
 
+	// Distribute the edges sharing each box face across distinct ports so
+	// parallel and opposite edges don't stack on one point (ortho routing only;
+	// Direct mode anchors radially toward the neighbour instead).
+	plan := assignPorts(dir, ports, verts, edgeChains, reversed)
+
 	routedEdges := make([]routed, len(edges))
 	for ei := range edges {
 		chain := edgeChains[ei]
@@ -654,18 +665,21 @@ func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex
 			pts[0] = borderPoint(src.x, src.y, src.bw, src.bh, pts[1])
 			pts[len(pts)-1] = borderPoint(dst.x, dst.y, dst.bw, dst.bh, pts[len(pts)-2])
 		} else {
-			// Leave and arrive square to the box face, then step between
-			// waypoints with right angles.
-			pts[0] = faceExit(src, dir)
-			pts[len(pts)-1] = faceEntry(dst, dir)
-			pts = orthoRoute(pts, dir)
+			// Leave and arrive square to the box face at the edge's port, then
+			// step between waypoints with right angles. A back edge's elbows are
+			// shifted off the midline so it doesn't run atop the forward edge.
+			ex, en := straighten(src, dst, dir,
+				plan.exit[ei], plan.entry[ei], plan.exitFree[ei], plan.entryFree[ei])
+			pts[0] = faceExit(src, dir, ex)
+			pts[len(pts)-1] = faceEntry(dst, dir, en)
+			pts = orthoRoute(pts, dir, edgeJog(reversed[ei], dir, pts))
 		}
 		if reversed[ei] {
 			for l, r := 0, len(pts)-1; l < r; l, r = l+1, r-1 {
 				pts[l], pts[r] = pts[r], pts[l]
 			}
 		}
-		routedEdges[ei] = routed{pts: pts, label: edges[ei].label}
+		routedEdges[ei] = routed{pts: pts, label: edges[ei].label, style: edges[ei].style, arrows: edges[ei].arrows, head: edges[ei].head}
 	}
 
 	return laid{
@@ -679,42 +693,278 @@ func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex
 	}
 }
 
-// faceExit is the centre of the box face an edge leaves along the flow axis.
-func faceExit(v vertex, dir Direction) xy {
+// faceExit is the point on the box outline an edge leaves along the flow axis,
+// off units along the cross axis from the face centre (its port).
+func faceExit(v vertex, dir Direction, off float64) xy {
 	if dir == LeftRight {
-		return xy{v.x + v.bw/2, v.y}
+		return xy{v.x + v.bw/2 - flowInset(v, dir, off), v.y + off}
 	}
-	return xy{v.x, v.y + v.bh/2}
+	return xy{v.x + off, v.y + v.bh/2 - flowInset(v, dir, off)}
 }
 
-// faceEntry is the centre of the box face an edge arrives at.
-func faceEntry(v vertex, dir Direction) xy {
+// faceEntry is the point on the box outline an edge arrives at, off units along
+// the cross axis from the face centre (its port).
+func faceEntry(v vertex, dir Direction, off float64) xy {
 	if dir == LeftRight {
-		return xy{v.x - v.bw/2, v.y}
+		return xy{v.x - v.bw/2 + flowInset(v, dir, off), v.y + off}
 	}
-	return xy{v.x, v.y - v.bh/2}
+	return xy{v.x + off, v.y - v.bh/2 + flowInset(v, dir, off)}
+}
+
+// flowInset is how far a port at cross-offset off recedes along the flow axis
+// from a box's flat face, so ports track a non-rectangular outline instead of
+// floating past it. A diamond's flow-axis faces are single vertices, so a port
+// slides up the slanted edge as it moves off-centre (reaching the side vertex
+// at the full half-width); rounded and stadium boxes have a flat face and don't
+// recede.
+func flowInset(v vertex, dir Direction, off float64) float64 {
+	if v.shape != diamond || off == 0 {
+		return 0
+	}
+	crossHalf, flowHalf := v.bw/2, v.bh/2
+	if dir == LeftRight {
+		crossHalf, flowHalf = v.bh/2, v.bw/2
+	}
+	if crossHalf == 0 {
+		return 0
+	}
+	return math.Min(flowHalf*math.Abs(off)/crossHalf, flowHalf)
+}
+
+// portPlan is the resolved attachment for every edge: the cross-axis offset of
+// its exit port (at the source) and entry port (at the destination), plus
+// whether each port is its face's only attachment. A lone port sits at the face
+// centre and is free to slide to keep its edge straight; one that shares a face
+// is placed relative to its neighbours, and moving it would throw the fan's
+// spacing off centre.
+type portPlan struct {
+	exit, entry         []float64
+	exitFree, entryFree []bool
+}
+
+// assignPorts gives each box face at most two attachment points ("floating
+// ports") instead of stacking every edge on the face centre.
+//
+// The bug it fixes is an outgoing shaft drawn over an incoming arrowhead when
+// both share a point (e.g. a 2-cycle). Edges are sorted into two lanes by
+// whether they run along the flow or were reversed to break a cycle, and the
+// lanes keep the same order on every face: forward edges on the low side, back
+// edges on the high side. Using the same convention at both ends is what stops
+// an edge and the back edge beside it from swapping sides and crossing over —
+// ordering the lanes per face (by drawn direction, or by where the neighbours
+// sit) puts the back edge on the left at one node and the right at the other,
+// which is exactly the X it is meant to avoid.
+//
+// Within a lane the edges share one port, so fans and joins read as one point.
+// PortsSpread instead gives every edge its own port, ordered by its neighbour —
+// busier, but each connection stays visually distinct.
+func assignPorts(dir Direction, mode PortMode, verts []vertex, edgeChains [][]int, reversed []bool) portPlan {
+	// Ports sit this far apart, capped so a wide box doesn't fling them to the
+	// corners.
+	const spread, gapMax = 0.7, 14.0
+
+	n := len(edgeChains)
+	p := portPlan{
+		exit: make([]float64, n), entry: make([]float64, n),
+		exitFree: make([]bool, n), entryFree: make([]bool, n),
+	}
+
+	crossExtent := func(vi int) float64 {
+		if dir == LeftRight {
+			return verts[vi].bh
+		}
+		return verts[vi].bw
+	}
+
+	// One edge incident to a node's face: which edge, whether it was reversed
+	// (so which lane it belongs in), and where the next stop along its chain
+	// sits on the cross axis (to order the ports in spread mode).
+	type incident struct {
+		ei       int
+		rev      bool
+		nbrCross float64
+	}
+	byFace := func(node, nbr func([]int) int) map[int][]incident {
+		buckets := map[int][]incident{}
+		for ei, chain := range edgeChains {
+			buckets[node(chain)] = append(buckets[node(chain)],
+				incident{ei, reversed[ei], verts[nbr(chain)].cross})
+		}
+		return buckets
+	}
+	// chain runs lower layer → higher: the node at chain[0] attaches on its exit
+	// face, the one at chain[len-1] on its entry face.
+	exitFaces := byFace(func(c []int) int { return c[0] }, func(c []int) int { return c[1] })
+	entryFaces := byFace(func(c []int) int { return c[len(c)-1] }, func(c []int) int { return c[len(c)-2] })
+
+	place := func(faces map[int][]incident, off []float64, free []bool) {
+		for vi, inc := range faces {
+			lone := len(inc) == 1 // the face's only attachment, so free to slide
+			var slots [][]int     // edges per port, in cross order
+			if mode == PortsSpread {
+				sort.Slice(inc, func(a, b int) bool {
+					if inc[a].nbrCross != inc[b].nbrCross {
+						return inc[a].nbrCross < inc[b].nbrCross
+					}
+					return inc[a].ei < inc[b].ei // deterministic
+				})
+				for _, in := range inc {
+					slots = append(slots, []int{in.ei})
+				}
+			} else {
+				var lane [2][]int // [0] along the flow, [1] reversed
+				for _, in := range inc {
+					g := 0
+					if in.rev {
+						g = 1
+					}
+					lane[g] = append(lane[g], in.ei)
+				}
+				for _, l := range lane {
+					if len(l) > 0 {
+						slots = append(slots, l)
+					}
+				}
+			}
+			k := len(slots)
+			step := math.Min(crossExtent(vi)*spread/float64(k), gapMax)
+			for i, eis := range slots {
+				o := step * (float64(i) - float64(k-1)/2) // centred; k==1 ⇒ 0
+				for _, ei := range eis {
+					off[ei], free[ei] = o, lone
+				}
+			}
+		}
+	}
+	place(exitFaces, p.exit, p.exitFree)
+	place(entryFaces, p.entry, p.entryFree)
+	return p
+}
+
+// straighten pulls an edge's two ports onto a common cross coordinate when they
+// sit closer than minBend — a step that small cannot render as a corner (see
+// minBend), so it would come out as a wobble.
+//
+// Only a port that is its face's sole attachment may move: one that belongs to
+// a fan is spaced against its neighbours, and sliding it to suit its own edge
+// would leave the fan visibly lopsided about the box's centreline. So when just
+// one end is free it travels the whole way to meet the fixed port, when both
+// are free they split the difference, and when neither is the step stays.
+func straighten(src, dst vertex, dir Direction, ex, en float64, srcFree, dstFree bool) (float64, float64) {
+	cross := func(v vertex) float64 {
+		if dir == LeftRight {
+			return v.y
+		}
+		return v.x
+	}
+	a, b := cross(src)+ex, cross(dst)+en
+	if math.Abs(a-b) > minBend {
+		return ex, en
+	}
+	// A free port starts centred, so it never travels more than minBend from
+	// the centre and stays comfortably on the face.
+	switch {
+	case srcFree && dstFree:
+		mid := (a + b) / 2
+		return mid - cross(src), mid - cross(dst)
+	case srcFree:
+		return b - cross(src), en
+	case dstFree:
+		return ex, a - cross(dst)
+	}
+	return ex, en
+}
+
+// minBend is the smallest cross-axis step that can be drawn as a real corner.
+// Rounding a bend pulls the path back by the radius on both sides, so a step
+// under twice that leaves no straight run between the two curves: the "corner"
+// degenerates into a wobble. Steps below it are flattened instead.
+const minBend = 2 * cornerRadius
+
+// backJog shifts a back edge's elbows off the gap midline (as a fraction of the
+// gap) so its cross-run gets its own track beside the forward edge's.
+const backJog = 0.2
+
+// edgeJog picks where an edge's elbows sit along the flow axis, as an offset
+// from the gap midpoint. Forward edges keep the midline; a back edge steps off
+// it so its cross-run doesn't lie on top of the forward edge sharing the
+// corridor.
+//
+// Which way it steps depends on where the pair is heading. The two staircases
+// only nest — rather than interleave and cross — when the back edge turns on
+// the far side of the forward edge's turn relative to the direction of travel:
+// later when the corridor runs toward decreasing cross, earlier when it runs
+// the other way. A fixed side fixes one of those cases and crosses in the other.
+func edgeJog(back bool, dir Direction, pts []xy) float64 {
+	if !back {
+		return 0
+	}
+	cross := func(p xy) float64 {
+		if dir == LeftRight {
+			return p.y
+		}
+		return p.x
+	}
+	if cross(pts[len(pts)-1]) > cross(pts[0]) {
+		return -backJog
+	}
+	return backJog
+}
+
+// snapWaypoints flattens a long edge's routing dummies onto their neighbours
+// where the offset between them is under minBend — too small to draw as a
+// corner. Only the intermediate stops move; the first and last are the edge's
+// ports and stay put, so arrowheads keep their place on the box.
+func snapWaypoints(stops []xy, dir Direction) []xy {
+	if len(stops) < 3 {
+		return stops
+	}
+	out := append([]xy(nil), stops...)
+	cross := func(i int) *float64 {
+		if dir == LeftRight {
+			return &out[i].y
+		}
+		return &out[i].x
+	}
+	for i := 1; i < len(out)-1; i++ { // pull each dummy onto the one before it
+		if c, prev := cross(i), cross(i-1); math.Abs(*c-*prev) <= minBend {
+			*c = *prev
+		}
+	}
+	for i := len(out) - 2; i >= 1; i-- { // then let the fixed tail port win
+		if c, next := cross(i), cross(i+1); math.Abs(*c-*next) <= minBend {
+			*c = *next
+		}
+	}
+	return out
 }
 
 // orthoRoute turns a list of waypoints into an axis-aligned path: where two
-// consecutive stops differ on the cross axis, it inserts an elbow halfway
-// along the flow axis, so the edge steps across with right angles.
-func orthoRoute(stops []xy, dir Direction) []xy {
+// consecutive stops differ on the cross axis, it inserts an elbow along the
+// flow axis so the edge steps across with right angles. jog moves that elbow
+// off the gap midpoint (0 = centre) — a back edge is shifted into its own track
+// so its cross-run doesn't lie on top of the forward edge beside it.
+func orthoRoute(stops []xy, dir Direction, jog float64) []xy {
 	// Offsets below this are snapped straight: an elbow for a sub-pixel
 	// misalignment reads as a wobble, not a corner.
 	const align = 2.0
 
+	// Fraction of the gap where the elbow sits, clamped clear of both ends.
+	frac := math.Min(math.Max(0.5+jog, 0.2), 0.8)
+
+	stops = snapWaypoints(stops, dir)
 	out := []xy{stops[0]}
 	for _, b := range stops[1:] {
 		a := out[len(out)-1]
 		if dir == LeftRight {
 			if math.Abs(a.y-b.y) > align {
-				mid := (a.x + b.x) / 2
+				mid := elbow(a.x, b.x, frac)
 				out = append(out, xy{mid, a.y}, xy{mid, b.y})
 			} else {
 				b.y = a.y
 			}
 		} else if math.Abs(a.x-b.x) > align {
-			mid := (a.y + b.y) / 2
+			mid := elbow(a.y, b.y, frac)
 			out = append(out, xy{a.x, mid}, xy{b.x, mid})
 		} else {
 			b.x = a.x
@@ -722,6 +972,19 @@ func orthoRoute(stops []xy, dir Direction) []xy {
 		out = append(out, b)
 	}
 	return dedupe(out)
+}
+
+// elbow picks the flow-axis coordinate where an edge steps across: frac of the
+// way from a to b, but held minBend clear of both ends whenever the gap has the
+// room. A bend that lands inside the arrowhead, or hard against a box face,
+// reads as a kink in the head rather than a step in the line.
+func elbow(a, b, frac float64) float64 {
+	m := a + frac*(b-a)
+	lo, hi := math.Min(a, b), math.Max(a, b)
+	if hi-lo > 2*minBend {
+		m = math.Min(math.Max(m, lo+minBend), hi-minBend)
+	}
+	return m
 }
 
 func snapshot(layers [][]int) [][]int {

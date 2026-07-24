@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/a-h/templ"
+	"golang.org/x/net/html"
 
 	"github.com/pietjan/loom/diagram"
 	"github.com/pietjan/loom/internal/dom"
@@ -256,6 +257,410 @@ func TestEdgeLabelsAreHoverDots(t *testing.T) {
 	// The label must not also be painted onto the canvas.
 	if strings.Contains(out, "diagram-edge-label") {
 		t.Error("label should not be drawn as SVG text any more")
+	}
+}
+
+// TestEdgeLineStyles: Dashed and Dotted break an edge's shaft via a
+// stroke-dasharray while leaving other edges (and every arrowhead) solid.
+func TestEdgeLineStyles(t *testing.T) {
+	out := diag(t,
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")},
+		diagram.Edge("a", "b", diagram.Dashed()),
+		diagram.Edge("a", "c", diagram.Dotted()),
+		diagram.Edge("a", "d"), // solid
+	)
+	tree := testutil.NewTree(t, out)
+
+	edges := dom.FindAll(tree.Root, dom.ByMarker("diagram-edge"))
+	if len(edges) != 3 {
+		t.Fatalf("edges = %d, want 3", len(edges))
+	}
+	var dashed, dotted, solid int
+	for _, e := range edges {
+		switch dom.GetAttr(e, "stroke-dasharray") {
+		case "":
+			solid++
+		case "6 4":
+			dashed++
+			if lc := dom.GetAttr(e, "stroke-linecap"); lc != "" {
+				t.Errorf("dashed edge should not set a linecap, got %q", lc)
+			}
+		case "0 6":
+			dotted++
+			if lc := dom.GetAttr(e, "stroke-linecap"); lc != "round" {
+				t.Errorf("dotted edge needs round linecap for dots, got %q", lc)
+			}
+		default:
+			t.Errorf("unexpected stroke-dasharray %q", dom.GetAttr(e, "stroke-dasharray"))
+		}
+	}
+	if dashed != 1 || dotted != 1 || solid != 1 {
+		t.Errorf("dashed=%d dotted=%d solid=%d, want 1 each", dashed, dotted, solid)
+	}
+
+	// Arrowheads stay solid regardless of the shaft's pattern.
+	for _, a := range dom.FindAll(tree.Root, dom.ByMarker("diagram-arrow")) {
+		if dom.GetAttr(a, "stroke-dasharray") != "" {
+			t.Error("arrowhead should never be dashed")
+		}
+	}
+}
+
+// TestArrowEnds: NoArrow draws a plain connector, BiDirectional draws a head at
+// each end, and a default edge keeps its single head at the target.
+func TestArrowEnds(t *testing.T) {
+	count := func(opts ...diagram.EdgeOption) int {
+		out := diag(t,
+			[]templ.Component{node("a", "A"), node("b", "B")},
+			diagram.Edge("a", "b", opts...),
+		)
+		return len(dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-arrow")))
+	}
+	if n := count(); n != 1 {
+		t.Errorf("default edge arrows = %d, want 1", n)
+	}
+	if n := count(diagram.NoArrow()); n != 0 {
+		t.Errorf("NoArrow edge arrows = %d, want 0", n)
+	}
+	if n := count(diagram.BiDirectional()); n != 2 {
+		t.Errorf("BiDirectional edge arrows = %d, want 2", n)
+	}
+}
+
+// TestBiDirectionalHeadsPointOutward: the two heads of a bidirectional edge sit
+// at opposite ends and point away from each other, not both the same way.
+func TestBiDirectionalHeadsPointOutward(t *testing.T) {
+	out := diag(t,
+		[]templ.Component{node("a", "A"), node("b", "B")},
+		diagram.Edge("a", "b", diagram.BiDirectional()),
+	)
+	arrows := dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-arrow"))
+	if len(arrows) != 2 {
+		t.Fatalf("arrows = %d, want 2", len(arrows))
+	}
+	// Top-bottom flow: the arrowhead's tip is its first polygon point, so the
+	// two tips should sit at opposite ends of the axis, not on top of each other.
+	tips := make([]float64, len(arrows))
+	for i, a := range arrows {
+		first := strings.Fields(dom.GetAttr(a, "points"))[0]
+		_, y, _ := strings.Cut(first, ",")
+		tips[i] = atof(t, y)
+	}
+	if math.Abs(tips[0]-tips[1]) < 1 {
+		t.Errorf("bidirectional heads should sit at opposite ends, tips at %v and %v", tips[0], tips[1])
+	}
+}
+
+// TestArrowShapes: each arrowhead variant renders the expected SVG element and
+// fill treatment, and the default stays a filled triangle.
+func TestArrowShapes(t *testing.T) {
+	arrow := func(opts ...diagram.EdgeOption) *html.Node {
+		out := diag(t,
+			[]templ.Component{node("a", "A"), node("b", "B")},
+			diagram.Edge("a", "b", opts...),
+		)
+		got := dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-arrow"))
+		if len(got) != 1 {
+			t.Fatalf("arrows = %d, want 1", len(got))
+		}
+		return got[0]
+	}
+
+	for _, tc := range []struct {
+		name     string
+		opt      diagram.EdgeOption
+		tag      string // expected SVG element
+		classSub string // a substring the class must contain
+	}{
+		{"solid", nil, "polygon", "fill-base-300"},
+		{"hollow", diagram.HollowArrow(), "polygon", "fill-white"},
+		{"open", diagram.OpenArrow(), "polyline", "fill-none"},
+		{"diamond", diagram.DiamondArrow(), "polygon", "fill-base-300"},
+		{"dot", diagram.DotArrow(), "circle", "fill-base-300"},
+	} {
+		var a *html.Node
+		if tc.opt == nil {
+			a = arrow()
+		} else {
+			a = arrow(tc.opt)
+		}
+		if a.Data != tc.tag {
+			t.Errorf("%s: element = %q, want %q", tc.name, a.Data, tc.tag)
+		}
+		if cls := dom.GetAttr(a, "class"); !strings.Contains(cls, tc.classSub) {
+			t.Errorf("%s: class %q missing %q", tc.name, cls, tc.classSub)
+		}
+	}
+
+	// The diamond has four points (tip, two sides, back); the solid triangle
+	// three — a quick guard that the diamond geometry is actually distinct.
+	if got := len(strings.Fields(dom.GetAttr(arrow(diagram.DiamondArrow()), "points"))); got != 4 {
+		t.Errorf("diamond points = %d, want 4", got)
+	}
+}
+
+// TestShaftTrimming: a closed arrowhead pulls the shaft back to its base, while
+// an open barb (or no head) lets the shaft run to the node border.
+func TestShaftTrimming(t *testing.T) {
+	end := func(opts ...diagram.EdgeOption) (x, y float64) {
+		out := diag(t, []templ.Component{node("a", "A"), node("b", "B")},
+			diagram.Edge("a", "b", opts...))
+		edge := dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-edge"))[0]
+		// The path ends with "... L x y"; grab its final two numbers.
+		nums := regexp.MustCompile(`[\d.]+`).FindAllString(dom.GetAttr(edge, "d"), -1)
+		return atof(t, nums[len(nums)-2]), atof(t, nums[len(nums)-1])
+	}
+	gap := func(a, b [2]float64) float64 { return math.Hypot(a[0]-b[0], a[1]-b[1]) }
+
+	sx, sy := end()                         // solid triangle: trimmed a full length
+	ox, oy := end(diagram.OpenArrow())      // barb: reaches the border
+	nx, ny := end(diagram.NoArrow())        // no head: reaches the border
+	dmx, dmy := end(diagram.DiamondArrow()) // diamond: trimmed less, overlaps in
+	dtx, dty := end(diagram.DotArrow())     // dot: trimmed less, overlaps in
+
+	if d := gap([2]float64{ox, oy}, [2]float64{sx, sy}); math.Abs(d-8) > 0.5 {
+		t.Errorf("solid shaft should stop ~8px (one arrow length) short of the border, gap=%v", d)
+	}
+	if d := gap([2]float64{ox, oy}, [2]float64{nx, ny}); d > 0.5 {
+		t.Errorf("open and no-arrow shafts should both reach the border, gap=%v", d)
+	}
+	// Pointed heads trim less than the triangle, so the shaft runs a touch
+	// further into their bodies: 8 − 2 = 6px short of the border.
+	for _, tc := range []struct {
+		name string
+		x, y float64
+	}{{"diamond", dmx, dmy}, {"dot", dtx, dty}} {
+		if d := gap([2]float64{ox, oy}, [2]float64{tc.x, tc.y}); math.Abs(d-6) > 0.5 {
+			t.Errorf("%s shaft should stop ~6px short of the border, gap=%v", tc.name, d)
+		}
+		if d := gap([2]float64{ox, oy}, [2]float64{sx, sy}); d <= gap([2]float64{ox, oy}, [2]float64{tc.x, tc.y}) {
+			t.Errorf("%s should be trimmed less than the solid triangle", tc.name)
+		}
+	}
+}
+
+// pathEnds returns the first and last point of an SVG path's "d" attribute.
+func pathEnds(t *testing.T, d string) (first, last [2]float64) {
+	t.Helper()
+	n := regexp.MustCompile(`[\d.]+`).FindAllString(d, -1)
+	if len(n) < 4 {
+		t.Fatalf("path too short: %q", d)
+	}
+	return [2]float64{atof(t, n[0]), atof(t, n[1])},
+		[2]float64{atof(t, n[len(n)-2]), atof(t, n[len(n)-1])}
+}
+
+// TestPortsSeparateOppositeEdges: the reported bug — a 2-cycle A⇄B anchored both
+// edges at the same face point, drawing one shaft over the other's arrowhead.
+// Distributed ports must give them distinct anchors on each node.
+func TestPortsSeparateOppositeEdges(t *testing.T) {
+	out := diag(t, []templ.Component{node("a", "A"), node("b", "B")},
+		diagram.Edge("a", "b"), diagram.Edge("b", "a"))
+	edges := dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-edge"))
+	if len(edges) != 2 {
+		t.Fatalf("edges = %d, want 2", len(edges))
+	}
+	// Edge 0 is A→B (starts at A); edge 1 is B→A, drawn reversed (ends at A).
+	aStart, _ := pathEnds(t, dom.GetAttr(edges[0], "d"))
+	_, aEnd := pathEnds(t, dom.GetAttr(edges[1], "d"))
+	if math.Hypot(aStart[0]-aEnd[0], aStart[1]-aEnd[1]) < 1 {
+		t.Errorf("opposite edges still share node A's anchor near %v", aStart)
+	}
+}
+
+// TestPortsShareFanOut: sibling edges leaving one node go the same direction, so
+// they share a single exit port and fan out from one point.
+func TestPortsShareFanOut(t *testing.T) {
+	out := diag(t, []templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Edge("a", "b"), diagram.Edge("a", "c"))
+	edges := dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-edge"))
+	toB, _ := pathEnds(t, dom.GetAttr(edges[0], "d")) // a→b exit
+	toC, _ := pathEnds(t, dom.GetAttr(edges[1], "d")) // a→c exit
+	if toB != toC {
+		t.Errorf("same-direction fan-out edges should share one exit port, got %v and %v", toB, toC)
+	}
+}
+
+// TestPortsSpreadOption: diagram.Ports(PortsSpread) reverts to a distinct port
+// per edge, so the same fan-out no longer shares an exit.
+func TestPortsSpreadOption(t *testing.T) {
+	nodes := []templ.Component{node("a", "A"), node("b", "B"), node("c", "C")}
+	edges := []diagram.Option{diagram.Edge("a", "b"), diagram.Edge("a", "c")}
+
+	exits := func(opts ...diagram.Option) (b, c [2]float64) {
+		out := diag(t, nodes, append(edges, opts...)...)
+		e := dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-edge"))
+		b, _ = pathEnds(t, dom.GetAttr(e[0], "d"))
+		c, _ = pathEnds(t, dom.GetAttr(e[1], "d"))
+		return b, c
+	}
+
+	if b, c := exits(); b != c { // default PortsShared
+		t.Errorf("default should share the fan-out exit, got %v and %v", b, c)
+	}
+	if b, c := exits(diagram.Ports(diagram.PortsSpread)); b == c {
+		t.Errorf("PortsSpread should give distinct exits, both at %v", b)
+	}
+}
+
+// --- edge crossing detection ---
+
+type xyPt struct{ x, y float64 }
+
+var pathNums = regexp.MustCompile(`-?[\d.]+`)
+var pathCorners = regexp.MustCompile(`Q (-?[\d.]+) (-?[\d.]+)`)
+
+// edgePolyline reconstructs an edge's corner points from its rounded path: the
+// start, each bend's control point (which is the corner itself), and the end.
+func edgePolyline(t *testing.T, d string) []xyPt {
+	t.Helper()
+	n := pathNums.FindAllString(d, -1)
+	out := []xyPt{{atof(t, n[0]), atof(t, n[1])}}
+	for _, m := range pathCorners.FindAllStringSubmatch(d, -1) {
+		out = append(out, xyPt{atof(t, m[1]), atof(t, m[2])})
+	}
+	return append(out, xyPt{atof(t, n[len(n)-2]), atof(t, n[len(n)-1])})
+}
+
+// properCrossing reports a genuine X between two segments; merely touching at a
+// shared point (as edges sharing a port do) does not count.
+func properCrossing(a, b, c, d xyPt) bool {
+	turn := func(o, p, q xyPt) int {
+		v := (p.x-o.x)*(q.y-o.y) - (p.y-o.y)*(q.x-o.x)
+		switch {
+		case v > 1e-9:
+			return 1
+		case v < -1e-9:
+			return -1
+		}
+		return 0
+	}
+	return turn(a, b, c)*turn(a, b, d) < 0 && turn(c, d, a)*turn(c, d, b) < 0
+}
+
+// edgeCrossings counts places where two different edges cross.
+func edgeCrossings(t *testing.T, out string) int {
+	t.Helper()
+	var polys [][]xyPt
+	for _, e := range dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-edge")) {
+		polys = append(polys, edgePolyline(t, dom.GetAttr(e, "d")))
+	}
+	n := 0
+	for i := range polys {
+		for j := i + 1; j < len(polys); j++ {
+			for a := 0; a+1 < len(polys[i]); a++ {
+				for b := 0; b+1 < len(polys[j]); b++ {
+					if properCrossing(polys[i][a], polys[i][a+1], polys[j][b], polys[j][b+1]) {
+						t.Logf("edge %d crosses edge %d near %v", i, j, polys[i][a])
+						n++
+					}
+				}
+			}
+		}
+	}
+	return n
+}
+
+// TestAntiparallelEdgesDoNotCross: a forward edge and the back edge sharing its
+// corridor must nest in their own lanes, not weave over each other. The lane
+// side alone isn't enough — the back edge's elbow has to fall on the far side
+// of the forward edge's, which flips with the direction the corridor runs, so
+// both a leftward and a rightward pair are checked.
+func TestAntiparallelEdgesDoNotCross(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		nodes []templ.Component
+		opts  []diagram.Option
+	}{
+		{"plain 2-cycle",
+			[]templ.Component{node("a", "A"), node("b", "B")},
+			[]diagram.Option{diagram.Edge("a", "b"), diagram.Edge("b", "a")}},
+		// Target left of the source.
+		{"cycle with a wider head",
+			[]templ.Component{node("a", "Stopped"), node("b", "Go")},
+			[]diagram.Option{diagram.Edge("a", "b"), diagram.Edge("b", "a")}},
+		// Decision fanning right, with the back edge returning up the corridor.
+		{"decision with back edge",
+			[]templ.Component{
+				node("start", "Start", diagram.Stadium()),
+				node("ok", "OK?", diagram.Diamond()),
+				node("yes", "Ship"), node("no", "Fix"),
+			},
+			[]diagram.Option{
+				diagram.Edge("start", "ok"), diagram.Edge("ok", "yes", diagram.Label("yes")),
+				diagram.Edge("ok", "no", diagram.Label("no")), diagram.Edge("no", "ok"),
+			}},
+	} {
+		if n := edgeCrossings(t, diag(t, tc.nodes, tc.opts...)); n != 0 {
+			t.Errorf("%s: %d edge crossing(s), want 0", tc.name, n)
+		}
+	}
+}
+
+// TestNoDegenerateBends: an edge never emits a "corner" too small to draw. A
+// bend pulls back by its radius on both sides, so a step under twice that has
+// no straight run left between the two curves and reads as a wobble; such steps
+// must be flattened into a straight line instead.
+func TestNoDegenerateBends(t *testing.T) {
+	out := diag(t, []templ.Component{
+		node("draft", "Draft", diagram.Stadium()), node("review", "In review"),
+		node("check", "Approved?", diagram.Diamond()),
+		node("publish", "Published"), node("revise", "Revising"),
+	},
+		diagram.Ports(diagram.PortsSpread),
+		diagram.Edge("draft", "review"), diagram.Edge("review", "check"),
+		diagram.Edge("check", "publish", diagram.Label("approved")),
+		diagram.Edge("check", "revise", diagram.Label("changes")),
+		diagram.Edge("revise", "review", diagram.Dashed()),
+	)
+	for i, e := range dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-edge")) {
+		pts := edgePolyline(t, dom.GetAttr(e, "d"))
+		for k := 0; k+1 < len(pts); k++ {
+			d := math.Hypot(pts[k+1].x-pts[k].x, pts[k+1].y-pts[k].y)
+			// Interior runs join two bends; the first and last meet a port.
+			if k > 0 && k+2 < len(pts) && d < 12 {
+				t.Errorf("edge %d: %vpx run between bends is too short to render as a corner", i, d)
+			}
+		}
+	}
+}
+
+// TestFanPortsStaySymmetric: straightening a near-aligned edge must not drag a
+// port that belongs to a fan — its branches would then sit lopsided about the
+// node's centreline. Only a face's sole attachment is free to slide, so here
+// the branch to Published is straightened by moving its far end instead.
+func TestFanPortsStaySymmetric(t *testing.T) {
+	out := diag(t, []templ.Component{
+		node("draft", "Draft", diagram.Stadium()), node("review", "In review"),
+		node("check", "Approved?", diagram.Diamond()),
+		node("publish", "Published"), node("revise", "Revising"),
+	},
+		diagram.Ports(diagram.PortsSpread),
+		diagram.Edge("draft", "review"), diagram.Edge("review", "check"),
+		diagram.Edge("check", "publish", diagram.Label("approved")),
+		diagram.Edge("check", "revise", diagram.Label("changes")),
+		diagram.Edge("revise", "review", diagram.Dashed()),
+	)
+	tree := testutil.NewTree(t, out)
+
+	// The decision diamond's centre is the x of its top vertex.
+	var cx float64
+	for _, s := range dom.FindAll(tree.Root, dom.ByMarker("diagram-shape")) {
+		if s.Data == "polygon" {
+			cx = atof(t, strings.Split(strings.Fields(dom.GetAttr(s, "points"))[0], ",")[0])
+		}
+	}
+	edges := dom.FindAll(tree.Root, dom.ByMarker("diagram-edge"))
+	pubStart, pubEnd := pathEnds(t, dom.GetAttr(edges[2], "d"))
+	revStart, _ := pathEnds(t, dom.GetAttr(edges[3], "d"))
+
+	if l, r := cx-pubStart[0], revStart[0]-cx; math.Abs(l-r) > 0.01 {
+		t.Errorf("fan lopsided about centre %v: exits at %v and %v sit %v and %v away",
+			cx, pubStart[0], revStart[0], l, r)
+	}
+	// ...and the straightening it gave up at that end still happened at the other.
+	if pubStart[0] != pubEnd[0] {
+		t.Errorf("branch to Published should run straight, got x %v → %v", pubStart[0], pubEnd[0])
 	}
 }
 

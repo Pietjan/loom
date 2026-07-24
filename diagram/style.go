@@ -58,9 +58,39 @@ func edgeClasses() string {
 	return b.String()
 }
 
+// dashPattern returns the SVG stroke-dasharray (and linecap) for a line style;
+// an empty pattern means a solid line, drawn without either attribute. The
+// values are tuned against the 2px edge stroke: a clearly broken dash, and
+// round dots produced by zero-length segments under a round cap.
+func dashPattern(s lineStyle) (dash, cap string) {
+	switch s {
+	case lineDashed:
+		return "6 4", ""
+	case lineDotted:
+		return "0 6", "round"
+	default:
+		return "", ""
+	}
+}
+
 func arrowClasses() string {
 	var b styles.Builder
 	b.Add("fill-base-300 dark:fill-base-600")
+	return b.String()
+}
+
+// arrowHollowClasses styles an outlined arrowhead: filled with the surface
+// colour so the shaft can't show through, outlined in the line's colour.
+func arrowHollowClasses() string {
+	var b styles.Builder
+	b.Add("fill-white stroke-1 stroke-base-300 dark:fill-base-800 dark:stroke-base-600")
+	return b.String()
+}
+
+// arrowOpenClasses styles an open barb: no fill, stroked like the line it caps.
+func arrowOpenClasses() string {
+	var b styles.Builder
+	b.Add("fill-none stroke-2 stroke-base-300 dark:stroke-base-600")
 	return b.String()
 }
 
