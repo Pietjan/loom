@@ -59,12 +59,13 @@ func arrowClasses() string {
 	return b.String()
 }
 
-// dotClasses styles the marker sitting on a labelled edge: a small hollow dot
-// in the same white-fill/base-border language as the node chrome, so it reads
-// as part of the diagram rather than a stray point.
+// dotClasses styles the marker sitting on a labelled edge, matching chart's
+// data points: a solid dot in the line's own colour, ringed in the surface
+// colour so it reads as sitting on the line rather than crossing it. Chart
+// draws r=3.5 with a 1.5 stroke; this is the HTML equivalent.
 func dotClasses() string {
 	var b styles.Builder
-	b.Add("block size-2.5 rounded-full border border-base-300 bg-white")
-	b.Add("dark:border-base-600 dark:bg-base-800")
+	b.Add("block size-[7px] rounded-full bg-base-300 ring-[1.5px] ring-white")
+	b.Add("dark:bg-base-600 dark:ring-base-800")
 	return b.String()
 }
