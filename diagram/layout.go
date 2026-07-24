@@ -812,18 +812,49 @@ func assignPorts(dir Direction, mode PortMode, verts []vertex, edgeChains [][]in
 					slots = append(slots, []int{in.ei})
 				}
 			} else {
-				var lane [2][]int // [0] along the flow, [1] reversed
+				// Two lanes: edges running along the flow, and back edges.
+				// Order them by where they actually head — the mean position of
+				// the next stop along each chain — so a lane sits on the side
+				// its edges travel toward. That matters for a long edge, whose
+				// next stop is a routing dummy the ordering phase has already
+				// placed: put the lane on the other side and the edge weaves
+				// across its own dummy.
+				var lane [2][]int
+				var sum [2]float64
 				for _, in := range inc {
 					g := 0
 					if in.rev {
 						g = 1
 					}
 					lane[g] = append(lane[g], in.ei)
+					sum[g] += in.nbrCross
 				}
-				for _, l := range lane {
+				type laneInfo struct {
+					mean float64
+					rev  int
+					eis  []int
+				}
+				var lanes []laneInfo
+				for g, l := range lane {
 					if len(l) > 0 {
-						slots = append(slots, l)
+						lanes = append(lanes, laneInfo{sum[g] / float64(len(l)), g, l})
 					}
+				}
+				sort.Slice(lanes, func(a, b int) bool {
+					if lanes[a].mean != lanes[b].mean {
+						return lanes[a].mean < lanes[b].mean
+					}
+					// Both lanes head for the same place — an antiparallel pair
+					// between adjacent layers — so position says nothing. Fall
+					// back to the flow lane first. This tie-break must resolve
+					// the same way at both ends of an edge, which is why it keys
+					// off the reversal flag and not the direction the arrow
+					// points: "outgoing" swaps meaning between the two faces,
+					// and that swap is exactly what makes the pair cross.
+					return lanes[a].rev < lanes[b].rev
+				})
+				for _, l := range lanes {
+					slots = append(slots, l.eis)
 				}
 			}
 			k := len(slots)

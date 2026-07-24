@@ -566,6 +566,11 @@ func edgeCrossings(t *testing.T, out string) int {
 // side alone isn't enough — the back edge's elbow has to fall on the far side
 // of the forward edge's, which flips with the direction the corridor runs, so
 // both a leftward and a rightward pair are checked.
+//
+// Scoped to pairs between adjacent layers. Layered layout reduces crossings
+// heuristically rather than eliminating them, and once a cycle is long enough
+// to route through dummies the pair's shape is decided by the ordering phase
+// and by dummy snapping too, which can still leave a weave.
 func TestAntiparallelEdgesDoNotCross(t *testing.T) {
 	for _, tc := range []struct {
 		name  string
