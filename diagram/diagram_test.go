@@ -2,6 +2,8 @@ package diagram_test
 
 import (
 	"errors"
+	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -69,8 +71,7 @@ func TestFlowchartBasics(t *testing.T) {
 	}
 }
 
-// TestRichBody: a node body may be any markup; it renders inside the
-// foreignObject untouched.
+// TestRichBody: a node body may be any markup, rendered untouched.
 func TestRichBody(t *testing.T) {
 	out := diag(t, []templ.Component{
 		testutil.WithChildren(diagram.Node("a"), testutil.Text("Bold")),
@@ -226,6 +227,49 @@ func TestEdgeLabelsAreHoverDots(t *testing.T) {
 	if strings.Contains(out, "diagram-edge-label") {
 		t.Error("label should not be drawn as SVG text any more")
 	}
+}
+
+// TestGapAndMargin: spacing is configurable, and a tight layer gap clamps the
+// edge corner radius rather than letting the two bends merge.
+func TestGapAndMargin(t *testing.T) {
+	nodes := []templ.Component{node("a", "A"), node("b", "B")}
+	edges := []diagram.Option{diagram.Edge("a", "b")}
+
+	def := viewBox(t, diag(t, nodes, edges...))
+	roomy := viewBox(t, diag(t, nodes, append(edges, diagram.Gap(120, 28), diagram.Margin(40))...))
+
+	// One layer gap + two margins grew: 80 more gap, 48 more margin.
+	if got, want := roomy.h-def.h, 80.0+48.0; got != want {
+		t.Errorf("height grew by %v, want %v", got, want)
+	}
+	if got, want := roomy.w-def.w, 48.0; got != want {
+		t.Errorf("width grew by %v (margin only), want %v", got, want)
+	}
+
+	// A tight gap must not emit corners wider than the space between layers.
+	tight := diag(t, []templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Gap(8, 28), diagram.Edge("a", "b"), diagram.Edge("a", "c"))
+	for _, d := range curveRadii(t, tight) {
+		if d > 2.0 {
+			t.Errorf("corner radius %v exceeds a quarter of the 8px layer gap", d)
+		}
+	}
+}
+
+// curveRadii measures how far each rounded corner pulls back from its bend.
+func curveRadii(t *testing.T, out string) []float64 {
+	t.Helper()
+	var radii []float64
+	for _, d := range regexp.MustCompile(`d="([^"]*)"`).FindAllStringSubmatch(out, -1) {
+		// "L x y Q cx cy x2 y2" — the gap between the L point and the control
+		// point is the pull-back distance.
+		for _, m := range regexp.MustCompile(`L ([\d.]+) ([\d.]+) Q ([\d.]+) ([\d.]+)`).FindAllStringSubmatch(d[1], -1) {
+			lx, ly := atof(t, m[1]), atof(t, m[2])
+			qx, qy := atof(t, m[3]), atof(t, m[4])
+			radii = append(radii, math.Hypot(qx-lx, qy-ly))
+		}
+	}
+	return radii
 }
 
 // TestSizeOverride: an explicit Size wins over inference.

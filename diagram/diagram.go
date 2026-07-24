@@ -23,7 +23,9 @@
 //
 // Linear pipelines and trees are DAG subsets handled for free; cycles lay out
 // and keep their drawn direction; diagram.Dir(diagram.LeftRight) flips the
-// flow axis.
+// flow axis. Spacing is tunable with diagram.Gap(layer, node) and
+// diagram.Margin(n); a labelled edge gets a dot on the line whose label a
+// CSS-only tooltip reveals on hover or focus.
 //
 // Naming note: this package deliberately deviates from loom's convention of
 // exporting Node(ctx, ...) as the raw-node render entry. Here Node(id, ...) is
@@ -112,10 +114,29 @@ type edge struct {
 // supplied as children, not options.
 type Config struct {
 	opts.Common
-	dir    Direction
-	title  string
-	direct bool
-	edges  []edge
+	dir       Direction
+	title     string
+	direct    bool
+	gapLayer  float64
+	gapNode   float64
+	margin    float64
+	marginSet bool
+	edges     []edge
+}
+
+// gaps resolves the configured spacing, falling back to the defaults.
+func (c Config) gaps() gaps {
+	sp := gaps{layer: defaultLayerGap, node: defaultNodeGap, margin: defaultMargin}
+	if c.gapLayer > 0 {
+		sp.layer = c.gapLayer
+	}
+	if c.gapNode > 0 {
+		sp.node = c.gapNode
+	}
+	if c.marginSet {
+		sp.margin = c.margin
+	}
+	return sp
 }
 
 // Option configures a diagram.
@@ -133,6 +154,29 @@ func Dir(d Direction) Option { return func(c *Config) { c.dir = d } }
 // Direct draws edges as straight point-to-point lines instead of the default
 // right-angled routing.
 func Direct() Option { return func(c *Config) { c.direct = true } }
+
+// Gap sets the spacing between layers (along the flow axis) and between
+// sibling nodes within a layer. Zero or negative keeps the default.
+func Gap(layer, node int) Option {
+	return func(c *Config) {
+		if layer > 0 {
+			c.gapLayer = float64(layer)
+		}
+		if node > 0 {
+			c.gapNode = float64(node)
+		}
+	}
+}
+
+// Margin sets the padding around the whole drawing. Negative keeps the default.
+func Margin(n int) Option {
+	return func(c *Config) {
+		if n >= 0 {
+			c.margin = float64(n)
+			c.marginSet = true
+		}
+	}
+}
 
 // Title sets the accessible name (aria-label). Without one, the node bodies'
 // text is joined. Like chart, no <title> is emitted (it would show as a native
@@ -277,7 +321,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 		layoutNodes[i] = layoutNode{id: c.id, w: c.w, h: c.h}
 	}
 
-	l, err := layout(layoutNodes, cfg.edges, cfg.dir, cfg.direct)
+	l, err := layout(layoutNodes, cfg.edges, cfg.dir, cfg.direct, cfg.gaps())
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +347,7 @@ func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Nod
 		dom.Attr("aria-hidden", "true"),
 		dom.Attr("class", canvasClasses()))
 	for _, e := range l.edges {
-		drawEdge(svg, e)
+		drawEdge(svg, e, l.radius)
 	}
 	for i, n := range nodes {
 		if shape := drawShape(n, l.boxes[i]); shape != nil {
@@ -406,10 +450,10 @@ func nodeBody(n collected, b box) *html.Node {
 	return div
 }
 
-func drawEdge(svg *html.Node, e routed) {
+func drawEdge(svg *html.Node, e routed, radius float64) {
 	svg.AppendChild(dom.CustomEl("path",
 		dom.Marker("diagram-edge"),
-		dom.Attr("d", roundedPath(e.pts, cornerRadius)),
+		dom.Attr("d", roundedPath(e.pts, radius)),
 		dom.Attr("class", edgeClasses())))
 	svg.AppendChild(dom.CustomEl("polygon",
 		dom.Marker("diagram-arrow"),

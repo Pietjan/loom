@@ -6,13 +6,18 @@ import (
 	"sort"
 )
 
-// Layout tuning (SVG user units).
+// Layout defaults (SVG user units); Gap and Margin override the spacing ones.
 const (
-	layerGap = 40.0 // gap between layers along the flow axis
-	nodeGap  = 28.0 // gap between nodes within a layer along the cross axis
-	margin   = 16.0 // padding around the whole drawing
-	sweeps   = 8    // crossing-reduction and coordinate-alignment iterations
+	defaultLayerGap = 40.0 // gap between layers along the flow axis
+	defaultNodeGap  = 28.0 // gap between nodes within a layer along the cross axis
+	defaultMargin   = 16.0 // padding around the whole drawing
+	sweeps          = 8    // crossing-reduction and coordinate-alignment iterations
 )
+
+// gaps is the resolved spacing configuration for one render.
+type gaps struct {
+	layer, node, margin float64
+}
 
 // layoutNode is a node reduced to what layout needs: its id and box size.
 type layoutNode struct {
@@ -34,9 +39,10 @@ type routed struct {
 
 // laid is the finished layout ready for SVG emission.
 type laid struct {
-	W, H  float64
-	boxes []box    // one per node, in node order
-	edges []routed // one per edge, in edge order
+	W, H   float64
+	radius float64  // corner radius for routed edges
+	boxes  []box    // one per node, in node order
+	edges  []routed // one per edge, in edge order
 }
 
 // vertex is a layout node: a real node (node >= 0) or a routing dummy.
@@ -52,7 +58,7 @@ type vertex struct {
 // layout runs the full Sugiyama pipeline. Every phase iterates slices in
 // insertion order and tie-breaks by index — never map iteration — so the
 // output is deterministic and golden files don't flake.
-func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool) (laid, error) {
+func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, sp gaps) (laid, error) {
 	if len(nodes) == 0 {
 		return laid{}, ErrNoNodes
 	}
@@ -135,7 +141,7 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool) (laid,
 	}
 
 	reduceCrossings(layers, verts, up, down)
-	assignCoords(dir, layers, verts, up, down)
+	assignCoords(dir, sp, layers, verts, up, down)
 
 	// 5. Map abstract (flow, cross) to (x, y) per direction.
 	for vi := range verts {
@@ -146,7 +152,7 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool) (laid,
 		}
 	}
 
-	return assemble(dir, direct, len(nodes), verts, edgeChains, reversed, edges), nil
+	return assemble(dir, direct, sp, len(nodes), verts, edgeChains, reversed, edges), nil
 }
 
 // breakCycles marks the back edges of a greedy DFS (in node insertion order)
@@ -315,7 +321,7 @@ func countCrossings(layers [][]int, verts []vertex, down [][]int) int {
 // assignCoords sets each vertex's flow coordinate (from its layer) and cross
 // coordinate (packed, then iteratively aligned toward neighbors without
 // overlap).
-func assignCoords(dir Direction, layers [][]int, verts []vertex, up, down [][]int) {
+func assignCoords(dir Direction, sp gaps, layers [][]int, verts []vertex, up, down [][]int) {
 	flowExtent := func(vi int) float64 {
 		if dir == LeftRight {
 			return verts[vi].bw
@@ -342,7 +348,7 @@ func assignCoords(dir Direction, layers [][]int, verts []vertex, up, down [][]in
 		for _, vi := range layers[L] {
 			verts[vi].flow = center
 		}
-		flow += thick + layerGap
+		flow += thick + sp.layer
 	}
 
 	// Cross: initial left-to-right packing within each layer.
@@ -351,7 +357,7 @@ func assignCoords(dir Direction, layers [][]int, verts []vertex, up, down [][]in
 		for _, vi := range layers[L] {
 			c += crossExtent(vi) / 2
 			verts[vi].cross = c
-			c += crossExtent(vi)/2 + nodeGap
+			c += crossExtent(vi)/2 + sp.node
 		}
 	}
 
@@ -374,7 +380,7 @@ func assignCoords(dir Direction, layers [][]int, verts []vertex, up, down [][]in
 			verts[vi].cross = desired[i]
 		}
 		for i := 1; i < len(ls); i++ {
-			min := verts[ls[i-1]].cross + crossExtent(ls[i-1])/2 + nodeGap + crossExtent(ls[i])/2
+			min := verts[ls[i-1]].cross + crossExtent(ls[i-1])/2 + sp.node + crossExtent(ls[i])/2
 			if verts[ls[i]].cross < min {
 				verts[ls[i]].cross = min
 			}
@@ -416,7 +422,7 @@ func assignCoords(dir Direction, layers [][]int, verts []vertex, up, down [][]in
 
 // assemble translates the drawing to the origin, computes the viewBox, and
 // builds the boxes and border-trimmed edge polylines.
-func assemble(dir Direction, direct bool, nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool, edges []edge) laid {
+func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex, edgeChains [][]int, reversed []bool, edges []edge) laid {
 	minX, minY := math.Inf(1), math.Inf(1)
 	maxX, maxY := math.Inf(-1), math.Inf(-1)
 	for i := range verts {
@@ -424,7 +430,7 @@ func assemble(dir Direction, direct bool, nodeCount int, verts []vertex, edgeCha
 		minX, maxX = math.Min(minX, v.x-v.bw/2), math.Max(maxX, v.x+v.bw/2)
 		minY, maxY = math.Min(minY, v.y-v.bh/2), math.Max(maxY, v.y+v.bh/2)
 	}
-	dx, dy := margin-minX, margin-minY
+	dx, dy := sp.margin-minX, sp.margin-minY
 	for i := range verts {
 		verts[i].x += dx
 		verts[i].y += dy
@@ -463,10 +469,13 @@ func assemble(dir Direction, direct bool, nodeCount int, verts []vertex, edgeCha
 	}
 
 	return laid{
-		W:     maxX - minX + 2*margin,
-		H:     maxY - minY + 2*margin,
-		boxes: boxes,
-		edges: routedEdges,
+		W: maxX - minX + 2*sp.margin,
+		H: maxY - minY + 2*sp.margin,
+		// A tight layer gap leaves no room for two rounded corners between
+		// layers, so clamp the radius rather than let them merge.
+		radius: math.Min(cornerRadius, sp.layer/4),
+		boxes:  boxes,
+		edges:  routedEdges,
 	}
 }
 
