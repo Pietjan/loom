@@ -24,20 +24,51 @@ const diagramRequestSnippet = `@diagram.New(
 }`
 
 const diagramSchemaSnippet = `// A node body is any markup — here each table is a small card, so the
-// nodes use diagram.Bare() to skip the default box chrome.
+// nodes use diagram.Bare() to skip the default box chrome. Each arrow runs
+// from the table holding the key to the one it points at; users and teams
+// reference each other, and the cycle lays out without special handling.
 @diagram.New(
-	diagram.Edge("users", "orders", diagram.Label("1:N"), diagram.NoArrow()),
-	diagram.Edge("products", "orders", diagram.Label("1:N"), diagram.NoArrow()),
+	diagram.Edge("users", "teams", diagram.Label("team_id")),
+	diagram.Edge("teams", "users", diagram.Label("owner_id")),
+	diagram.Edge("orders", "users", diagram.Label("user_id")),
+	diagram.Edge("items", "orders", diagram.Label("order_id")),
+	diagram.Edge("items", "products", diagram.Label("product_id")),
+	diagram.Edge("products", "categories", diagram.Label("category_id")),
 ) {
+	@diagram.Node("teams", diagram.Bare()) {
+		@schemaTable("teams", "id", "name", "owner_id")
+	}
 	@diagram.Node("users", diagram.Bare()) {
-		@schemaTable("users", "id", "email", "created_at")
+		@schemaTable("users", "id", "email", "team_id")
 	}
-	@diagram.Node("products", diagram.Bare()) {
-		@schemaTable("products", "id", "name", "price_cents")
+	// ... categories, products, orders, items
+}`
+
+const diagramTopologySnippet = `// Physical links have no direction, so every edge uses diagram.NoArrow().
+// The standby uplink is dashed, and the pair of edge routers puts a
+// diamond in front of the firewall.
+@diagram.New(
+	diagram.Edge("net", "edge1", diagram.NoArrow()),
+	diagram.Edge("net", "edge2", diagram.NoArrow(), diagram.Dashed()),
+	diagram.Edge("edge1", "fw", diagram.NoArrow()),
+	diagram.Edge("edge2", "fw", diagram.NoArrow()),
+	diagram.Edge("fw", "core", diagram.NoArrow(), diagram.Label("10G")),
+	diagram.Edge("core", "sw1", diagram.NoArrow()),
+	diagram.Edge("core", "sw2", diagram.NoArrow()),
+	diagram.Edge("sw1", "app1", diagram.NoArrow()),
+	// ... app2, nas on sw1; desk, laptop, printer on sw2
+) {
+	@diagram.Node("net", diagram.Stadium()) { @iconNode("Internet", icon.Globe) }
+	@diagram.Node("edge1", diagram.WithTone(diagram.ToneAccent)) {
+		@iconNode("edge-1", icon.ArrowsSplit)
 	}
-	@diagram.Node("orders", diagram.Bare()) {
-		@schemaTable("orders", "id", "user_id", "product_id", "qty")
+	@diagram.Node("fw", diagram.WithTone(diagram.ToneRose)) {
+		@iconNode("firewall", icon.ShieldCheck)
 	}
+	@diagram.Node("core", diagram.WithTone(diagram.ToneIndigo)) {
+		@iconNode("core-sw", icon.SquaresFour)
+	}
+	// ... switches and machines
 }`
 
 const diagramWorkflowSnippet = `@diagram.New(
@@ -176,20 +207,92 @@ templ Diagram() {
 				}
 			</div>
 		}
+		@example("Network topology", diagramTopologySnippet) {
+			<div class="w-full overflow-x-auto">
+				@diagram.New(
+					diagram.Edge("net", "edge1", diagram.NoArrow()),
+					diagram.Edge("net", "edge2", diagram.NoArrow(), diagram.Dashed()),
+					diagram.Edge("edge1", "fw", diagram.NoArrow()),
+					diagram.Edge("edge2", "fw", diagram.NoArrow()),
+					diagram.Edge("fw", "core", diagram.NoArrow(), diagram.Label("10G")),
+					diagram.Edge("core", "sw1", diagram.NoArrow()),
+					diagram.Edge("core", "sw2", diagram.NoArrow()),
+					diagram.Edge("sw1", "app1", diagram.NoArrow()),
+					diagram.Edge("sw1", "app2", diagram.NoArrow()),
+					diagram.Edge("sw1", "nas", diagram.NoArrow()),
+					diagram.Edge("sw2", "desk", diagram.NoArrow()),
+					diagram.Edge("sw2", "laptop", diagram.NoArrow()),
+					diagram.Edge("sw2", "printer", diagram.NoArrow()),
+				) {
+					@diagram.Node("net", diagram.Stadium()) {
+						@iconNode("Internet", icon.Globe)
+					}
+					@diagram.Node("edge1", diagram.WithTone(diagram.ToneAccent)) {
+						@iconNode("edge-1", icon.ArrowsSplit)
+					}
+					@diagram.Node("edge2", diagram.WithTone(diagram.ToneAccent)) {
+						@iconNode("edge-2", icon.ArrowsSplit)
+					}
+					@diagram.Node("fw", diagram.WithTone(diagram.ToneRose)) {
+						@iconNode("firewall", icon.ShieldCheck)
+					}
+					@diagram.Node("core", diagram.WithTone(diagram.ToneIndigo)) {
+						@iconNode("core-sw", icon.SquaresFour)
+					}
+					@diagram.Node("sw1", diagram.WithTone(diagram.ToneIndigo)) {
+						@iconNode("rack-sw", icon.SquaresFour)
+					}
+					@diagram.Node("sw2", diagram.WithTone(diagram.ToneIndigo)) {
+						@iconNode("floor-sw", icon.SquaresFour)
+					}
+					@diagram.Node("app1", diagram.WithTone(diagram.ToneEmerald)) {
+						@iconNode("app-01", icon.HardDrives)
+					}
+					@diagram.Node("app2", diagram.WithTone(diagram.ToneEmerald)) {
+						@iconNode("app-02", icon.HardDrives)
+					}
+					@diagram.Node("nas", diagram.WithTone(diagram.ToneEmerald)) {
+						@iconNode("nas-01", icon.Database)
+					}
+					@diagram.Node("desk", diagram.WithTone(diagram.ToneAmber)) {
+						@iconNode("desk-01", icon.Desktop)
+					}
+					@diagram.Node("laptop", diagram.WithTone(diagram.ToneAmber)) {
+						@iconNode("laptop-02", icon.Laptop)
+					}
+					@diagram.Node("printer", diagram.WithTone(diagram.ToneAmber)) {
+						@iconNode("printer-01", icon.Printer)
+					}
+				}
+			</div>
+		}
 		@example("Database schema", diagramSchemaSnippet) {
 			<div class="w-full overflow-x-auto">
 				@diagram.New(
-					diagram.Edge("users", "orders", diagram.Label("1:N"), diagram.NoArrow()),
-					diagram.Edge("products", "orders", diagram.Label("1:N"), diagram.NoArrow()),
+					diagram.Edge("users", "teams", diagram.Label("team_id")),
+					diagram.Edge("teams", "users", diagram.Label("owner_id")),
+					diagram.Edge("orders", "users", diagram.Label("user_id")),
+					diagram.Edge("items", "orders", diagram.Label("order_id")),
+					diagram.Edge("items", "products", diagram.Label("product_id")),
+					diagram.Edge("products", "categories", diagram.Label("category_id")),
 				) {
+					@diagram.Node("teams", diagram.Bare()) {
+						@schemaTable("teams", "id", "name", "owner_id")
+					}
 					@diagram.Node("users", diagram.Bare()) {
-						@schemaTable("users", "id", "email", "created_at")
+						@schemaTable("users", "id", "email", "team_id")
+					}
+					@diagram.Node("categories", diagram.Bare()) {
+						@schemaTable("categories", "id", "name")
 					}
 					@diagram.Node("products", diagram.Bare()) {
-						@schemaTable("products", "id", "name", "price_cents")
+						@schemaTable("products", "id", "name", "category_id")
 					}
 					@diagram.Node("orders", diagram.Bare()) {
-						@schemaTable("orders", "id", "user_id", "product_id", "qty")
+						@schemaTable("orders", "id", "user_id", "placed_at")
+					}
+					@diagram.Node("items", diagram.Bare()) {
+						@schemaTable("order_items", "id", "order_id", "product_id", "qty")
 					}
 				}
 			</div>
