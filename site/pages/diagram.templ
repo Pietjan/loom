@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"github.com/pietjan/loom/avatar"
 	"github.com/pietjan/loom/diagram"
 	"github.com/pietjan/loom/icon"
 )
@@ -12,7 +13,7 @@ const diagramNetworkSnippet = `@diagram.New(
 	diagram.Edge("lb", "web2"),
 	diagram.Edge("web1", "cache"),
 	diagram.Edge("web2", "cache"),
-	diagram.Edge("cache", "db"),
+	diagram.Edge("cache", "db", diagram.Dotted()), // read through on a miss
 ) {
 	@diagram.Node("net", diagram.Stadium()) { Internet }
 	@diagram.Node("lb", diagram.WithTone(diagram.ToneAccent)) { Load balancer }
@@ -25,8 +26,8 @@ const diagramNetworkSnippet = `@diagram.New(
 const diagramSchemaSnippet = `// A node body is any markup — here each table is a small card, so the
 // nodes use diagram.Bare() to skip the default box chrome.
 @diagram.New(
-	diagram.Edge("users", "orders", diagram.Label("1:N")),
-	diagram.Edge("products", "orders", diagram.Label("1:N")),
+	diagram.Edge("users", "orders", diagram.Label("1:N"), diagram.NoArrow()),
+	diagram.Edge("products", "orders", diagram.Label("1:N"), diagram.NoArrow()),
 ) {
 	@diagram.Node("users", diagram.Bare()) {
 		@schemaTable("users", "id", "email", "created_at")
@@ -40,17 +41,66 @@ const diagramSchemaSnippet = `// A node body is any markup — here each table i
 }`
 
 const diagramWorkflowSnippet = `@diagram.New(
+	// PortsSpread gives every edge its own attachment point on a node.
+	diagram.Ports(diagram.PortsSpread),
 	diagram.Edge("draft", "review"),
 	diagram.Edge("review", "check"),
 	diagram.Edge("check", "publish", diagram.Label("approved")),
 	diagram.Edge("check", "revise", diagram.Label("changes")),
-	diagram.Edge("revise", "review"),
+	diagram.Edge("revise", "review", diagram.Dashed()),
 ) {
 	@diagram.Node("draft", diagram.Stadium()) { Draft }
 	@diagram.Node("review") { In review }
 	@diagram.Node("check", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)) { Approved? }
 	@diagram.Node("publish", diagram.WithTone(diagram.ToneEmerald)) { Published }
 	@diagram.Node("revise", diagram.WithTone(diagram.ToneAmber)) { Revising }
+}`
+
+const diagramStateSnippet = `// A cycle lays out fine, and diagram.BiDirectional() draws an arrowhead on
+// both ends — here the two-way transition between Playing and Paused.
+@diagram.New(
+	diagram.Edge("stop", "play", diagram.Label("play")),
+	diagram.Edge("play", "pause", diagram.Label("pause"), diagram.BiDirectional()),
+	diagram.Edge("play", "stop", diagram.Label("stop")),
+	diagram.Edge("pause", "stop", diagram.Label("stop")),
+) {
+	@diagram.Node("stop", diagram.Stadium(), diagram.WithTone(diagram.ToneRose)) { Stopped }
+	@diagram.Node("play", diagram.Stadium(), diagram.WithTone(diagram.ToneEmerald)) { Playing }
+	@diagram.Node("pause", diagram.Stadium(), diagram.WithTone(diagram.ToneAmber)) { Paused }
+}`
+
+const diagramOrgSnippet = `// Each parent settles over the midpoint of its children, and diagram.Size
+// reserves room for the avatar body the text measurer can't see.
+@diagram.New(
+	diagram.Edge("ceo", "cto"),
+	diagram.Edge("ceo", "cfo"),
+	diagram.Edge("cto", "eng1"),
+	diagram.Edge("cto", "eng2"),
+) {
+	@diagram.Node("ceo", diagram.Size(180, 48)) {
+		@orgNode("Ada Lovelace", "CEO", "AL")
+	}
+	@diagram.Node("cto", diagram.Size(180, 48)) {
+		@orgNode("Alan Turing", "CTO", "AT")
+	}
+	// ... cfo, eng1, eng2
+}`
+
+const diagramArrowSnippet = `// The arrowhead shape is per-edge: a filled triangle by default, or hollow,
+// open, diamond, or dot — here reading like a UML relationship diagram.
+@diagram.New(
+	diagram.Edge("circle", "shape", diagram.HollowArrow()),
+	diagram.Edge("square", "shape", diagram.HollowArrow()),
+	diagram.Edge("shape", "canvas", diagram.DiamondArrow(), diagram.Label("drawn on")),
+	diagram.Edge("canvas", "render", diagram.OpenArrow(), diagram.Label("calls")),
+	diagram.Edge("render", "gpu", diagram.DotArrow(), diagram.Label("submits")),
+) {
+	@diagram.Node("circle") { Circle }
+	@diagram.Node("square") { Square }
+	@diagram.Node("shape", diagram.WithTone(diagram.ToneAccent)) { Shape }
+	@diagram.Node("canvas", diagram.WithTone(diagram.ToneIndigo)) { Canvas }
+	@diagram.Node("render") { Renderer }
+	@diagram.Node("gpu", diagram.WithTone(diagram.ToneEmerald)) { GPU }
 }`
 
 // schemaTable renders a schema-style table card used as a diagram node body.
@@ -76,6 +126,17 @@ templ netNode(name string, glyph icon.Name) {
 	</span>
 }
 
+// orgNode renders an avatar-and-title node body for the org chart.
+templ orgNode(name, role, initials string) {
+	<span class="flex items-center gap-2">
+		@avatar.New(avatar.Initials(initials), avatar.Small)
+		<span class="text-left leading-tight">
+			<span class="block text-xs font-semibold text-base-700 dark:text-base-100">{ name }</span>
+			<span class="block text-[11px] text-base-500 dark:text-base-400">{ role }</span>
+		</span>
+	</span>
+}
+
 templ Diagram() {
 	@componentPage("diagram") {
 		@prose() {
@@ -92,7 +153,7 @@ templ Diagram() {
 					diagram.Edge("lb", "web2"),
 					diagram.Edge("web1", "cache"),
 					diagram.Edge("web2", "cache"),
-					diagram.Edge("cache", "db"),
+					diagram.Edge("cache", "db", diagram.Dotted()),
 				) {
 					@diagram.Node("net", diagram.Stadium()) {
 						@netNode("Internet", icon.Globe)
@@ -118,8 +179,8 @@ templ Diagram() {
 		@example("Database schema", diagramSchemaSnippet) {
 			<div class="w-full overflow-x-auto">
 				@diagram.New(
-					diagram.Edge("users", "orders", diagram.Label("1:N")),
-					diagram.Edge("products", "orders", diagram.Label("1:N")),
+					diagram.Edge("users", "orders", diagram.Label("1:N"), diagram.NoArrow()),
+					diagram.Edge("products", "orders", diagram.Label("1:N"), diagram.NoArrow()),
 				) {
 					@diagram.Node("users", diagram.Bare()) {
 						@schemaTable("users", "id", "email", "created_at")
@@ -136,11 +197,12 @@ templ Diagram() {
 		@example("Approval workflow", diagramWorkflowSnippet) {
 			<div class="w-full overflow-x-auto">
 				@diagram.New(
+					diagram.Ports(diagram.PortsSpread),
 					diagram.Edge("draft", "review"),
 					diagram.Edge("review", "check"),
 					diagram.Edge("check", "publish", diagram.Label("approved")),
 					diagram.Edge("check", "revise", diagram.Label("changes")),
-					diagram.Edge("revise", "review"),
+					diagram.Edge("revise", "review", diagram.Dashed()),
 				) {
 					@diagram.Node("draft", diagram.Stadium()) {
 						Draft
@@ -156,6 +218,82 @@ templ Diagram() {
 					}
 					@diagram.Node("revise", diagram.WithTone(diagram.ToneAmber)) {
 						Revising
+					}
+				}
+			</div>
+		}
+		@example("State machine", diagramStateSnippet) {
+			<div class="w-full overflow-x-auto">
+				@diagram.New(
+					diagram.Edge("stop", "play", diagram.Label("play")),
+					diagram.Edge("play", "pause", diagram.Label("pause"), diagram.BiDirectional()),
+					diagram.Edge("play", "stop", diagram.Label("stop")),
+					diagram.Edge("pause", "stop", diagram.Label("stop")),
+				) {
+					@diagram.Node("stop", diagram.Stadium(), diagram.WithTone(diagram.ToneRose)) {
+						@netNode("Stopped", icon.Stop)
+					}
+					@diagram.Node("play", diagram.Stadium(), diagram.WithTone(diagram.ToneEmerald)) {
+						@netNode("Playing", icon.Play)
+					}
+					@diagram.Node("pause", diagram.Stadium(), diagram.WithTone(diagram.ToneAmber)) {
+						@netNode("Paused", icon.Pause)
+					}
+				}
+			</div>
+		}
+		@example("Arrowhead styles", diagramArrowSnippet) {
+			<div class="w-full overflow-x-auto">
+				@diagram.New(
+					diagram.Edge("circle", "shape", diagram.HollowArrow()),
+					diagram.Edge("square", "shape", diagram.HollowArrow()),
+					diagram.Edge("shape", "canvas", diagram.DiamondArrow(), diagram.Label("drawn on")),
+					diagram.Edge("canvas", "render", diagram.OpenArrow(), diagram.Label("calls")),
+					diagram.Edge("render", "gpu", diagram.DotArrow(), diagram.Label("submits")),
+				) {
+					@diagram.Node("circle") {
+						Circle
+					}
+					@diagram.Node("square") {
+						Square
+					}
+					@diagram.Node("shape", diagram.WithTone(diagram.ToneAccent)) {
+						Shape
+					}
+					@diagram.Node("canvas", diagram.WithTone(diagram.ToneIndigo)) {
+						Canvas
+					}
+					@diagram.Node("render") {
+						Renderer
+					}
+					@diagram.Node("gpu", diagram.WithTone(diagram.ToneEmerald)) {
+						GPU
+					}
+				}
+			</div>
+		}
+		@example("Org chart", diagramOrgSnippet) {
+			<div class="w-full overflow-x-auto">
+				@diagram.New(
+					diagram.Edge("ceo", "cto"),
+					diagram.Edge("ceo", "cfo"),
+					diagram.Edge("cto", "eng1"),
+					diagram.Edge("cto", "eng2"),
+				) {
+					@diagram.Node("ceo", diagram.Size(180, 48)) {
+						@orgNode("Ada Lovelace", "CEO", "AL")
+					}
+					@diagram.Node("cto", diagram.Size(180, 48)) {
+						@orgNode("Alan Turing", "CTO", "AT")
+					}
+					@diagram.Node("cfo", diagram.Size(180, 48)) {
+						@orgNode("Grace Hopper", "CFO", "GH")
+					}
+					@diagram.Node("eng1", diagram.Size(180, 48)) {
+						@orgNode("Linus Torvalds", "Engineer", "LT")
+					}
+					@diagram.Node("eng2", diagram.Size(180, 48)) {
+						@orgNode("Rob Pike", "Engineer", "RP")
 					}
 				}
 			</div>
