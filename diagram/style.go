@@ -47,9 +47,14 @@ func contentClasses(bare bool) string {
 	return b.String()
 }
 
+// Connectors are stroke-2, matching chart's data lines: an edge is content
+// (the relationship) rather than chrome, and the edge dot is sized against a
+// 2px line the same way chart's data points are. Node outlines stay at 1px
+// like loom's borders, giving the same content-over-chrome weighting chart
+// uses for its lines over its grid.
 func edgeClasses() string {
 	var b styles.Builder
-	b.Add("fill-none stroke-base-300 stroke-1 dark:stroke-base-600")
+	b.Add("fill-none stroke-base-300 stroke-2 dark:stroke-base-600")
 	return b.String()
 }
 
