@@ -6,7 +6,7 @@ import (
 	"github.com/pietjan/loom/icon"
 )
 
-const diagramNetworkSnippet = `@diagram.New(
+const diagramRequestSnippet = `@diagram.New(
 	diagram.Dir(diagram.LeftRight),
 	diagram.Edge("net", "lb"),
 	diagram.Edge("lb", "web1"),
@@ -118,8 +118,8 @@ templ schemaTable(name string, columns ...string) {
 	</div>
 }
 
-// netNode renders an icon-and-label node body.
-templ netNode(name string, glyph icon.Name) {
+// iconNode renders an icon-and-label node body.
+templ iconNode(name string, glyph icon.Name) {
 	<span class="inline-flex items-center gap-1.5">
 		@icon.New(glyph, icon.Small)
 		{ name }
@@ -144,7 +144,7 @@ templ Diagram() {
 			any templ component — and wire them with edges; the component breaks cycles,
 			assigns layers, and places everything automatically, no JavaScript.
 		}
-		@example("Network topology", diagramNetworkSnippet) {
+		@example("Request path", diagramRequestSnippet) {
 			<div class="w-full overflow-x-auto">
 				@diagram.New(
 					diagram.Dir(diagram.LeftRight),
@@ -156,22 +156,22 @@ templ Diagram() {
 					diagram.Edge("cache", "db", diagram.Dotted()),
 				) {
 					@diagram.Node("net", diagram.Stadium()) {
-						@netNode("Internet", icon.Globe)
+						@iconNode("Internet", icon.Globe)
 					}
 					@diagram.Node("lb", diagram.WithTone(diagram.ToneAccent)) {
-						@netNode("Load balancer", icon.ArrowsSplit)
+						@iconNode("Load balancer", icon.ArrowsSplit)
 					}
 					@diagram.Node("web1") {
-						@netNode("web-1", icon.Browsers)
+						@iconNode("web-1", icon.Browsers)
 					}
 					@diagram.Node("web2") {
-						@netNode("web-2", icon.Browsers)
+						@iconNode("web-2", icon.Browsers)
 					}
 					@diagram.Node("cache", diagram.WithTone(diagram.ToneAmber)) {
-						@netNode("Redis", icon.Lightning)
+						@iconNode("Redis", icon.Lightning)
 					}
 					@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)) {
-						@netNode("Postgres", icon.Database)
+						@iconNode("Postgres", icon.Database)
 					}
 				}
 			</div>
@@ -231,13 +231,13 @@ templ Diagram() {
 					diagram.Edge("pause", "stop", diagram.Label("stop")),
 				) {
 					@diagram.Node("stop", diagram.Stadium(), diagram.WithTone(diagram.ToneRose)) {
-						@netNode("Stopped", icon.Stop)
+						@iconNode("Stopped", icon.Stop)
 					}
 					@diagram.Node("play", diagram.Stadium(), diagram.WithTone(diagram.ToneEmerald)) {
-						@netNode("Playing", icon.Play)
+						@iconNode("Playing", icon.Play)
 					}
 					@diagram.Node("pause", diagram.Stadium(), diagram.WithTone(diagram.ToneAmber)) {
-						@netNode("Paused", icon.Pause)
+						@iconNode("Paused", icon.Pause)
 					}
 				}
 			</div>
