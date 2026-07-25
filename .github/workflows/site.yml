@@ -27,6 +27,11 @@ jobs:
           curl -sSL -o /usr/local/bin/tailwindcss \
             https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.17/tailwindcss-linux-x64
           chmod +x /usr/local/bin/tailwindcss
+      # *_templ.go is generated output and is not committed, so the pages
+      # package does not compile until the runner generates it.
+      - name: Generate templ output
+        working-directory: site
+        run: go tool templ generate
       # The generated Tailwind entry file embeds an absolute path to the loom
       # module, so CSS must be rebuilt on the runner rather than committed.
       - name: Build CSS

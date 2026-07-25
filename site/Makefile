@@ -67,4 +67,4 @@ preview: build/static
 ## clean: remove generated artifacts
 .PHONY: clean
 clean:
-	rm -rf $(dist) css/input.css
+	rm -rf $(dist) css/input.css static/styles.css pages/*_templ.go
