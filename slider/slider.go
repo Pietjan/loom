@@ -5,7 +5,7 @@
 //
 // Inside a field it adopts the field's id and disabled state. The track
 // and thumb are styled in cmd/css/loom.css (pseudo-elements utilities
-// can't reach). Zero JS.
+// can't reach).
 package slider
 
 import (

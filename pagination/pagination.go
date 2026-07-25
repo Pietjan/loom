@@ -1,5 +1,5 @@
 // Package pagination renders page navigation as links — the server
-// renders the target page, so it works with zero JS:
+// renders the target page:
 //
 //	@pagination.New() {
 //		@pagination.Prev("?page=2")

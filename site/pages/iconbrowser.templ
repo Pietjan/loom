@@ -1,0 +1,58 @@
+package pages
+
+import (
+	"strconv"
+
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/input"
+	"github.com/pietjan/loom/text"
+)
+
+// iconBrowser renders every generated icon with its constant name. The whole
+// set is on the page, so find-in-page works with the script blocked; the
+// script only adds live filtering on top.
+templ iconBrowser() {
+	{{ names := iconNames() }}
+	if len(names) > 0 {
+		<section class="space-y-3" data-icon-browser>
+			@sectionHeading("Browse icons")
+			<div hidden data-icon-search-field>
+				@input.New(
+					input.Type("search"),
+					input.Placeholder("Search icons…"),
+					input.Attr("aria-label", "Search icons"),
+					input.Attr("data-icon-search", ""),
+					input.Attr("autocomplete", "off"),
+				)
+			</div>
+			@text.New(text.Subtle, text.Small) {
+				<span data-icon-count>{ strconv.Itoa(len(names)) } icons</span>
+				— click a name to select it, or use { "⌘" }F to find one.
+			}
+			// Cells are spaced rather than separated by rules: a gap-px grid
+			// over a tinted container leaves the partly-filled last row
+			// showing as a block of background.
+			<ul class="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-1 rounded-2xl border border-base-200 p-2 dark:border-base-700">
+				for _, name := range names {
+					<li
+						class="flex flex-col items-center gap-2 rounded-xl p-3 text-center hover:bg-base-100 dark:hover:bg-base-700/50"
+						data-icon={ iconSearchKey(name) }
+					>
+						@icon.New(icon.Name(name.Value))
+						// Names wrap rather than truncate: three of them start
+						// "AlignCenter" and an ellipsis makes them identical.
+						<code class="w-full font-mono text-[0.6875rem] leading-tight break-words text-base-500 select-all dark:text-base-400">
+							{ name.Name }
+						</code>
+					</li>
+				}
+			</ul>
+			// Visibility is the hidden attribute's job alone — a Tailwind
+			// "hidden" class here would outlive the script setting it false.
+			<p class="py-8 text-center text-sm text-base-500 dark:text-base-400" hidden data-icon-empty>
+				No icon matches that search.
+			</p>
+			<script src={ href(ctx, "/static/icon-browser.js") } defer></script>
+		</section>
+	}
+}

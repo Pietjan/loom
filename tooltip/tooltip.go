@@ -1,4 +1,4 @@
-// Package tooltip renders CSS-only tooltips:
+// Package tooltip renders tooltips that reveal on hover and focus:
 //
 //	@tooltip.New(tooltip.Text("Delete forever")) {
 //		@button.New(button.Label("Delete")) {

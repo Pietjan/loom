@@ -1,0 +1,216 @@
+package pages
+
+import (
+	"strconv"
+
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/code"
+	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/table"
+	"github.com/pietjan/loom/text"
+
+	"github.com/pietjan/loom/site/internal/apidoc"
+)
+
+// importSection shows the module install and the component's import path.
+templ importSection(slug string) {
+	{{ api := apiFor(slug) }}
+	if api != nil {
+		<section class="space-y-3">
+			@sectionHeading("Import")
+			@text.New(text.Subtle, text.Small) {
+				Add the module once:
+			}
+			@code.New(goGetSnippet, code.Language("shell"))
+			@text.New(text.Subtle, text.Small) {
+				Then import the component package:
+			}
+			@code.New(importSnippet(api), code.Language("go"))
+		</section>
+	}
+}
+
+// reference renders the package's public API, read from its source at build
+// time. Empty groups are skipped, so a small package gets a short section.
+templ reference(slug string) {
+	{{ api := apiFor(slug) }}
+	if api != nil {
+		<section class="space-y-6">
+			@sectionHeading("Reference")
+			if len(api.Components) > 0 {
+				@declTable("Components", api.Components)
+			}
+			for _, group := range api.Options {
+				@declTable(optionsTitle(group), group.Decls)
+			}
+			for _, group := range api.Values {
+				@valueTable(slug, group)
+			}
+			if len(api.Errors) > 0 {
+				@declTable("Errors", api.Errors)
+			}
+			@commonOptions()
+		</section>
+	}
+}
+
+// declTable lists functions, presets or errors as name and description.
+templ declTable(title string, decls []apidoc.Decl) {
+	<div class="space-y-3">
+		@subHeading(title)
+		@table.New() {
+			@table.Header() {
+				@table.Column() {
+					Name
+				}
+				@table.Column() {
+					Description
+				}
+			}
+			@table.Body() {
+				for _, decl := range decls {
+					@table.Row() {
+						@table.Cell() {
+							@mono(decl.Signature)
+						}
+						@table.Cell() {
+							{ decl.Doc }
+						}
+					}
+				}
+			}
+		}
+	</div>
+}
+
+// valueTable lists one typed constant group, marking its default.
+templ valueTable(slug string, group apidoc.Group) {
+	{{ note, anchor, elsewhere := valueNote(slug, group.Name) }}
+	{{ decls, more := cappedValues(group.Decls) }}
+	<div class="space-y-3">
+		@subHeading(group.Name)
+		if group.Doc != "" {
+			@text.New(text.Subtle, text.Small) {
+				{ group.Doc }
+			}
+		}
+		if elsewhere {
+			@text.New(text.Subtle, text.Small) {
+				// The explicit spaces are load-bearing: templ pads literal
+				// text but not the output of an expression or a component.
+				{ note }{ " " }
+				@link.New("#"+anchor) {
+					Browse them all
+				}
+				{ " above." }
+			}
+		} else {
+			@valueRows(decls, more)
+		}
+	</div>
+}
+
+// valueRows is the table itself, split out so a group documented elsewhere
+// can skip it.
+templ valueRows(decls []apidoc.Decl, more int) {
+	<div class="space-y-3">
+		@table.New() {
+			@table.Header() {
+				@table.Column() {
+					Name
+				}
+				@table.Column() {
+					Value
+				}
+				@table.Column() {
+					Description
+				}
+			}
+			@table.Body() {
+				for _, decl := range decls {
+					@table.Row() {
+						@table.Cell() {
+							@mono(decl.Name)
+						}
+						@table.Cell() {
+							if decl.Signature != "" {
+								@mono(decl.Signature)
+							}
+						}
+						@table.Cell() {
+							if decl.Default {
+								@badge.New(badge.Green, badge.Small) {
+									default
+								}
+							}
+							{ decl.Doc }
+						}
+					}
+				}
+			}
+		}
+		if more > 0 {
+			@text.New(text.Subtle, text.Small) {
+				… and { strconv.Itoa(more) } more.
+			}
+		}
+	</div>
+}
+
+// commonOptions documents the Class/ID/Attr triple, which every component
+// instantiates from the same shared generics — identical in all of them, so
+// it is written once here rather than extracted per package.
+templ commonOptions() {
+	<div class="space-y-3">
+		@subHeading("Common options")
+		@text.New(text.Subtle, text.Small) {
+			Every component accepts these.
+		}
+		@table.New() {
+			@table.Header() {
+				@table.Column() {
+					Name
+				}
+				@table.Column() {
+					Description
+				}
+			}
+			@table.Body() {
+				@table.Row() {
+					@table.Cell() {
+						@mono("Class(classes string)")
+					}
+					@table.Cell() {
+						Merged with the component's own classes; on a conflict yours win.
+					}
+				}
+				@table.Row() {
+					@table.Cell() {
+						@mono("ID(id string)")
+					}
+					@table.Cell() {
+						Sets the element id, replacing the generated one.
+					}
+				}
+				@table.Row() {
+					@table.Cell() {
+						@mono("Attr(key string, val ...string)")
+					}
+					@table.Cell() {
+						Sets any HTML attribute; omit val for a boolean attribute.
+					}
+				}
+			}
+		}
+	</div>
+}
+
+// mono renders an identifier or signature inline.
+templ mono(s string) {
+	<code class="font-mono text-xs whitespace-nowrap">{ s }</code>
+}
+
+// subHeading titles a group within a section.
+templ subHeading(title string) {
+	<h3 class="text-sm font-semibold tracking-wide text-base-500 dark:text-base-400">{ title }</h3>
+}

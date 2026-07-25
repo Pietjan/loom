@@ -1,4 +1,4 @@
-// Package sidebar renders a responsive app sidebar with zero JavaScript:
+// Package sidebar renders a responsive app sidebar:
 //
 //	@sidebar.New() {
 //		@navlist.New(navlist.Label("Main")) { ... }

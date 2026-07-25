@@ -10,22 +10,6 @@ import (
 	"github.com/pietjan/loom/sidebar"
 )
 
-// themeInitScript runs before first paint: it applies the stored theme (or the
-// system preference when none is stored), setting exactly one of .dark/.light on
-// <html>. loom's raw dark CSS keys off .dark and gates its prefers-color-scheme
-// rules behind :not(.light), so an explicit .light wins even on a dark OS. Emitted
-// via templ.Raw because templ treats the contents of a literal <script> as text.
-const themeInitScript = `<script>(function(){try{var s=localStorage.getItem('theme');` +
-	`var d=s?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;` +
-	`var c=document.documentElement.classList;c.toggle('dark',d);c.toggle('light',!d);}catch(e){}})();</script>`
-
-// themeToggleScript wires the header button: flip .dark/.light and persist.
-const themeToggleScript = `<script>document.querySelector('[data-theme-toggle]')` +
-	`.addEventListener('click',function(){` +
-	`var c=document.documentElement.classList;var d=!c.contains('dark');` +
-	`c.toggle('dark',d);c.toggle('light',!d);` +
-	`try{localStorage.setItem('theme',d?'dark':'light');}catch(e){}});</script>`
-
 templ layout(title, activeSlug string) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -33,7 +17,9 @@ templ layout(title, activeSlug string) {
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ title }</title>
-			@templ.Raw(themeInitScript)
+			// Deliberately not deferred: the theme has to land on <html>
+			// before the first paint.
+			<script src={ href(ctx, "/static/theme.js") }></script>
 			<link rel="preload" href={ href(ctx, "/static/fonts/geist-sans.woff2") } as="font" type="font/woff2" crossorigin/>
 			<link rel="stylesheet" href={ href(ctx, "/static/styles.css") }/>
 		</head>
@@ -81,7 +67,6 @@ templ layout(title, activeSlug string) {
 					</main>
 				</div>
 			</div>
-			@templ.Raw(themeToggleScript)
 		</body>
 	</html>
 }

@@ -12,7 +12,7 @@
 //	}
 //
 // Expandable groups are plain <details><summary> — self-contained
-// platform disclosure, zero JS and zero cross-component coordination (the
+// platform disclosure, with no cross-component coordination (the
 // predecessor's group toggling was JS keyed to markup that was never
 // emitted; nothing here can drift like that). The current page is marked
 // with aria-current="page" and styled off that attribute.

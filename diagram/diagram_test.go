@@ -230,7 +230,7 @@ func TestMonospaceScalesExactly(t *testing.T) {
 }
 
 // TestEdgeLabelsAreHoverDots: a labelled edge gets a dot on the line whose
-// label is revealed by loom's CSS-only tooltip, not printed onto the diagram.
+// label is revealed by loom's tooltip, not printed onto the diagram.
 // The dot is drawn in the canvas so it rasterises with the line it sits on; a
 // separate transparent target over it carries the hover and focus.
 func TestEdgeLabelsAreHoverDots(t *testing.T) {

@@ -12,7 +12,7 @@ templ Page() {
 }
 ```
 
-Interactivity comes from **web platform primitives, not JavaScript**:
+Interactivity comes from **web platform primitives**:
 modals are `<dialog>` driven by [invoker commands](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API)
 (`commandfor`/`command`, Baseline 2025), dropdowns are popovers with CSS
 anchor positioning, accordions and nav groups are `<details name>`, selects
@@ -171,21 +171,32 @@ disclosure (which it is), not ARIA tabs. For URL-addressable sections,
 compose `navlist`-style links and render the active content
 server-side.
 
-### JavaScript policy
+### Known limitations
 
-loom ships zero JavaScript — no exceptions. Patterns that honestly
-require JS (the full ARIA tabs pattern with arrow-key roving,
-combobox/autocomplete) are out of scope rather than faked.
+Some patterns need more than the primitives above provide, and are left
+out rather than approximated:
+
+- **The full ARIA tabs pattern** (`role=tab` with arrow-key roving).
+  `tabs` is a disclosure group and is announced as one — see above.
+- **Combobox / autocomplete.** `picker` covers the native select; there
+  is nothing for the filter-as-you-type case.
+- **A synced crosshair cursor** with a live multi-value tooltip, à la
+  Flux's `chart.cursor`. `chart` labels points individually instead.
 
 ## Development
 
+Everything runs from the repo root; `make help` lists every target.
+
 ```sh
-go test ./...                    # unit + golden + contract tests
+make test                        # unit + golden + contract tests, both modules
+make audit                       # tidy-diff, verify, gofmt, vet, test
+make lint                        # golangci-lint
+
 LOOM_UPDATE=1 go test ./...      # rewrite golden files
 
-cd site
-make run                          # templ generate + CSS build + serve :8080
-make run/live                     # ...with live reload (templ watch + proxy)
+make site/run                    # templ generate + CSS build + serve :8080
+make site/run/live               # ...with live reload (templ watch + proxy)
+make site/build                  # render the static site to site/dist
 ```
 
 The contract harness (`contract_test.go`) checks every composite render:

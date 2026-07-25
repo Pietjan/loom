@@ -21,7 +21,7 @@
 // children are the card body, with CardHeader (badges above the heading)
 // and CardFooter (metadata below it) as optional slots. To make a card
 // navigable, compose a link inside it. The board is static markup + CSS —
-// reordering is your application's concern. Zero JS.
+// reordering is your application's concern.
 package kanban
 
 import (

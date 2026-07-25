@@ -1,11 +1,9 @@
 package pages
 
 import (
-	"github.com/pietjan/loom/callout"
+	"github.com/pietjan/loom/button"
 	"github.com/pietjan/loom/code"
 	"github.com/pietjan/loom/heading"
-	"github.com/pietjan/loom/icon"
-	"github.com/pietjan/loom/link"
 	"github.com/pietjan/loom/text"
 )
 
@@ -33,18 +31,6 @@ templ Index() {
 			@text.New() {
 				Pre-styled components for Go + templ, powered by web platform primitives.
 			}
-			@callout.New() {
-				@icon.New(icon.Info)
-				@callout.Heading() {
-					No JavaScript required
-				}
-				@callout.Text() {
-					Modals, dropdowns, tabs, and sidebars work out of the box on web platform
-					primitives — the Popover API, invoker commands, the dialog element, and
-					exclusive details. Bring your own JavaScript to enhance them; you won't have
-					to fight the defaults to do it.
-				}
-			}
 		</div>
 		<section class="space-y-3">
 			<h2 class="text-lg font-semibold border-b border-base-200 pb-2 dark:border-base-600">Install</h2>
@@ -65,9 +51,9 @@ templ Index() {
 			}
 			@code.New(cssSnippet, code.Language("sh"))
 		</section>
-		<div>
-			@link.New(href(ctx, "/components/button/")) {
-				Browse the components →
+		<div class="flex justify-center pt-2">
+			@button.New(button.Primary, button.Href(href(ctx, "/components/button/"))) {
+				Browse the components
 			}
 		</div>
 	}

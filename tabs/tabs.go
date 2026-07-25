@@ -1,6 +1,6 @@
 // Package tabs renders client-side tabbed content on a <details name>
 // disclosure group — all panels ship in the page and the platform
-// switches them, zero JavaScript:
+// switches them:
 //
 //	@tabs.New(tabs.Label("Account sections")) {
 //		@tabs.Section(tabs.Title("Profile"), tabs.Open()) { ... }
@@ -15,8 +15,9 @@
 // panels hidden; the mouse path is guarded with pointer-events.
 //
 // Honest limitation, by design: the full ARIA tabs pattern (role=tab,
-// arrow-key roving) cannot be met without JavaScript, and loom ships
-// none.
+// arrow-key roving) cannot be met by the platform alone, and components
+// add no script of their own — so it is out of scope here rather than
+// half-implemented.
 package tabs
 
 import (

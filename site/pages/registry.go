@@ -44,13 +44,13 @@ func init() {
 			{Slug: "avatar", Title: "Avatar", Description: "Initials avatars with sizes, status dots, and stacked groups.", Body: Avatar},
 			{Slug: "kbd", Title: "Kbd", Description: "Keyboard key caps for shortcut hints.", Body: Kbd},
 			{Slug: "skeleton", Title: "Skeleton", Description: "Loading placeholders in bar and circle shapes.", Body: Skeleton},
-			{Slug: "tooltip", Title: "Tooltip", Description: "CSS-only tooltips on hover and focus.", Body: Tooltip},
+			{Slug: "tooltip", Title: "Tooltip", Description: "Tooltips that reveal on hover and focus.", Body: Tooltip},
 		}},
 		{Name: "Data display", Pages: []Page{
 			{Slug: "table", Title: "Table", Description: "Semantic data tables with styled header and rows.", Body: Table},
 			{Slug: "stat", Title: "Stat", Description: "KPI tiles with label, value, and a trend slot.", Body: Stat},
 			{Slug: "chart", Title: "Chart", Description: "Server-rendered SVG line, area, bar, and sparkline charts.", Body: Chart},
-			{Slug: "diagram", Title: "Diagram", Description: "Server-rendered SVG flowcharts with automatic layered layout — no JavaScript.", Body: Diagram},
+			{Slug: "diagram", Title: "Diagram", Description: "Server-rendered SVG flowcharts with automatic layered layout.", Body: Diagram},
 			{Slug: "timeline", Title: "Timeline", Description: "Vertical and horizontal event timelines with composable indicators.", Body: Timeline},
 			{Slug: "kanban", Title: "Kanban", Description: "Static kanban board markup: columns, cards, headers, footers.", Body: Kanban},
 			{Slug: "description", Title: "Description", Description: "Definition lists for label and value pairs.", Body: Description},
@@ -62,7 +62,7 @@ func init() {
 			{Slug: "markdown", Title: "Markdown", Description: "Render a markdown string as loom-styled markup, GFM included.", Body: Markdown},
 			{Slug: "code", Title: "Code", Description: "Chroma-highlighted code blocks with optional diff rendering.", Body: Code},
 			{Slug: "accordion", Title: "Accordion", Description: "Expandable sections on the details element, optionally exclusive.", Body: Accordion},
-			{Slug: "carousel", Title: "Carousel", Description: "CSS scroll-snap slides — no JavaScript.", Body: Carousel},
+			{Slug: "carousel", Title: "Carousel", Description: "Slides on CSS scroll-snap with anchor-linked dots.", Body: Carousel},
 		}},
 		{Name: "Forms", Pages: []Page{
 			{Slug: "field", Title: "Field", Description: "Label, control, description, and error wiring for form fields.", Body: Field},
@@ -78,10 +78,10 @@ func init() {
 			{Slug: "fileupload", Title: "File upload", Description: "Styled file inputs with accept filters.", Body: Fileupload},
 		}},
 		{Name: "Overlays", Pages: []Page{
-			{Slug: "modal", Title: "Modal", Description: "Dialogs on the native dialog element and invoker commands — no JavaScript.", Body: Modal},
+			{Slug: "modal", Title: "Modal", Description: "Dialogs on the native dialog element and invoker commands.", Body: Modal},
 			{Slug: "dropdown", Title: "Dropdown", Description: "Popover-powered menus with anchor positioning.", Body: Dropdown},
 			{Slug: "popover", Title: "Popover", Description: "Freeform popover panels anchored to a trigger.", Body: Popover},
-			{Slug: "flash", Title: "Flash", Description: "Flash messages with CSS-only dismiss and auto-hide.", Body: Flash},
+			{Slug: "flash", Title: "Flash", Description: "Flash messages with dismiss and auto-hide.", Body: Flash},
 		}},
 		{Name: "Layout & navigation", Pages: []Page{
 			{Slug: "header", Title: "Header", Description: "A top app bar with spacer and sticky option.", Body: Header},

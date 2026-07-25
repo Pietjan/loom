@@ -10,7 +10,7 @@
 //	}
 //
 // Exclusive() makes opening one item close the others — the platform's
-// own <details name> behavior, zero JS. The chevron rotation is pure CSS.
+// own <details name> behavior. The chevron rotation is CSS.
 package accordion
 
 import (
@@ -111,7 +111,7 @@ func Item(options ...Option) templ.Component {
 	})
 }
 
-// chevron builds the rotating indicator (CSS-only via group-open).
+// chevron builds the rotating indicator (rotated via group-open).
 func chevron() *html.Node {
 	svg := dom.El(atom.Svg,
 		dom.Attr("viewBox", "0 0 16 16"),

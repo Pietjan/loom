@@ -1,5 +1,5 @@
 // Package popover renders a floating panel anchored to a trigger — richer
-// than a tooltip, more free-form than a dropdown menu. Zero JS:
+// than a tooltip, more free-form than a dropdown menu:
 //
 //	@popover.Root() {
 //		@popover.Trigger() {

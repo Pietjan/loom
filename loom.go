@@ -7,9 +7,10 @@
 //	@button.New(button.Primary) { Save }
 //
 // Interactivity comes from modern web platform primitives — the Popover
-// API, invoker commands (commandfor/command), <dialog>, <details name> —
-// not JavaScript. Styling is Tailwind; compile your CSS with the Tailwind
-// CLI using the entry file written by:
+// API, invoker commands (commandfor/command), <dialog>, <details name>.
+// Components add no script of their own, so anything you layer on top is
+// the only JavaScript on the page. Styling is Tailwind; compile your CSS
+// with the Tailwind CLI using the entry file written by:
 //
 //	go run github.com/pietjan/loom/cmd/css -accent indigo -base zinc -o assets/css/input.css
 package loom

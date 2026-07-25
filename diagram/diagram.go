@@ -1,5 +1,5 @@
-// Package diagram renders a directed-graph flowchart as SVG on the server,
-// zero JavaScript. Nodes are declared as children — each carrying any templ
+// Package diagram renders a directed-graph flowchart as SVG on the server.
+// Nodes are declared as children — each carrying any templ
 // component as its body — and edges wire them by id; the component lays them
 // out automatically with a layered (Sugiyama-style) algorithm and draws the
 // boxes, connectors, and arrowheads:
@@ -29,7 +29,7 @@
 // diagram.Ports(diagram.PortsSpread) instead gives every edge its own port.
 // Spacing is tunable with diagram.Gap(layer, node) and
 // diagram.Margin(n); a labelled edge gets a dot on the line whose label a
-// CSS-only tooltip reveals on hover or focus. diagram.Dashed() and
+// tooltip reveals on hover or focus. diagram.Dashed() and
 // diagram.Dotted() break an edge's line while leaving its arrowhead solid;
 // diagram.NoArrow() drops the arrowhead for a plain connector and
 // diagram.BiDirectional() adds one at the source end too. The arrowhead's
@@ -453,8 +453,8 @@ func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Nod
 	}
 
 	// The label itself is never painted onto the diagram: the dot drawn above is
-	// the affordance, and loom's CSS-only tooltip reveals the text on hover or
-	// keyboard focus from the transparent target placed over it. No JavaScript.
+	// the affordance, and loom's tooltip reveals the text on hover or keyboard
+	// focus from the transparent target placed over it.
 	for _, e := range l.edges {
 		if e.label == "" {
 			continue
@@ -496,8 +496,8 @@ func edgeDot(e routed) *html.Node {
 		dom.Attr("class", edgeDotClasses()))
 }
 
-// edgeTip builds the transparent target over that dot, which the CSS-only
-// tooltip opens from. The dot itself is drawn in the canvas; this only has to
+// edgeTip builds the transparent target over that dot, which the tooltip
+// opens from. The dot itself is drawn in the canvas; this only has to
 // be in the right place and catch a pointer or a focus.
 func edgeTip(ctx context.Context, e routed) (*html.Node, error) {
 	// tabindex makes it focusable so the tooltip's :focus-within path can fire —

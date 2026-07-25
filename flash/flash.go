@@ -1,6 +1,6 @@
 // Package flash renders a server-rendered flash message — the alert you
 // show after a redirect (post/redirect/get). Dismissal and auto-hide are
-// pure CSS, so it needs no JavaScript:
+// CSS:
 //
 //	@flash.New(flash.Success(), flash.Dismissible()) {
 //		Your changes were saved.

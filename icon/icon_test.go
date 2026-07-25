@@ -13,7 +13,7 @@ func TestGolden(t *testing.T) {
 	testutil.Golden(t, "icon-bell-small", icon.New(icon.Bell, icon.Small))
 }
 
-// Phosphor draws every weight on one grid, so sizing is CSS-only: the
+// Phosphor draws every weight on one grid, so sizing is done in CSS: the
 // viewBox must survive untouched whatever variant or size is asked for.
 func TestSizesShareOneViewBox(t *testing.T) {
 	for _, option := range []icon.Option{icon.Regular, icon.Fill, icon.Small, icon.ExtraSmall} {

@@ -1,5 +1,5 @@
 // Package chart renders data as SVG on the server — line, area, and bar
-// charts plus sparklines, zero JavaScript:
+// charts plus sparklines:
 //
 //	@chart.New(
 //		chart.Title("Visitors per month"),
@@ -19,8 +19,8 @@
 //	@chart.New(chart.Sparkline(), chart.Series("Trend", data))
 //
 // Honest limitation, by design: a synced crosshair cursor with a live
-// multi-value tooltip (à la Flux's chart.cursor) requires JavaScript, and
-// loom ships none — per-point tooltips are the offering.
+// multi-value tooltip (à la Flux's chart.cursor) requires JavaScript, which
+// components do not add — per-point tooltips are the offering.
 package chart
 
 import (

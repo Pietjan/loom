@@ -5,7 +5,7 @@
 //	@progress.New(progress.Indeterminate())
 //
 // Determinate bars expose value/max via ARIA; the indeterminate variant
-// animates with CSS (see cmd/css/loom.css). Zero JS.
+// animates with CSS (see cmd/css/loom.css).
 package progress
 
 import (

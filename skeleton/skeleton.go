@@ -5,7 +5,7 @@
 //	@skeleton.New(skeleton.Class("h-24"))   // a block
 //
 // Shape it with utility classes; the pulse is Tailwind's animate-pulse.
-// Mark the surrounding region aria-busy while it loads. Zero JS.
+// Mark the surrounding region aria-busy while it loads.
 package skeleton
 
 import (

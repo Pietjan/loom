@@ -20,7 +20,7 @@
 // (Complete, Current, Incomplete) color the indicator and its connector
 // segment; Horizontal() lays the whole timeline out inline-start to
 // inline-end. Large() enlarges indicators for numbered steps. The dots,
-// lines, and layout are all CSS. Zero JS.
+// lines, and layout are all CSS.
 package timeline
 
 import (

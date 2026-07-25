@@ -1,8 +1,10 @@
 // The site command serves the loom project website for development and
 // renders it out as static HTML for GitHub Pages.
 //
-//	make dev            # generate templ + build CSS + serve on :8080
-//	make build/static   # render to dist/ with base path /loom/
+// Driven by the Makefile at the repo root:
+//
+//	make site/run     # generate templ + build CSS + serve on :8080
+//	make site/build   # render to dist/ with base path /loom/
 package main
 
 import (
@@ -18,6 +20,7 @@ import (
 	"github.com/a-h/templ"
 
 	"github.com/pietjan/loom"
+	"github.com/pietjan/loom/site/internal/apidoc"
 	"github.com/pietjan/loom/site/pages"
 )
 
@@ -25,6 +28,16 @@ func main() {
 	if len(os.Args) < 2 {
 		usage()
 	}
+	// The reference sections are read from the component packages' source at
+	// startup, which sits one directory up — the same tree the replace
+	// directive in go.mod points at. Failing here is deliberate: a page whose
+	// reference silently vanished would be worse than a build that stops.
+	parsed, err := apidoc.Load("..")
+	if err != nil {
+		log.Fatal(err)
+	}
+	pages.SetAPI(parsed)
+
 	switch os.Args[1] {
 	case "serve":
 		fs := flag.NewFlagSet("serve", flag.ExitOnError)

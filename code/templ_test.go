@@ -18,11 +18,11 @@ func TestTemplHighlighting(t *testing.T) {
 	out := testutil.Render(t, code.New(src, code.Language("templ")))
 
 	cases := map[string]string{
-		"@ marker is a keyword":                  `<span class="k">@</span>`,
-		"qualifier stays default like a package": `<span class="n">button.</span>`,
+		"@ marker is a keyword":                   `<span class="k">@</span>`,
+		"qualifier stays default like a package":  `<span class="n">button.</span>`,
 		"only the final identifier is a function": `<span class="nf">New</span>`,
-		"nested call name is highlighted":          `<span class="nf">Label</span>`,
-		"string argument is a literal":             `<span class="s">&#34;Save&#34;</span>`,
+		"nested call name is highlighted":         `<span class="nf">Label</span>`,
+		"string argument is a literal":            `<span class="s">&#34;Save&#34;</span>`,
 	}
 	for name, want := range cases {
 		if !strings.Contains(out, want) {

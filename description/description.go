@@ -9,7 +9,7 @@
 //	}
 //
 // A two-column grid aligns terms and details; it collapses to stacked rows
-// on narrow viewports. Zero JS.
+// on narrow viewports.
 package description
 
 import (

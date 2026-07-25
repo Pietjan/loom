@@ -1,5 +1,5 @@
 // Package carousel renders a horizontally scroll-snapping slider — CSS
-// scroll-snap plus in-page anchor links for the dots, zero JS:
+// scroll-snap plus in-page anchor links for the dots:
 //
 //	@carousel.New() {
 //		@carousel.Slide() { ...slide one... }

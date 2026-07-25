@@ -1,5 +1,5 @@
 // Package modal renders native <dialog> modals driven entirely by invoker
-// commands — no JavaScript:
+// commands:
 //
 //	@modal.Root() {
 //		@modal.Trigger() {
