@@ -189,7 +189,7 @@ func wire(root *html.Node, sc Scope) {
 	}
 
 	if control != nil && len(describedBy) > 0 {
-		dom.SetAttr(control, "aria-describedby", join(describedBy))
+		dom.SetAttr(control, "aria-describedby", strings.Join(describedBy, " "))
 	}
 }
 
@@ -205,13 +205,4 @@ func findControl(root *html.Node) *html.Node {
 		return dom.Find(grp, dom.ByMarker(controlMarkers...))
 	}
 	return nil
-}
-
-func join(ss []string) string {
-	var out strings.Builder
-	out.WriteString(ss[0])
-	for _, s := range ss[1:] {
-		out.WriteString(" " + s)
-	}
-	return out.String()
 }

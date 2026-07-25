@@ -22,7 +22,7 @@ func classes(c Config) string {
 func closeClasses() string {
 	var b styles.Builder
 	b.Add("-m-1 inline-flex shrink-0 cursor-pointer items-center justify-center rounded p-1 opacity-70")
-	b.Add("hover:opacity-100 has-focus-visible:outline has-focus-visible:outline-2 has-focus-visible:outline-current")
+	b.Add("hover:opacity-100 has-focus-visible:outline-2 has-focus-visible:outline-current")
 	b.Add("**:data-[ui=icon]:size-4")
 	return b.String()
 }

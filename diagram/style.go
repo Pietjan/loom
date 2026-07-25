@@ -113,6 +113,6 @@ func edgeDotClasses() string {
 func edgeHitClasses() string {
 	var b styles.Builder
 	b.Add("block size-2.5 rounded-full")
-	b.Add("focus-visible:outline focus-visible:outline-2 focus-visible:outline-current")
+	b.Add("focus-visible:outline-2 focus-visible:outline-current")
 	return b.String()
 }

@@ -88,7 +88,7 @@ func groupClasses() string {
 	b.Add("bg-white text-sm shadow-xs")
 	b.Add("border border-base-200 border-b-base-300/80 dark:border-base-600 dark:bg-base-700")
 	// The group shows the focus ring for whichever control it wraps.
-	b.Add("focus-within:outline focus-within:outline-2 focus-within:outline-accent focus-within:outline-offset-2")
+	b.Add("focus-within:outline-2 focus-within:outline-accent focus-within:outline-offset-2")
 	b.Add("has-[:disabled]:opacity-75")
 	return b.String()
 }
