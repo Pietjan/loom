@@ -94,15 +94,25 @@ func arrowOpenClasses() string {
 	return b.String()
 }
 
-// dotClasses styles the marker sitting on a labelled edge, following chart's
-// data points: a solid dot in the line's own colour, ringed in the surface
-// colour so it reads as sitting on the line rather than crossing it. Sized off
-// the spacing scale instead of in raw pixels, so it lands a little under
-// chart's r=3.5 point — which suits a marker you hover for a label rather than
-// a value to read off the line.
-func dotClasses() string {
+// edgeDotClasses styles the marker sitting on a labelled edge, following
+// chart's data points: a solid dot in the line's own colour, ringed in the
+// surface colour so it reads as sitting on the line rather than crossing it.
+// It is a little under chart's r=3.5 point, which suits a marker you hover for
+// a label rather than a value to read off the line.
+func edgeDotClasses() string {
 	var b styles.Builder
-	b.Add("block size-1.25 rounded-full bg-base-300 ring ring-white")
-	b.Add("dark:bg-base-600 dark:ring-base-800")
+	b.Add("fill-base-300 stroke-white dark:fill-base-600 dark:stroke-base-800")
+	return b.String()
+}
+
+// edgeHitClasses styles the target sitting over that dot. It is transparent —
+// the dot itself is painted in the canvas — and exists to carry the hover and
+// focus the tooltip opens on, so it is sized a little larger than the dot to
+// stay comfortable to hit. Focus has to show here rather than on the dot,
+// which is in the SVG and out of this element's reach.
+func edgeHitClasses() string {
+	var b styles.Builder
+	b.Add("block size-2.5 rounded-full")
+	b.Add("focus-visible:outline focus-visible:outline-2 focus-visible:outline-current")
 	return b.String()
 }

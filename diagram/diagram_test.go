@@ -231,6 +231,8 @@ func TestMonospaceScalesExactly(t *testing.T) {
 
 // TestEdgeLabelsAreHoverDots: a labelled edge gets a dot on the line whose
 // label is revealed by loom's CSS-only tooltip, not printed onto the diagram.
+// The dot is drawn in the canvas so it rasterises with the line it sits on; a
+// separate transparent target over it carries the hover and focus.
 func TestEdgeLabelsAreHoverDots(t *testing.T) {
 	out := diag(t,
 		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
@@ -243,12 +245,20 @@ func TestEdgeLabelsAreHoverDots(t *testing.T) {
 	if len(dots) != 1 {
 		t.Fatalf("dots = %d, want 1 (only the labelled edge)", len(dots))
 	}
-	// Reachable by keyboard, and described by the tooltip it opens.
-	if dom.GetAttr(dots[0], "tabindex") != "0" {
-		t.Error("dot must be focusable so the tooltip's focus path works")
+	if dots[0].Data != "circle" {
+		t.Errorf("dot should be drawn in the canvas, got <%s>", dots[0].Data)
 	}
-	if dom.GetAttr(dots[0], "aria-describedby") == "" {
-		t.Error("dot should be described by its tooltip")
+
+	hits := dom.FindAll(tree.Root, dom.ByMarker("diagram-edge-hit"))
+	if len(hits) != 1 {
+		t.Fatalf("hit targets = %d, want 1", len(hits))
+	}
+	// Reachable by keyboard, and described by the tooltip it opens.
+	if dom.GetAttr(hits[0], "tabindex") != "0" {
+		t.Error("target must be focusable so the tooltip's focus path works")
+	}
+	if dom.GetAttr(hits[0], "aria-describedby") == "" {
+		t.Error("target should be described by its tooltip")
 	}
 
 	tips := dom.FindAll(tree.Root, dom.ByMarker("tooltip-content"))
@@ -258,6 +268,46 @@ func TestEdgeLabelsAreHoverDots(t *testing.T) {
 	// The label must not also be painted onto the canvas.
 	if strings.Contains(out, "diagram-edge-label") {
 		t.Error("label should not be drawn as SVG text any more")
+	}
+}
+
+// TestEdgeDotSitsOnTheLine: the dot and its hover target must land on the same
+// point, since one is drawn in the canvas and the other positioned over it.
+func TestEdgeDotSitsOnTheLine(t *testing.T) {
+	out := diag(t,
+		[]templ.Component{node("a", "A"), node("b", "B")},
+		diagram.Edge("a", "b", diagram.Label("yes")),
+	)
+	tree := testutil.NewTree(t, out)
+
+	dot := dom.FindAll(tree.Root, dom.ByMarker("diagram-edge-dot"))[0]
+	cx, cy := atof(t, dom.GetAttr(dot, "cx")), atof(t, dom.GetAttr(dot, "cy"))
+
+	// The tooltip wrapper carries the target's position, centred by a transform.
+	tip := dom.FindAll(tree.Root, dom.ByMarker("tooltip"))[0]
+	var tx, ty float64
+	for _, decl := range strings.Split(dom.GetAttr(tip, "style"), ";") {
+		k, v, ok := strings.Cut(decl, ":")
+		if !ok {
+			continue
+		}
+		val := atof(t, strings.TrimSuffix(strings.TrimSpace(v), "px"))
+		switch strings.TrimSpace(k) {
+		case "left":
+			tx = val
+		case "top":
+			ty = val
+		}
+	}
+	if math.Abs(cx-tx) > 0.01 || math.Abs(cy-ty) > 0.01 {
+		t.Errorf("dot at (%v,%v) but its target at (%v,%v)", cx, cy, tx, ty)
+	}
+
+	// ...and that point is the middle of the shaft actually drawn.
+	pts := edgePolyline(t, dom.GetAttr(dom.FindAll(tree.Root, dom.ByMarker("diagram-edge"))[0], "d"))
+	want := xyPt{(pts[0].x + pts[len(pts)-1].x) / 2, (pts[0].y + pts[len(pts)-1].y) / 2}
+	if math.Abs(cx-want.x) > 0.01 || math.Abs(cy-want.y) > 0.01 {
+		t.Errorf("dot at (%v,%v), want the shaft's midpoint (%v,%v)", cx, cy, want.x, want.y)
 	}
 }
 

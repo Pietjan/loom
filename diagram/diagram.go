@@ -434,6 +434,13 @@ func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Nod
 	for _, e := range l.edges {
 		drawEdge(svg, e, l.radius)
 	}
+	// Label dots go on after every line, so one never disappears under an edge
+	// crossing beneath it.
+	for _, e := range l.edges {
+		if e.label != "" {
+			svg.AppendChild(edgeDot(e))
+		}
+	}
 	for i, n := range nodes {
 		if shape := drawShape(n, l.boxes[i]); shape != nil {
 			svg.AppendChild(shape)
@@ -445,9 +452,9 @@ func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Nod
 		stage.AppendChild(nodeBody(n, l.boxes[i]))
 	}
 
-	// A labelled edge gets a dot on the line rather than always-on text: the
-	// dot is the affordance, and loom's CSS-only tooltip reveals the label on
-	// hover or keyboard focus. Still no JavaScript.
+	// The label itself is never painted onto the diagram: the dot drawn above is
+	// the affordance, and loom's CSS-only tooltip reveals the text on hover or
+	// keyboard focus from the transparent target placed over it. No JavaScript.
 	for _, e := range l.edges {
 		if e.label == "" {
 			continue
@@ -465,23 +472,42 @@ func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Nod
 	return stage, nil
 }
 
-// edgeTip builds the hoverable dot that reveals an edge's label, placed at the
-// midpoint of the drawn shaft.
-//
-// That is the trimmed polyline, not the routed one: the shaft stops at the
-// arrowhead's base, so measuring the midpoint on the untrimmed points puts the
-// dot half the arrowhead's length past the middle of the line anyone can see —
-// a quarter of the way along a short edge, and plainly off centre against a
-// 5px dot.
+// labelPoint is where a labelled edge's dot sits: the midpoint of the drawn
+// shaft. That is the trimmed polyline, not the routed one — the shaft stops at
+// the arrowhead's base, so measuring on the untrimmed points would put the dot
+// half an arrowhead past the middle of the line anyone can see, a fifth of the
+// way along a short edge.
+func labelPoint(e routed) xy {
+	return midpoint(trimShaft(e.pts, e.arrows, e.head))
+}
+
+// edgeDot draws the marker on a labelled edge. It goes in the canvas, next to
+// the line it sits on, so the browser rasterises the two together: an HTML
+// element positioned over the SVG is laid out by a different part of the engine
+// and lands up to half a pixel off, in a direction that varies by browser.
+func edgeDot(e routed) *html.Node {
+	p := labelPoint(e)
+	return dom.CustomEl("circle",
+		dom.Marker("diagram-edge-dot"),
+		dom.Attr("cx", fmtCoord(p.x)),
+		dom.Attr("cy", fmtCoord(p.y)),
+		dom.Attr("r", "3"),
+		dom.Attr("stroke-width", "1"),
+		dom.Attr("class", edgeDotClasses()))
+}
+
+// edgeTip builds the transparent target over that dot, which the CSS-only
+// tooltip opens from. The dot itself is drawn in the canvas; this only has to
+// be in the right place and catch a pointer or a focus.
 func edgeTip(ctx context.Context, e routed) (*html.Node, error) {
-	// tabindex makes the dot focusable so the tooltip's :focus-within path can
-	// fire — otherwise the label would be unreachable by keyboard.
+	// tabindex makes it focusable so the tooltip's :focus-within path can fire —
+	// otherwise the label would be unreachable by keyboard.
 	dot := render.Component(func(context.Context) (*html.Node, error) {
-		return dom.El(atom.Span, dom.Marker("diagram-edge-dot"),
+		return dom.El(atom.Span, dom.Marker("diagram-edge-hit"),
 			dom.Attr("tabindex", "0"),
-			dom.Attr("class", dotClasses())), nil
+			dom.Attr("class", edgeHitClasses())), nil
 	})
-	mid := midpoint(trimShaft(e.pts, e.arrows, e.head))
+	mid := labelPoint(e)
 	return tooltip.Node(templ.WithChildren(ctx, dot),
 		tooltip.Text(e.label),
 		tooltip.Class("absolute -translate-x-1/2 -translate-y-1/2 p-1"),
