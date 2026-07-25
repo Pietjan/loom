@@ -185,10 +185,13 @@ out rather than approximated:
 
 ## Development
 
-Everything runs from the repo root; `make help` lists every target.
+Three modules: the library at the root, the documentation site in `site/`, and
+`tools/`, which exists only to pin the templ and spark CLIs so that neither the
+library nor the site inherits their dependency trees. Everything runs from the
+repo root; `make help` lists every target.
 
 ```sh
-make test                        # unit + golden + contract tests, both modules
+make test                        # unit + golden + contract tests
 make audit                       # tidy-diff, verify, gofmt, vet, test
 make lint                        # golangci-lint
 

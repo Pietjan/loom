@@ -4,27 +4,24 @@ addr = :8080
 base = /loom/
 dist = dist
 
+# The CLIs live in their own module so that neither the published library nor
+# the site inherits their dependency trees. -modfile runs them from that module
+# without changing the working directory, which is what lets a tool act on the
+# module it is invoked from.
+tools = -modfile=tools/go.mod
+site_tools = -modfile=../tools/go.mod
+
 # Live-reload watcher. The path is the repo root rather than site/, so editing
 # a component rebuilds the page that demonstrates it — and because the site's
 # reference sections are parsed from the library's source at startup, a doc
 # comment would otherwise stay stale until the server was restarted by hand.
-#
-# Absolute on purpose. The templ CLI belongs to the site module, so it runs
-# under `go -C site`, which puts the process's working directory in site/; a
-# relative path would quietly watch that subtree instead of the repo, and only
-# the site's own files would trigger a rebuild.
-watch_path = $(CURDIR)
+watch_path = .
 # templ's default pattern covers .go, .templ and _templ.txt. The site also has
 # hand-written JS in static/ and the Tailwind source in css/.
 watch_pattern = (.+\.go$$)|(.+\.templ$$)|(.+_templ\.txt$$)|(.+\.js$$)|(.+\.css$$)
 # Everything the build writes back into the tree. Without these the watcher
 # would see its own output and rebuild in a loop.
 ignore_pattern = (_templ\.go$$)|(static/styles\.css$$)|(css/input\.css$$)|(/dist/)|(/\.git/)
-
-# The templ and spark CLIs are tools of the site module, not the library —
-# keeping them out of the root go.mod is what stops a published consumer of
-# loom from inheriting them. `go -C` runs them in the module that declares them.
-site_go = go -C $(site_dir)
 
 # ==================================================================================== #
 # HELPERS
@@ -36,70 +33,74 @@ help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 
-## confirm: prompt before continuing
 .PHONY: confirm
 confirm:
 	@echo -n 'Are you sure? [y/N] ' && read ans && [ $${ans:-N} = y ]
 
-## no-dirty: fail if the working tree has uncommitted changes
 .PHONY: no-dirty
 no-dirty:
-	@test -z "$(shell git status --porcelain)" || (echo 'working tree is dirty'; exit 1)
+	@test -z "$(shell git status --porcelain)"
 
 # ==================================================================================== #
 # QUALITY CONTROL
 # ==================================================================================== #
 
-## tidy: format all code and tidy both modules
-.PHONY: tidy
-tidy:
-	go mod tidy -v
-	$(site_go) mod tidy -v
-	gofmt -w .
-
-## audit: run quality control checks over both modules
-# Generates first: without the *_templ.go files the site package imports none
-# of the components, and `go mod tidy -diff` reports the whole dependency set
-# as removable.
+## audit: run quality control checks
 .PHONY: audit
-audit: site/generate
+audit: test
 	go mod tidy -diff
 	go mod verify
-	@test -z "$$(gofmt -l .)" || (echo 'unformatted files, run make tidy:'; gofmt -l .; exit 1)
+	test -z "$(shell go tool $(tools) gofumpt -l .)"
 	go vet ./...
-	$(site_go) mod tidy -diff
-	$(site_go) vet ./...
-	$(MAKE) test
+	go tool $(tools) golangci-lint run ./...
+	go tool $(tools) govulncheck ./...
+	cd $(site_dir) && go mod tidy -diff
+	cd $(site_dir) && go vet ./...
+	cd $(site_dir) && go tool $(site_tools) golangci-lint run ./...
+	cd tools && go mod tidy -diff
+	cd tools && go mod verify
 
-# lint is deliberately not part of audit: it currently reports pre-existing
-# findings (see `make lint`), and audit is meant to stay green so a failure
-# means something new broke.
-## lint: run golangci-lint over both modules
-.PHONY: lint
-lint:
-	golangci-lint run ./...
-	cd $(site_dir) && golangci-lint run ./...
-
-## test: run the library and site test suites
+## test: run all tests
+# Generates first: without the *_templ.go files the site's pages package does
+# not compile.
 .PHONY: test
 test: site/generate
 	go test -race -buildvcs ./...
-	$(site_go) test -race -buildvcs ./...
+	cd $(site_dir) && go test -race -buildvcs ./...
 
-## test/cover: run the tests and open the coverage profile
+## test/cover: run all tests and display coverage
 .PHONY: test/cover
 test/cover: site/generate
 	go test -race -buildvcs -coverprofile=/tmp/coverage.out ./...
 	go tool cover -html=/tmp/coverage.out
 
+## upgradeable: list direct dependencies that have upgrades available
+.PHONY: upgradeable
+upgradeable:
+	@go tool $(tools) go-mod-upgrade
+
+## upgradeable/tools: list tool dependencies that have upgrades available
+.PHONY: upgradeable/tools
+upgradeable/tools:
+	@cd tools && go tool -modfile=go.mod go-mod-upgrade
+
 # ==================================================================================== #
 # DEVELOPMENT
 # ==================================================================================== #
 
+## tidy: tidy modfiles, modernize and format .go files
+.PHONY: tidy
+tidy:
+	go mod tidy -v
+	cd $(site_dir) && go mod tidy -v
+	cd tools && go mod tidy -v
+	go tool $(tools) modernize -test -fix ./...
+	go tool $(tools) gofumpt -l -w .
+
 ## site/generate: generate Go code from .templ files
 .PHONY: site/generate
 site/generate:
-	$(site_go) tool templ generate
+	go tool $(tools) templ generate -path $(site_dir)
 
 ## site/css: regenerate the Tailwind entry file and compile styles.css
 .PHONY: site/css
@@ -111,12 +112,12 @@ site/css:
 ## site/run: run the site locally on $(addr)
 .PHONY: site/run
 site/run: site/generate site/css
-	$(site_go) run . serve -addr $(addr)
+	cd $(site_dir) && go run . serve -addr $(addr)
 
 ## site/run/live: run the site with live reload (the watcher owns regeneration)
 .PHONY: site/run/live
 site/run/live:
-	$(site_go) tool templ generate --watch \
+	go tool $(tools) templ generate --watch \
 		-path "$(watch_path)" \
 		-watch-pattern '$(watch_pattern)' \
 		-ignore-pattern '$(ignore_pattern)' \
@@ -132,7 +133,7 @@ site/run/live:
 # server would then fail with "templ: failed to render template".
 .PHONY: site/run/live/server
 site/run/live/server: site/css
-	$(site_go) run . serve -addr $(addr)
+	cd $(site_dir) && go run . serve -addr $(addr)
 
 # ==================================================================================== #
 # BUILD
@@ -141,14 +142,14 @@ site/run/live/server: site/css
 ## site/build: render the site to $(dist) with base path $(base)
 .PHONY: site/build
 site/build: site/generate site/css
-	$(site_go) run . build -o $(dist) -base $(base)
+	cd $(site_dir) && go run . build -o $(dist) -base $(base)
 
 ## site/preview: serve $(dist) under $(base) like GitHub Pages would
 .PHONY: site/preview
 site/preview: site/build
 	mkdir -p /tmp/loom-preview && ln -sfn $(CURDIR)/$(site_dir)/$(dist) /tmp/loom-preview/loom
 	@echo 'open http://localhost:8000/loom/'
-	$(site_go) tool spark -port 8000 /tmp/loom-preview
+	go tool $(tools) spark -port 8000 /tmp/loom-preview
 
 ## site/clean: remove generated artifacts
 .PHONY: site/clean
