@@ -466,7 +466,13 @@ func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Nod
 }
 
 // edgeTip builds the hoverable dot that reveals an edge's label, placed at the
-// midpoint of the routed line.
+// midpoint of the drawn shaft.
+//
+// That is the trimmed polyline, not the routed one: the shaft stops at the
+// arrowhead's base, so measuring the midpoint on the untrimmed points puts the
+// dot half the arrowhead's length past the middle of the line anyone can see —
+// a quarter of the way along a short edge, and plainly off centre against a
+// 5px dot.
 func edgeTip(ctx context.Context, e routed) (*html.Node, error) {
 	// tabindex makes the dot focusable so the tooltip's :focus-within path can
 	// fire — otherwise the label would be unreachable by keyboard.
@@ -475,7 +481,7 @@ func edgeTip(ctx context.Context, e routed) (*html.Node, error) {
 			dom.Attr("tabindex", "0"),
 			dom.Attr("class", dotClasses())), nil
 	})
-	mid := midpoint(e.pts)
+	mid := midpoint(trimShaft(e.pts, e.arrows, e.head))
 	return tooltip.Node(templ.WithChildren(ctx, dot),
 		tooltip.Text(e.label),
 		tooltip.Class("absolute -translate-x-1/2 -translate-y-1/2 p-1"),
