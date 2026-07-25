@@ -73,19 +73,19 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, ports 
 	index := make(map[string]int, len(nodes))
 	for i, n := range nodes {
 		if _, dup := index[n.id]; dup {
-			return laid{}, fmt.Errorf("diagram: duplicate node id %q", n.id)
+			return laid{}, fmt.Errorf("%w: %q", ErrDuplicateNode, n.id)
 		}
 		index[n.id] = i
 	}
 	for _, e := range edges {
 		if _, ok := index[e.from]; !ok {
-			return laid{}, fmt.Errorf("diagram: edge references unknown node %q", e.from)
+			return laid{}, fmt.Errorf("%w: %q", ErrUnknownNode, e.from)
 		}
 		if _, ok := index[e.to]; !ok {
-			return laid{}, fmt.Errorf("diagram: edge references unknown node %q", e.to)
+			return laid{}, fmt.Errorf("%w: %q", ErrUnknownNode, e.to)
 		}
 		if e.from == e.to {
-			return laid{}, fmt.Errorf("diagram: self-loop on node %q not supported", e.from)
+			return laid{}, fmt.Errorf("%w: %q", ErrSelfLoop, e.from)
 		}
 	}
 
@@ -236,7 +236,7 @@ func breakCycles(edges []edge, index map[string]int, n int) []bool {
 func reduceCrossings(layers [][]int, verts []vertex, up, down [][]int) {
 	best := snapshot(layers)
 	bestCount := countCrossings(layers, verts, down)
-	for it := 0; it < sweeps; it++ {
+	for it := range sweeps {
 		if it%2 == 0 {
 			for L := 1; L < len(layers); L++ {
 				medianSort(layers[L], verts, up)
@@ -678,7 +678,7 @@ func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex
 	}
 
 	boxes := make([]box, nodeCount)
-	for i := 0; i < nodeCount; i++ {
+	for i := range nodeCount {
 		v := verts[i]
 		boxes[i] = box{x: v.x, y: v.y, w: v.bw, h: v.bh}
 	}

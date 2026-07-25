@@ -1,0 +1,58 @@
+# golangci-lint v2 configuration
+# See https://golangci-lint.run/docs/configuration/file/
+version: "2"
+
+run:
+  timeout: 5m
+  allow-parallel-runners: true
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - errname
+    - err113
+    - errorlint
+    - goconst
+    - gocyclo
+    - gosec
+    - misspell
+    - nolintlint
+    - revive
+    - unconvert
+    - unparam
+
+  settings:
+    revive:
+      confidence: 0.8
+
+  exclusions:
+    rules:
+      - linters:
+          - errcheck
+          - goconst
+          - gocyclo
+          - gosec
+        path: _test\.go
+      # These write build output into the developer's own tree — generated Go,
+      # CSS, vendored SVGs, golden HTML — which must stay world-readable.
+      # gosec's 0600/0750 expectations are for secrets, and its file-inclusion
+      # warning is for untrusted input, neither of which applies here.
+      - linters:
+          - gosec
+        path: (cmd/|internal/testutil/|site/main\.go)
+      # The build tools report to a human and exit; their errors reach
+      # log.Fatal, never a caller, so sentinels to match on would be noise.
+      # Library packages still wrap, so component failures stay matchable.
+      - linters:
+          - err113
+        path: cmd/
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports

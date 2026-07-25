@@ -17,6 +17,7 @@ package field
 
 import (
 	"context"
+	"strings"
 
 	"github.com/a-h/templ"
 	"golang.org/x/net/html"
@@ -207,9 +208,10 @@ func findControl(root *html.Node) *html.Node {
 }
 
 func join(ss []string) string {
-	out := ss[0]
+	var out strings.Builder
+	out.WriteString(ss[0])
 	for _, s := range ss[1:] {
-		out += " " + s
+		out.WriteString(" " + s)
 	}
-	return out
+	return out.String()
 }

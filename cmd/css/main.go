@@ -57,7 +57,9 @@ func main() {
 	buf.Write(loomCSS)
 
 	if *out == "" {
-		os.Stdout.Write(buf.Bytes())
+		if _, err := os.Stdout.Write(buf.Bytes()); err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 	if err := os.MkdirAll(filepath.Dir(*out), 0o755); err != nil {

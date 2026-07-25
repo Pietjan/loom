@@ -20,13 +20,20 @@ var templLexer = buildTemplLexer()
 // once so UsingLexer needs no LexerRegistry at tokenise time.
 var goLexer = lexers.Get("Go")
 
+const (
+	// templLang is the lexer's name and its own alias.
+	templLang = "templ"
+	// whitespacePattern matches the runs of whitespace every state skips.
+	whitespacePattern = `\s+`
+)
+
 func buildTemplLexer() chroma.Lexer {
 	using := chroma.UsingLexer(goLexer)
 
 	return chroma.MustNewLexer(
 		&chroma.Config{
-			Name:      "templ",
-			Aliases:   []string{"templ"},
+			Name:      templLang,
+			Aliases:   []string{templLang},
 			Filenames: []string{"*.templ"},
 			MimeTypes: []string{"text/x-templ"},
 			DotAll:    true,
@@ -60,7 +67,7 @@ func buildTemplLexer() chroma.Lexer {
 					{Pattern: `(<)([A-Za-z][\w:.-]*)`, Type: chroma.ByGroups(chroma.Punctuation, chroma.NameTag), Mutator: chroma.Push("tag")},
 					{Pattern: "`[^`]*`", Type: chroma.LiteralStringBacktick},
 					{Pattern: `&\S*?;`, Type: chroma.NameEntity},
-					{Pattern: `\s+`, Type: chroma.TextWhitespace},
+					{Pattern: whitespacePattern, Type: chroma.TextWhitespace},
 					{Pattern: "[^<&@{}`\\s]+", Type: chroma.Text},
 					{Pattern: `[@{}<&]`, Type: chroma.Punctuation},
 				},
@@ -83,10 +90,10 @@ func buildTemplLexer() chroma.Lexer {
 					{Pattern: `[)\]}]`, Type: chroma.Punctuation, Mutator: chroma.Pop(1)},
 					{Pattern: `[+\-*/%<>=!&|^~:]+`, Type: chroma.Operator},
 					{Pattern: `[.,;]`, Type: chroma.Punctuation},
-					{Pattern: `\s+`, Type: chroma.TextWhitespace},
+					{Pattern: whitespacePattern, Type: chroma.TextWhitespace},
 				},
 				"tag": {
-					{Pattern: `\s+`, Type: chroma.TextWhitespace},
+					{Pattern: whitespacePattern, Type: chroma.TextWhitespace},
 					{Pattern: `([\w:.-]+)(\s*)(=)(\s*)`, Type: chroma.ByGroups(chroma.NameAttribute, chroma.Text, chroma.Operator, chroma.Text), Mutator: chroma.Push("attr")},
 					{Pattern: `[\w:.-]+`, Type: chroma.NameAttribute},
 					{Pattern: `(/?)(\s*)(>)`, Type: chroma.ByGroups(chroma.Punctuation, chroma.Text, chroma.Punctuation), Mutator: chroma.Pop(1)},

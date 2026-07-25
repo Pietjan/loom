@@ -16,6 +16,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -120,10 +121,5 @@ func packageImports(dir string) ([]string, error) {
 }
 
 func contains(list []string, s string) bool {
-	for _, v := range list {
-		if v == s {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(list, s)
 }

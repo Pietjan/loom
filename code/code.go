@@ -105,7 +105,7 @@ func classify(line string) lineKind {
 // its newlines.
 func diffCode(src, lang string) *html.Node {
 	code := dom.El(atom.Code, dom.Attr("class", "block w-fit min-w-full"))
-	for _, line := range strings.Split(strings.TrimSuffix(src, "\n"), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSuffix(src, "\n"), "\n") {
 		kind := classify(line)
 		span := dom.El(atom.Span, dom.Attr("class", diffLineClass(kind)))
 		if lang != "" && line != "" && (kind == lineAdd || kind == lineDel || kind == lineContext) {

@@ -72,6 +72,15 @@ import (
 // ErrNoNodes is returned when the diagram has no nodes.
 var ErrNoNodes = errors.New("diagram: at least one diagram.Node(...) child is required")
 
+// ErrDuplicateNode is returned when two nodes share an id.
+var ErrDuplicateNode = errors.New("diagram: duplicate node id")
+
+// ErrUnknownNode is returned when an edge names an id no node declares.
+var ErrUnknownNode = errors.New("diagram: edge references unknown node")
+
+// ErrSelfLoop is returned for an edge whose ends are the same node.
+var ErrSelfLoop = errors.New("diagram: self-loop is not supported")
+
 // Direction is the flow axis: the direction edges point and layers advance.
 type Direction int
 
@@ -698,6 +707,6 @@ func parseTone(s string) Tone {
 
 func atof(s string) float64 {
 	var v float64
-	fmt.Sscanf(s, "%g", &v)
+	_, _ = fmt.Sscanf(s, "%g", &v)
 	return v
 }

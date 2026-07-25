@@ -107,7 +107,7 @@ func assertReferencesResolve(t *testing.T, tree *html.Node) {
 			if val == "" {
 				continue
 			}
-			for _, ref := range strings.Fields(val) {
+			for ref := range strings.FieldsSeq(val) {
 				if !ids[ref] {
 					t.Errorf("<%s %s=%q>: id %q does not exist in the document", n.Data, attr, val, ref)
 				}

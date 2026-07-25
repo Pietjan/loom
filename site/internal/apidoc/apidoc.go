@@ -10,6 +10,7 @@
 package apidoc
 
 import (
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/doc"
@@ -25,6 +26,14 @@ import (
 
 // ImportBase is the module path every component package hangs off.
 const ImportBase = "github.com/pietjan/loom"
+
+// optionSuffix names the option types: Option itself and the narrower ones a
+// few packages add (SeriesOption, EdgeOption, NodeOption).
+const optionSuffix = "Option"
+
+// errNoPackages marks a root directory that holds no component packages,
+// which means the site was pointed somewhere unexpected.
+var errNoPackages = errors.New("apidoc: no component packages found under")
 
 // API is one component package's public surface.
 type API struct {
@@ -82,7 +91,7 @@ func Load(root string) (map[string]*API, error) {
 		}
 	}
 	if len(apis) == 0 {
-		return nil, fmt.Errorf("apidoc: no component packages found under %s", root)
+		return nil, fmt.Errorf("%w: %s", errNoPackages, root)
 	}
 	return apis, nil
 }
@@ -90,19 +99,40 @@ func Load(root string) (map[string]*API, error) {
 // parsePackage reads one directory, returning nil when it is not a component
 // package rather than an error — Load walks every sibling directory.
 func parsePackage(dir string) (*API, error) {
-	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, dir, func(fi os.FileInfo) bool {
-		return !strings.HasSuffix(fi.Name(), "_test.go")
-	}, parser.ParseComments)
+	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("apidoc: parse %s: %w", dir, err)
+		return nil, fmt.Errorf("apidoc: read %s: %w", dir, err)
 	}
 	name := filepath.Base(dir)
-	pkg, ok := pkgs[name]
-	if !ok {
+	fset := token.NewFileSet()
+
+	// Parsed a file at a time rather than with parser.ParseDir, which is
+	// deprecated as of Go 1.25 — as is the ast.Package it returns.
+	var files []*ast.File
+	for _, e := range entries {
+		fname := e.Name()
+		if e.IsDir() || !strings.HasSuffix(fname, ".go") || strings.HasSuffix(fname, "_test.go") {
+			continue
+		}
+		path := filepath.Join(dir, fname)
+		f, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+		if err != nil {
+			return nil, fmt.Errorf("apidoc: parse %s: %w", path, err)
+		}
+		// A directory whose package is named something else is not the
+		// component package this slug refers to.
+		if f.Name.Name != name {
+			continue
+		}
+		files = append(files, f)
+	}
+	if len(files) == 0 {
 		return nil, nil
 	}
-	d := doc.New(pkg, ImportBase+"/"+name, doc.PreserveAST)
+	d, err := doc.NewFromFiles(fset, files, ImportBase+"/"+name, doc.PreserveAST)
+	if err != nil {
+		return nil, fmt.Errorf("apidoc: document %s: %w", dir, err)
+	}
 
 	optionTypes := optionTypeNames(d)
 	if len(optionTypes) == 0 {
@@ -126,7 +156,7 @@ func parsePackage(dir string) (*API, error) {
 func optionTypeNames(d *doc.Package) map[string]string {
 	types := make(map[string]string)
 	for _, t := range d.Types {
-		if strings.HasSuffix(t.Name, "Option") {
+		if strings.HasSuffix(t.Name, optionSuffix) {
 			types[t.Name] = firstSentence(t.Doc)
 		}
 	}
@@ -225,7 +255,7 @@ func collectVars(api *API, d *doc.Package, fset *token.FileSet, optionTypes map[
 // marking the value whose line comment says it is the default.
 func collectValues(api *API, d *doc.Package, fset *token.FileSet) {
 	for _, t := range d.Types {
-		if strings.HasSuffix(t.Name, "Option") || t.Name == "Config" {
+		if strings.HasSuffix(t.Name, optionSuffix) || t.Name == "Config" {
 			continue
 		}
 		var decls []Decl
@@ -283,8 +313,8 @@ func sortGroups(api *API) {
 	}
 	sort.Slice(api.Options, func(a, b int) bool {
 		// The plain "Option" type first, then any narrower ones.
-		if (api.Options[a].Name == "Option") != (api.Options[b].Name == "Option") {
-			return api.Options[a].Name == "Option"
+		if (api.Options[a].Name == optionSuffix) != (api.Options[b].Name == optionSuffix) {
+			return api.Options[a].Name == optionSuffix
 		}
 		return api.Options[a].Name < api.Options[b].Name
 	})

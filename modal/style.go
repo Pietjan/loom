@@ -4,7 +4,7 @@ import "github.com/pietjan/loom/internal/styles"
 
 // classes style the dialog box; the backdrop and open/close transitions
 // are structural CSS in css/loom.css ([data-ui=modal]).
-func classes(c Config) string {
+func classes(_ Config) string {
 	var b styles.Builder
 	b.Add("m-auto w-full max-w-lg rounded-xl p-6")
 	b.Add("bg-white text-base-800 shadow-xl border border-base-200")

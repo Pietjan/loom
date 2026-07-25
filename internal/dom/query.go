@@ -1,6 +1,8 @@
 package dom
 
 import (
+	"slices"
+
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -15,12 +17,7 @@ func ByMarker(names ...string) Matcher {
 			return false
 		}
 		m := MarkerName(n)
-		for _, name := range names {
-			if m == name {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(names, m)
 	}
 }
 
@@ -30,12 +27,7 @@ func ByTag(atoms ...atom.Atom) Matcher {
 		if n.Type != html.ElementNode {
 			return false
 		}
-		for _, a := range atoms {
-			if n.DataAtom == a {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(atoms, n.DataAtom)
 	}
 }
 

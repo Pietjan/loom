@@ -49,7 +49,7 @@ func Into(parent *html.Node, src, lang string) {
 // lexer over chroma's coarser built-in for templ and its aliases.
 func lexerFor(lang string) chroma.Lexer {
 	switch lang {
-	case "templ", "text/x-templ":
+	case templLang, "text/x-templ":
 		return templLexer
 	default:
 		return lexers.Get(lang)

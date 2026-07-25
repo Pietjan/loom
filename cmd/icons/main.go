@@ -14,6 +14,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"flag"
 	"fmt"
 	"go/format"
@@ -118,7 +119,7 @@ func vendorIcons(version string) error {
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(stage)
+	defer func() { _ = os.RemoveAll(stage) }()
 
 	counts, license, err := extract(version, stage)
 	if err != nil {
@@ -170,7 +171,7 @@ func extract(version, stage string) (map[string]map[string]bool, []byte, error) 
 	if err != nil {
 		return nil, nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return nil, nil, fmt.Errorf("GET %s: %s", url, resp.Status)
 	}
@@ -179,7 +180,7 @@ func extract(version, stage string) (map[string]map[string]bool, []byte, error) 
 	if err != nil {
 		return nil, nil, err
 	}
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 
 	counts := make(map[string]map[string]bool, len(variants))
 	for _, v := range variants {
@@ -193,7 +194,7 @@ func extract(version, stage string) (map[string]map[string]bool, []byte, error) 
 	tr := tar.NewReader(gz)
 	for {
 		hdr, err := tr.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -291,7 +292,7 @@ var reserved = map[string]bool{
 // constName converts a file name like "academic-cap" to "AcademicCap".
 func constName(name string) string {
 	var out strings.Builder
-	for _, part := range strings.Split(name, "-") {
+	for part := range strings.SplitSeq(name, "-") {
 		if part == "" {
 			continue
 		}

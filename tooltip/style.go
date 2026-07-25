@@ -2,7 +2,7 @@ package tooltip
 
 import "github.com/pietjan/loom/internal/styles"
 
-func classes(c Config) string {
+func classes(_ Config) string {
 	var b styles.Builder
 	b.Add("group/tooltip relative inline-flex")
 	return b.String()

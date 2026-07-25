@@ -65,7 +65,7 @@ func (s style) inherit() style {
 func parseStyle(n *html.Node, parent style) style {
 	s := parent.inherit()
 	var flex, col bool
-	for _, c := range strings.Fields(dom.GetAttr(n, "class")) {
+	for c := range strings.FieldsSeq(dom.GetAttr(n, "class")) {
 		// Variant-prefixed utilities (dark:, hover:, md:) never apply to the
 		// base measurement; arbitrary-variant wrappers are stripped so
 		// icon's "[:where(&)]:size-5" still reads as size-5.

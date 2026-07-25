@@ -7,6 +7,7 @@ package assets
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 
 	"golang.org/x/net/html"
@@ -16,6 +17,9 @@ import (
 //go:embed icon/*/*.svg
 var files embed.FS
 
+// errNoSVGRoot marks a vendored asset whose root element is not <svg>.
+var errNoSVGRoot = errors.New("assets: no <svg> root")
+
 // LoadIcon parses the named icon SVG for a variant (regular, fill) and
 // returns its root <svg> node.
 func LoadIcon(name, variant string) (*html.Node, error) {
@@ -23,7 +27,7 @@ func LoadIcon(name, variant string) (*html.Node, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unknown icon %q (variant %q): %w", name, variant, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	container := &html.Node{Type: html.ElementNode, Data: "div", DataAtom: atom.Div}
 	nodes, err := html.ParseFragment(file, container)
@@ -35,5 +39,5 @@ func LoadIcon(name, variant string) (*html.Node, error) {
 			return n, nil
 		}
 	}
-	return nil, fmt.Errorf("no <svg> root in icon %q (variant %q)", name, variant)
+	return nil, fmt.Errorf("%w: icon %q (variant %q)", errNoSVGRoot, name, variant)
 }

@@ -41,6 +41,13 @@ import (
 // ErrNoSeries is returned when the chart has no data.
 var ErrNoSeries = errors.New("chart: at least one chart.Series(...) is required")
 
+// ErrNoValues is returned when a series carries no data points.
+var ErrNoValues = errors.New("chart: series has no values")
+
+// ErrMisalignedSeries is returned when the series and labels do not all
+// describe the same number of points.
+var ErrMisalignedSeries = errors.New("chart: series and labels must align")
+
 type series struct {
 	name   string
 	values []float64
@@ -146,15 +153,15 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 	}
 	n := len(cfg.series[0].values)
 	if n == 0 {
-		return nil, fmt.Errorf("chart: series %q has no values", cfg.series[0].name)
+		return nil, fmt.Errorf("%w: %q", ErrNoValues, cfg.series[0].name)
 	}
 	for _, s := range cfg.series {
 		if len(s.values) != n {
-			return nil, fmt.Errorf("chart: series %q has %d values, want %d (all series and labels must align)", s.name, len(s.values), n)
+			return nil, fmt.Errorf("%w: series %q has %d values, want %d", ErrMisalignedSeries, s.name, len(s.values), n)
 		}
 	}
 	if cfg.labels != nil && len(cfg.labels) != n {
-		return nil, fmt.Errorf("chart: %d labels for %d values per series", len(cfg.labels), n)
+		return nil, fmt.Errorf("%w: %d labels for %d values per series", ErrMisalignedSeries, len(cfg.labels), n)
 	}
 	if cfg.W == 0 {
 		cfg.W, cfg.H = 600, 240

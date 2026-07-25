@@ -2,7 +2,7 @@ package field
 
 import "github.com/pietjan/loom/internal/styles"
 
-func classes(c Config) string {
+func classes(_ Config) string {
 	var b styles.Builder
 	b.Add("grid gap-2")
 	return b.String()

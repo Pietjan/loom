@@ -29,7 +29,8 @@ func diag(t *testing.T, nodes []templ.Component, opts ...diagram.Option) string 
 }
 
 func TestFlowchartBasics(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "Start"), node("b", "Verify"), node("c", "Done")},
 		diagram.Title("Signup flow"),
 		diagram.Edge("a", "b"),
@@ -93,7 +94,8 @@ func TestRichBody(t *testing.T) {
 // TestLinearFlowsDownward: in a top-bottom chain each node sits strictly below
 // the previous one.
 func TestLinearFlowsDownward(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
 		diagram.Edge("a", "b"), diagram.Edge("b", "c"),
 	)
@@ -125,7 +127,8 @@ func TestLeftRightFlow(t *testing.T) {
 // TestBranchSpreads: a branch puts siblings on the same layer at different
 // cross positions.
 func TestBranchSpreads(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")},
 		diagram.Edge("a", "b"), diagram.Edge("a", "c"),
 		diagram.Edge("b", "d"), diagram.Edge("c", "d"),
@@ -141,7 +144,8 @@ func TestBranchSpreads(t *testing.T) {
 // two-child subtree and a wider childless sibling, which the earlier averaging
 // sweep left visibly off-center.
 func TestParentCentersOverChildren(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{
 			node("root", "Root"), node("l", "Left"), node("r", "Right"),
 			node("ll", "L1"), node("lr", "L2"),
@@ -169,7 +173,8 @@ func TestParentCentersOverChildren(t *testing.T) {
 // TestCycleTerminates: a cycle lays out (via cycle-breaking) and still draws an
 // arrow per edge.
 func TestCycleTerminates(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
 		diagram.Edge("a", "b"), diagram.Edge("b", "c"), diagram.Edge("c", "a"),
 	)
@@ -234,7 +239,8 @@ func TestMonospaceScalesExactly(t *testing.T) {
 // The dot is drawn in the canvas so it rasterises with the line it sits on; a
 // separate transparent target over it carries the hover and focus.
 func TestEdgeLabelsAreHoverDots(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
 		diagram.Edge("a", "b", diagram.Label("yes")),
 		diagram.Edge("a", "c"), // unlabelled: no dot
@@ -274,7 +280,8 @@ func TestEdgeLabelsAreHoverDots(t *testing.T) {
 // TestEdgeDotSitsOnTheLine: the dot and its hover target must land on the same
 // point, since one is drawn in the canvas and the other positioned over it.
 func TestEdgeDotSitsOnTheLine(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "A"), node("b", "B")},
 		diagram.Edge("a", "b", diagram.Label("yes")),
 	)
@@ -286,7 +293,7 @@ func TestEdgeDotSitsOnTheLine(t *testing.T) {
 	// The tooltip wrapper carries the target's position, centred by a transform.
 	tip := dom.FindAll(tree.Root, dom.ByMarker("tooltip"))[0]
 	var tx, ty float64
-	for _, decl := range strings.Split(dom.GetAttr(tip, "style"), ";") {
+	for decl := range strings.SplitSeq(dom.GetAttr(tip, "style"), ";") {
 		k, v, ok := strings.Cut(decl, ":")
 		if !ok {
 			continue
@@ -314,7 +321,8 @@ func TestEdgeDotSitsOnTheLine(t *testing.T) {
 // TestEdgeLineStyles: Dashed and Dotted break an edge's shaft via a
 // stroke-dasharray while leaving other edges (and every arrowhead) solid.
 func TestEdgeLineStyles(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")},
 		diagram.Edge("a", "b", diagram.Dashed()),
 		diagram.Edge("a", "c", diagram.Dotted()),
@@ -361,7 +369,8 @@ func TestEdgeLineStyles(t *testing.T) {
 // each end, and a default edge keeps its single head at the target.
 func TestArrowEnds(t *testing.T) {
 	count := func(opts ...diagram.EdgeOption) int {
-		out := diag(t,
+		out := diag(
+			t,
 			[]templ.Component{node("a", "A"), node("b", "B")},
 			diagram.Edge("a", "b", opts...),
 		)
@@ -381,7 +390,8 @@ func TestArrowEnds(t *testing.T) {
 // TestBiDirectionalHeadsPointOutward: the two heads of a bidirectional edge sit
 // at opposite ends and point away from each other, not both the same way.
 func TestBiDirectionalHeadsPointOutward(t *testing.T) {
-	out := diag(t,
+	out := diag(
+		t,
 		[]templ.Component{node("a", "A"), node("b", "B")},
 		diagram.Edge("a", "b", diagram.BiDirectional()),
 	)
@@ -406,7 +416,8 @@ func TestBiDirectionalHeadsPointOutward(t *testing.T) {
 // fill treatment, and the default stays a filled triangle.
 func TestArrowShapes(t *testing.T) {
 	arrow := func(opts ...diagram.EdgeOption) *html.Node {
-		out := diag(t,
+		out := diag(
+			t,
 			[]templ.Component{node("a", "A"), node("b", "B")},
 			diagram.Edge("a", "b", opts...),
 		)
@@ -558,8 +569,10 @@ func TestPortsSpreadOption(t *testing.T) {
 
 type xyPt struct{ x, y float64 }
 
-var pathNums = regexp.MustCompile(`-?[\d.]+`)
-var pathCorners = regexp.MustCompile(`Q (-?[\d.]+) (-?[\d.]+)`)
+var (
+	pathNums    = regexp.MustCompile(`-?[\d.]+`)
+	pathCorners = regexp.MustCompile(`Q (-?[\d.]+) (-?[\d.]+)`)
+)
 
 // edgePolyline reconstructs an edge's corner points from its rounded path: the
 // start, each bend's control point (which is the corner itself), and the end.
@@ -627,15 +640,20 @@ func TestAntiparallelEdgesDoNotCross(t *testing.T) {
 		nodes []templ.Component
 		opts  []diagram.Option
 	}{
-		{"plain 2-cycle",
+		{
+			"plain 2-cycle",
 			[]templ.Component{node("a", "A"), node("b", "B")},
-			[]diagram.Option{diagram.Edge("a", "b"), diagram.Edge("b", "a")}},
+			[]diagram.Option{diagram.Edge("a", "b"), diagram.Edge("b", "a")},
+		},
 		// Target left of the source.
-		{"cycle with a wider head",
+		{
+			"cycle with a wider head",
 			[]templ.Component{node("a", "Stopped"), node("b", "Go")},
-			[]diagram.Option{diagram.Edge("a", "b"), diagram.Edge("b", "a")}},
+			[]diagram.Option{diagram.Edge("a", "b"), diagram.Edge("b", "a")},
+		},
 		// Decision fanning right, with the back edge returning up the corridor.
-		{"decision with back edge",
+		{
+			"decision with back edge",
 			[]templ.Component{
 				node("start", "Start", diagram.Stadium()),
 				node("ok", "OK?", diagram.Diamond()),
@@ -644,7 +662,8 @@ func TestAntiparallelEdgesDoNotCross(t *testing.T) {
 			[]diagram.Option{
 				diagram.Edge("start", "ok"), diagram.Edge("ok", "yes", diagram.Label("yes")),
 				diagram.Edge("ok", "no", diagram.Label("no")), diagram.Edge("no", "ok"),
-			}},
+			},
+		},
 	} {
 		if n := edgeCrossings(t, diag(t, tc.nodes, tc.opts...)); n != 0 {
 			t.Errorf("%s: %d edge crossing(s), want 0", tc.name, n)
@@ -697,7 +716,7 @@ func TestCrowdedGapMakesRoom(t *testing.T) {
 	fan := func(k int) string {
 		nodes := []templ.Component{node("a", "A")}
 		opts := []diagram.Option{diagram.Ports(diagram.PortsSpread)}
-		for i := 0; i < k; i++ {
+		for i := range k {
 			id := "t" + strconv.Itoa(i)
 			nodes = append(nodes, node(id, id))
 			opts = append(opts, diagram.Edge("a", id))
@@ -746,11 +765,12 @@ func elbowFlows(t *testing.T, out string) []float64 {
 // no straight run left between the two curves and reads as a wobble; such steps
 // must be flattened into a straight line instead.
 func TestNoDegenerateBends(t *testing.T) {
-	out := diag(t, []templ.Component{
-		node("draft", "Draft", diagram.Stadium()), node("review", "In review"),
-		node("check", "Approved?", diagram.Diamond()),
-		node("publish", "Published"), node("revise", "Revising"),
-	},
+	out := diag(
+		t, []templ.Component{
+			node("draft", "Draft", diagram.Stadium()), node("review", "In review"),
+			node("check", "Approved?", diagram.Diamond()),
+			node("publish", "Published"), node("revise", "Revising"),
+		},
 		diagram.Ports(diagram.PortsSpread),
 		diagram.Edge("draft", "review"), diagram.Edge("review", "check"),
 		diagram.Edge("check", "publish", diagram.Label("approved")),
@@ -774,11 +794,12 @@ func TestNoDegenerateBends(t *testing.T) {
 // node's centreline. Only a face's sole attachment is free to slide, so here
 // the branch to Published is straightened by moving its far end instead.
 func TestFanPortsStaySymmetric(t *testing.T) {
-	out := diag(t, []templ.Component{
-		node("draft", "Draft", diagram.Stadium()), node("review", "In review"),
-		node("check", "Approved?", diagram.Diamond()),
-		node("publish", "Published"), node("revise", "Revising"),
-	},
+	out := diag(
+		t, []templ.Component{
+			node("draft", "Draft", diagram.Stadium()), node("review", "In review"),
+			node("check", "Approved?", diagram.Diamond()),
+			node("publish", "Published"), node("revise", "Revising"),
+		},
 		diagram.Ports(diagram.PortsSpread),
 		diagram.Edge("draft", "review"), diagram.Edge("review", "check"),
 		diagram.Edge("check", "publish", diagram.Label("approved")),
@@ -925,13 +946,18 @@ func TestSizeOverride(t *testing.T) {
 // TestDeterministic: identical inputs render byte-identical output.
 func TestDeterministic(t *testing.T) {
 	build := func() string {
-		return diag(t,
+		return diag(
+			t,
 			[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")},
 			diagram.Edge("a", "b"), diagram.Edge("a", "c"),
 			diagram.Edge("b", "d"), diagram.Edge("c", "d"),
 		)
 	}
-	if build() != build() {
+	// Bound to variables rather than compared inline: the two calls look like
+	// identical expressions to static analysis, but the whole point is to run
+	// the layout twice and compare.
+	first, second := build(), build()
+	if first != second {
 		t.Error("diagram output is not deterministic")
 	}
 }
@@ -1044,7 +1070,7 @@ func nodeStyleVal(t *testing.T, out string, n int, prop string) float64 {
 	if n >= len(nodes) {
 		t.Fatalf("node %d out of range (%d nodes)", n, len(nodes))
 	}
-	for _, decl := range strings.Split(dom.GetAttr(nodes[n], "style"), ";") {
+	for decl := range strings.SplitSeq(dom.GetAttr(nodes[n], "style"), ";") {
 		k, v, ok := strings.Cut(decl, ":")
 		if ok && strings.TrimSpace(k) == prop {
 			return atof(t, strings.TrimSuffix(strings.TrimSpace(v), "px"))

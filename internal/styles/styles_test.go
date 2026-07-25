@@ -55,7 +55,8 @@ func TestSortStable(t *testing.T) {
 		t.Fatalf("sort not canonical:\n%q\n%q", a, b)
 	}
 	// Layout before spacing before background.
-	if !(strings.Index(a, "flex") < strings.Index(a, "px-4") && strings.Index(a, "px-4") < strings.Index(a, "bg-accent")) {
+	flex, spacing, background := strings.Index(a, "flex"), strings.Index(a, "px-4"), strings.Index(a, "bg-accent")
+	if flex >= spacing || spacing >= background {
 		t.Fatalf("unexpected order: %q", a)
 	}
 	// Unvarianted before varianted.
@@ -92,7 +93,7 @@ func TestSortIsTotalOrder(t *testing.T) {
 func TestSortKeepsArbitraryValuesIntact(t *testing.T) {
 	in := "[&_svg]:size-4 grid-cols-[1fr_auto] supports-[anchor-name:--a]:absolute"
 	got := styles.Sort(in)
-	for _, tok := range strings.Fields(in) {
+	for tok := range strings.FieldsSeq(in) {
 		if !strings.Contains(got, tok) {
 			t.Fatalf("token %q mangled; got %q", tok, got)
 		}

@@ -29,6 +29,7 @@ package modal
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/a-h/templ"
 	"golang.org/x/net/html"
@@ -49,6 +50,15 @@ var ErrNoTarget = errors.New("modal: trigger has no target — wrap it in modal.
 // ErrNoButton is returned when a Trigger or Close block contains no button
 // to wire.
 var ErrNoButton = errors.New("modal: trigger needs a <button> in its block (e.g. @button.New())")
+
+// ErrNoContentID is returned when modal content cannot be given an id.
+var ErrNoContentID = errors.New("modal: content has no id — wrap it in modal.Root or pass modal.Name(...)")
+
+// errNoDialogID is the shared cause behind ErrNoTarget and ErrNoContentID:
+// neither a modal.Root scope nor an explicit name supplied an id. It carries
+// no advice of its own, so each caller wraps it with guidance that fits —
+// a trigger is told about modal.For, content about modal.Name.
+var errNoDialogID = errors.New("no dialog id in scope")
 
 // Scope carries the dialog id from Root to Trigger/Content/Close.
 type Scope struct {
@@ -114,7 +124,7 @@ func command(cmd string, options []Option) templ.Component {
 
 		id, err := target(ctx, cfg)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %w", ErrNoTarget, err)
 		}
 
 		wrap := dom.El(atom.Span, dom.Attr("class", "contents"))
@@ -148,7 +158,7 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 
 	id, err := target(ctx, cfg)
 	if err != nil {
-		return nil, errors.New("modal: content has no id — wrap it in modal.Root or pass modal.Name(...)")
+		return nil, fmt.Errorf("%w: %w", ErrNoContentID, err)
 	}
 
 	d := dom.El(atom.Dialog, dom.Marker("modal"), dom.Attr("id", id), dom.Attr("closedby", "any"))
@@ -192,5 +202,5 @@ func target(ctx context.Context, cfg Config) (string, error) {
 	if sc, ok := scope.From[Scope](ctx); ok {
 		return sc.DialogID, nil
 	}
-	return "", ErrNoTarget
+	return "", errNoDialogID
 }

@@ -139,7 +139,8 @@ func TestGoldens(t *testing.T) {
 	t.Run("stat", func(t *testing.T) {
 		testutil.Golden(t, "stat", testutil.WithChildren(
 			stat.New(stat.Label("Revenue"), stat.Value("$48.2k")),
-			testutil.WithChildren(badge.New(badge.Green), testutil.Text("+12%"))))
+			testutil.WithChildren(badge.New(badge.Green), testutil.Text("+12%")),
+		))
 	})
 	t.Run("timeline", func(t *testing.T) {
 		testutil.Golden(t, "timeline", testutil.WithChildren(timeline.New(), testutil.Sequence(

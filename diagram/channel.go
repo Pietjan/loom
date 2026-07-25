@@ -184,7 +184,7 @@ func allocate(segs []segment) []int {
 	}
 
 	var cons []above
-	for i := 0; i < n; i++ {
+	for i := range n {
 		for j := i + 1; j < n; j++ {
 			iFirst := inside(segs[i].a, segs[j]) || inside(segs[j].b, segs[i])
 			jFirst := inside(segs[j].a, segs[i]) || inside(segs[i].b, segs[j])
@@ -231,7 +231,7 @@ func breakConstraintCycles(n int, cons []above) []above {
 		}
 		state[u] = black
 	}
-	for u := 0; u < n; u++ {
+	for u := range n {
 		if state[u] == white {
 			dfs(u)
 		}
@@ -263,7 +263,7 @@ func layerTracks(n int, cons []above) []int {
 		track[v] = d
 		return d
 	}
-	for v := 0; v < n; v++ {
+	for v := range n {
 		depth(v)
 	}
 	return track

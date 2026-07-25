@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/a-h/templ"
 
@@ -42,14 +43,24 @@ func main() {
 	case "serve":
 		fs := flag.NewFlagSet("serve", flag.ExitOnError)
 		addr := fs.String("addr", ":8080", "listen address")
-		fs.Parse(os.Args[2:])
+		_ = fs.Parse(os.Args[2:])
 		log.Printf("site: http://localhost%s", *addr)
-		log.Fatal(http.ListenAndServe(*addr, handler()))
+		// Timeouts on a local dev server are belt-and-braces, but a server
+		// without them is a bad example to set in a repo people read.
+		srv := &http.Server{
+			Addr:              *addr,
+			Handler:           handler(),
+			ReadHeaderTimeout: 10 * time.Second,
+			ReadTimeout:       30 * time.Second,
+			WriteTimeout:      60 * time.Second,
+			IdleTimeout:       2 * time.Minute,
+		}
+		log.Fatal(srv.ListenAndServe())
 	case "build":
 		fs := flag.NewFlagSet("build", flag.ExitOnError)
 		out := fs.String("o", "dist", "output directory")
 		base := fs.String("base", "", "base path prefix, e.g. /loom/")
-		fs.Parse(os.Args[2:])
+		_ = fs.Parse(os.Args[2:])
 		if err := build(*out, *base); err != nil {
 			log.Fatal(err)
 		}
@@ -91,8 +102,13 @@ func build(out, base string) error {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
-		return c.Render(ctx, f)
+		// Closed explicitly as well as deferred: this file is written, so a
+		// failure to flush on close would silently truncate a page.
+		defer func() { _ = f.Close() }()
+		if err := c.Render(ctx, f); err != nil {
+			return err
+		}
+		return f.Close()
 	}
 	if err := render("index.html", pages.Index()); err != nil {
 		return err
@@ -140,12 +156,12 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	defer func() { _ = in.Close() }()
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 	if _, err := io.Copy(out, in); err != nil {
 		return err
 	}

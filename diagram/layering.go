@@ -79,7 +79,7 @@ func longestPathRanks(es []layerEdge, n int) []int {
 	}
 	rank := make([]int, n)
 	var queue []int
-	for u := 0; u < n; u++ {
+	for u := range n {
 		if indeg[u] == 0 {
 			queue = append(queue, u)
 		}
@@ -120,7 +120,7 @@ func weakComponents(es []layerEdge, n int) []layerComponent {
 	seenNode := make([]bool, n)
 	seenEdge := make([]bool, len(es))
 	var out []layerComponent
-	for s := 0; s < n; s++ {
+	for s := range n {
 		if seenNode[s] {
 			continue
 		}

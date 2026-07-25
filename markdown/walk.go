@@ -2,6 +2,7 @@ package markdown
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -27,6 +28,9 @@ type walker struct {
 	source []byte
 	cfg    Config
 }
+
+// errUnsupportedKind marks a goldmark node this renderer does not handle.
+var errUnsupportedKind = errors.New("markdown: unsupported node kind")
 
 // blocks appends n's block children to parent.
 func (w *walker) blocks(n gast.Node, parent *html.Node) error {
@@ -97,7 +101,7 @@ func (w *walker) block(n gast.Node, parent *html.Node) error {
 	case *extast.Table:
 		return w.table(n, parent)
 	default:
-		return fmt.Errorf("markdown: unsupported block kind %s", n.Kind())
+		return fmt.Errorf("%w: block %s", errUnsupportedKind, n.Kind())
 	}
 	return nil
 }
@@ -182,7 +186,7 @@ func (w *walker) table(n *extast.Table, parent *html.Node) error {
 			}
 			tbody.AppendChild(tr)
 		default:
-			return fmt.Errorf("markdown: unsupported table child kind %s", row.Kind())
+			return fmt.Errorf("%w: table child %s", errUnsupportedKind, row.Kind())
 		}
 	}
 	parent.AppendChild(wrap)
@@ -193,7 +197,7 @@ func (w *walker) tableCells(row gast.Node, tr *html.Node, tag atom.Atom) error {
 	for c := row.FirstChild(); c != nil; c = c.NextSibling() {
 		cell, ok := c.(*extast.TableCell)
 		if !ok {
-			return fmt.Errorf("markdown: unsupported table cell kind %s", c.Kind())
+			return fmt.Errorf("%w: table cell %s", errUnsupportedKind, c.Kind())
 		}
 		td := dom.El(tag, dom.Attr("class", tableCellClass(tag == atom.Th, cell.Alignment)))
 		if tag == atom.Th {
@@ -306,7 +310,7 @@ func (w *walker) inline(n gast.Node, parent *html.Node) error {
 		}
 		parent.AppendChild(box)
 	default:
-		return fmt.Errorf("markdown: unsupported inline kind %s", n.Kind())
+		return fmt.Errorf("%w: inline %s", errUnsupportedKind, n.Kind())
 	}
 	return nil
 }
