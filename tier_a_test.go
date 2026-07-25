@@ -174,4 +174,14 @@ func TestGoldens(t *testing.T) {
 	t.Run("kbd", func(t *testing.T) {
 		testutil.Golden(t, "kbd", testutil.WithChildren(kbd.New(), testutil.Text("K")))
 	})
+	t.Run("pagination", func(t *testing.T) {
+		testutil.Golden(t, "pagination", testutil.WithChildren(pagination.New(), testutil.Sequence(
+			pagination.Prev("/page/1"),
+			testutil.WithChildren(pagination.Item("/page/1"), testutil.Text("1")),
+			testutil.WithChildren(pagination.Item("/page/2", pagination.Current()), testutil.Text("2")),
+			pagination.Gap(),
+			testutil.WithChildren(pagination.Item("/page/9"), testutil.Text("9")),
+			pagination.Next("/page/3"),
+		)))
+	})
 }

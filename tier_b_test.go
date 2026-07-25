@@ -1,7 +1,7 @@
 package loom_test
 
-// Tier B form controls: slider, file upload, input group — plus the
-// field-through-input-group wiring.
+// Tier B form controls: slider, file upload, input group and the plain
+// controls — plus the field-through-input-group wiring.
 
 import (
 	"strings"
@@ -16,7 +16,9 @@ import (
 	"github.com/pietjan/loom/inputgroup"
 	"github.com/pietjan/loom/internal/dom"
 	"github.com/pietjan/loom/internal/testutil"
+	"github.com/pietjan/loom/picker"
 	"github.com/pietjan/loom/slider"
+	"github.com/pietjan/loom/textarea"
 )
 
 func TestSlider(t *testing.T) {
@@ -116,6 +118,38 @@ func TestTierBGoldens(t *testing.T) {
 			testutil.WithChildren(inputgroup.Addon(), icon.New(icon.MagnifyingGlass, icon.Small)),
 			input.New(input.Name("q"), input.Placeholder("Search")),
 		)))
+	})
+	// The controls below are golden on their own rather than inside a field,
+	// so each records the classes the component itself puts on the element
+	// rather than what field's post-pass adds around it.
+	t.Run("input", func(t *testing.T) {
+		testutil.Golden(t, "input",
+			input.New(input.Type("email"), input.Name("email"), input.Placeholder("you@example.com")))
+	})
+	t.Run("textarea", func(t *testing.T) {
+		testutil.Golden(t, "textarea",
+			textarea.New(textarea.Name("bio"), textarea.Rows(4), textarea.Placeholder("About you")))
+	})
+	t.Run("picker", func(t *testing.T) {
+		testutil.Golden(t, "picker", testutil.WithChildren(
+			picker.New(picker.Name("pet"), picker.Placeholder("Choose a pet")),
+			testutil.Sequence(
+				testutil.WithChildren(picker.Item("cat"), testutil.Text("Cat")),
+				testutil.WithChildren(picker.Item("dog", picker.Selected()), testutil.Text("Dog")),
+			),
+		))
+	})
+	t.Run("checkbox", func(t *testing.T) {
+		testutil.Golden(t, "checkbox", composites["checkbox-labeled"]())
+	})
+	t.Run("toggle", func(t *testing.T) {
+		testutil.Golden(t, "toggle", composites["toggle-labeled"]())
+	})
+	t.Run("radio", func(t *testing.T) {
+		testutil.Golden(t, "radio", composites["radio-group"]())
+	})
+	t.Run("fieldset", func(t *testing.T) {
+		testutil.Golden(t, "fieldset", composites["fieldset"]())
 	})
 }
 

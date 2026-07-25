@@ -1,0 +1,25 @@
+<select data-ui="picker" name="pet" class="flex gap-2 justify-between items-center px-3 w-full h-10 text-base-800 text-sm bg-white rounded-lg border border-b-base-300/80 border-base-200 shadow-xs cursor-pointer dark:text-base-100 dark:bg-base-700 dark:border-base-600 disabled:opacity-75 disabled:cursor-not-allowed">
+  <button class="flex flex-1 gap-2 items-center min-w-0">
+    <selectedcontent>
+    </selectedcontent>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" data-ui="icon" data-variant="regular" data-size="xs" aria-hidden="true" class="ms-auto text-base-400 transition-transform duration-150 in-[select:open]:rotate-180 shrink-0 [:where(&amp;)]:size-4">
+      <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z">
+      </path>
+    </svg>
+  </button>
+  <option value disabled hidden>Choose a pet</option>
+  <option data-ui="picker-option" value="cat" class="flex gap-2 items-center px-2 py-1.5 text-base-800 text-sm rounded-md cursor-pointer **:data-[ui=icon]:size-4 dark:text-base-100 checked:font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-base-800/5 dark:hover:bg-white/10">
+    Cat
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" data-ui="icon" data-variant="regular" data-size="xs" aria-hidden="true" class="invisible ms-auto text-accent-content in-checked:visible shrink-0 [:where(&amp;)]:size-4" data-picker-check>
+      <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z">
+      </path>
+    </svg>
+  </option>
+  <option data-ui="picker-option" value="dog" selected class="flex gap-2 items-center px-2 py-1.5 text-base-800 text-sm rounded-md cursor-pointer **:data-[ui=icon]:size-4 dark:text-base-100 checked:font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-base-800/5 dark:hover:bg-white/10">
+    Dog
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" data-ui="icon" data-variant="regular" data-size="xs" aria-hidden="true" class="invisible ms-auto text-accent-content in-checked:visible shrink-0 [:where(&amp;)]:size-4" data-picker-check>
+      <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z">
+      </path>
+    </svg>
+  </option>
+</select>

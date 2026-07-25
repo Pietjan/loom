@@ -137,9 +137,10 @@ func classes(c Config) string {
 
 func diffLineClass(k lineKind) string {
 	var b styles.Builder
-	// min-h-lh keeps empty lines one line tall — an empty block would
-	// otherwise collapse.
-	b.Add("block min-h-lh px-5")
+	// min-h-[1lh] keeps empty lines one line tall — an empty block would
+	// otherwise collapse. Spelled as an arbitrary value because Tailwind
+	// 4.0 has no min-h-lh: it silently emitted nothing for it.
+	b.Add("block min-h-[1lh] px-5")
 	styles.Match(&b, k, map[lineKind]string{
 		lineAdd:  "bg-green-100/50 text-green-900 dark:bg-green-400/15 dark:text-green-200",
 		lineDel:  "bg-red-100/40 text-red-700 dark:bg-red-400/15 dark:text-red-200",

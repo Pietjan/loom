@@ -336,4 +336,7 @@ func TestPhase3Goldens(t *testing.T) {
 	testutil.Golden(t, "accordion", composites["accordion"]())
 	testutil.Golden(t, "table", composites["table"]())
 	testutil.Golden(t, "tabs", composites["tabs"]())
+	testutil.Golden(t, "tooltip", composites["tooltip"]())
+	testutil.Golden(t, "header", composites["header"]())
+	testutil.Golden(t, "sidebar", composites["sidebar"]())
 }
