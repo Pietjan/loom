@@ -134,6 +134,48 @@ const diagramArrowSnippet = `// The arrowhead shape is per-edge: a filled triang
 	@diagram.Node("gpu", diagram.WithTone(diagram.ToneEmerald)) { GPU }
 }`
 
+const diagramOrderSnippet = `// Layout follows the edges, not the order the nodes are written in. Both of
+// these declare the same graph — retry cycle and all — with the node blocks
+// in opposite orders, and both lay out identically.
+edges := []diagram.Option{
+	diagram.Edge("ingest", "queue"),
+	diagram.Edge("queue", "worker"),
+	diagram.Edge("worker", "queue", diagram.Dashed(), diagram.Label("retry")),
+	diagram.Edge("worker", "store"),
+	diagram.Edge("ingest", "audit"),
+	diagram.Edge("store", "audit"),
+}
+
+@diagram.New(edges...) {
+	@diagram.Node("ingest", diagram.Stadium()) { ingest }
+	@diagram.Node("queue") { queue }
+	@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) { worker }
+	@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) { store }
+	@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) { audit }
+}
+
+@diagram.New(edges...) { // same edges, declarations reversed
+	@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) { audit }
+	@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) { store }
+	@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) { worker }
+	@diagram.Node("queue") { queue }
+	@diagram.Node("ingest", diagram.Stadium()) { ingest }
+}`
+
+// orderDemoEdges is the graph both halves of the declaration-order example
+// draw. It has a cycle on purpose: breaking one is where the order used to
+// change the shape of the drawing.
+func orderDemoEdges() []diagram.Option {
+	return []diagram.Option{
+		diagram.Edge("ingest", "queue"),
+		diagram.Edge("queue", "worker"),
+		diagram.Edge("worker", "queue", diagram.Dashed(), diagram.Label("retry")),
+		diagram.Edge("worker", "store"),
+		diagram.Edge("ingest", "audit"),
+		diagram.Edge("store", "audit"),
+	}
+}
+
 // schemaTable renders a schema-style table card used as a diagram node body.
 templ schemaTable(name string, columns ...string) {
 	<div class="w-full overflow-hidden rounded-lg border border-base-200 bg-white text-left dark:border-base-600 dark:bg-base-800">
@@ -399,6 +441,50 @@ templ Diagram() {
 						@orgNode("Rob Pike", "Engineer", "RP")
 					}
 				}
+			</div>
+		}
+		@example("Declaration order", diagramOrderSnippet) {
+			<div class="flex flex-wrap items-start gap-10">
+				<div class="space-y-2">
+					<p class="text-xs font-medium text-base-500 dark:text-base-400">declared ingest → audit</p>
+					@diagram.New(orderDemoEdges()...) {
+						@diagram.Node("ingest", diagram.Stadium()) {
+							ingest
+						}
+						@diagram.Node("queue") {
+							queue
+						}
+						@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) {
+							worker
+						}
+						@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) {
+							store
+						}
+						@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) {
+							audit
+						}
+					}
+				</div>
+				<div class="space-y-2">
+					<p class="text-xs font-medium text-base-500 dark:text-base-400">declared audit → ingest</p>
+					@diagram.New(orderDemoEdges()...) {
+						@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) {
+							audit
+						}
+						@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) {
+							store
+						}
+						@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) {
+							worker
+						}
+						@diagram.Node("queue") {
+							queue
+						}
+						@diagram.Node("ingest", diagram.Stadium()) {
+							ingest
+						}
+					}
+				</div>
 			</div>
 		}
 	}
