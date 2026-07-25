@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -666,6 +667,59 @@ func TestFanPortsStaySymmetric(t *testing.T) {
 	// ...and the straightening it gave up at that end still happened at the other.
 	if pubStart[0] != pubEnd[0] {
 		t.Errorf("branch to Published should run straight, got x %v → %v", pubStart[0], pubEnd[0])
+	}
+}
+
+// TestLayoutIgnoresDeclarationOrder: rearranging the @diagram.Node blocks must
+// not restructure the drawing. It bites hardest on a cycle, where the choice of
+// which edge to reverse decides which node lands above the other and so the
+// whole shape; rooting that traversal at the nodes nothing points at, rather
+// than at whichever happened to be declared first, is what holds it steady.
+//
+// Which layer each node lands on is asserted, not where it sits along that
+// layer: the left-to-right arrangement of siblings does follow declaration
+// order, deliberately, so that declaring one branch before another puts it on
+// the left. Reordering can therefore still mirror a diagram — it just cannot
+// re-layer it.
+func TestLayoutIgnoresDeclarationOrder(t *testing.T) {
+	edges := []diagram.Option{
+		diagram.Edge("users", "teams"), diagram.Edge("teams", "users"), // circular
+		diagram.Edge("orders", "users"), diagram.Edge("items", "orders"),
+		diagram.Edge("items", "products"), diagram.Edge("products", "categories"),
+	}
+	draw := func(order []string) (box, layers string, crossings int) {
+		var nodes []templ.Component
+		for _, id := range order {
+			nodes = append(nodes, node(id, id, diagram.Size(80, 40)))
+		}
+		out := diag(t, nodes, edges...)
+		tree := testutil.NewTree(t, out)
+		var at []string
+		for i, s := range dom.FindAll(tree.Root, dom.ByMarker("diagram-shape")) {
+			at = append(at, order[i]+"@"+dom.GetAttr(s, "y"))
+		}
+		sort.Strings(at) // by node, so the document's own order doesn't matter
+		return dom.GetAttr(tree.One("diagram-canvas"), "viewBox"),
+			strings.Join(at, " "), edgeCrossings(t, out)
+	}
+
+	wantBox, wantLayers, _ := draw([]string{"teams", "users", "categories", "products", "orders", "items"})
+	for _, order := range [][]string{
+		{"users", "teams", "categories", "products", "orders", "items"},
+		{"items", "orders", "products", "categories", "users", "teams"},
+		{"categories", "products", "orders", "items", "teams", "users"},
+		{"items", "products", "categories", "orders", "users", "teams"},
+	} {
+		box, layers, crossings := draw(order)
+		if box != wantBox {
+			t.Errorf("order %v: viewBox %q, want %q", order, box, wantBox)
+		}
+		if layers != wantLayers {
+			t.Errorf("order %v: nodes landed on different layers\n got %s\nwant %s", order, layers, wantLayers)
+		}
+		if crossings != 0 {
+			t.Errorf("order %v: %d edge crossing(s), want 0", order, crossings)
+		}
 	}
 }
 

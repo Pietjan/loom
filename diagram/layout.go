@@ -161,13 +161,35 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, ports 
 	return assemble(dir, direct, ports, sp, len(nodes), verts, edgeChains, reversed, edges), nil
 }
 
-// breakCycles marks the back edges of a greedy DFS (in node insertion order)
-// so the graph layers as a DAG; their drawn direction is restored later.
+// breakCycles marks the back edges of a greedy DFS so the graph layers as a
+// DAG; their drawn direction is restored later.
+//
+// Which edge of a cycle ends up reversed decides the whole shape of a cyclic
+// drawing — the node that keeps its outgoing edge lays out above the one that
+// gives its up — so where the traversal starts matters a great deal. Starting
+// at whichever node happened to be declared first meant moving two
+// @diagram.Node blocks past each other could silently redraw the diagram.
+//
+// So begin at the nodes nothing points at. Those are the graph's real entry
+// points, they are a property of the edges rather than of the source layout,
+// and a traversal rooted there descends the flow instead of picking it up
+// somewhere in the middle and pushing part of it backwards. Declaration order
+// only breaks ties between several such sources.
 func breakCycles(edges []edge, index map[string]int, n int) []bool {
 	out := make([][]int, n) // out[u] = edge indices leaving u
+	indeg := make([]int, n)
 	for ei, e := range edges {
 		out[index[e.from]] = append(out[index[e.from]], ei)
+		indeg[index[e.to]]++
 	}
+	roots := make([]int, n)
+	for i := range roots {
+		roots[i] = i
+	}
+	sort.SliceStable(roots, func(a, b int) bool {
+		return indeg[roots[a]] == 0 && indeg[roots[b]] != 0
+	})
+
 	const (
 		white = iota
 		gray
@@ -188,7 +210,7 @@ func breakCycles(edges []edge, index map[string]int, n int) []bool {
 		}
 		state[u] = black
 	}
-	for u := 0; u < n; u++ {
+	for _, u := range roots {
 		if state[u] == white {
 			dfs(u)
 		}
