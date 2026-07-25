@@ -87,6 +87,25 @@ const diagramWorkflowSnippet = `@diagram.New(
 	@diagram.Node("revise", diagram.WithTone(diagram.ToneAmber)) { Revising }
 }`
 
+const diagramFanSnippet = `// A wide fan is where spread ports earn their keep. The gap between two
+// layers is a routing channel: its sideways runs are ordered so none cuts
+// across another, and each edge keeps its own line from port to arrowhead
+// instead of the whole fan merging into one bar. The gap widens to fit.
+@diagram.New(
+	diagram.Ports(diagram.PortsSpread),
+	diagram.Edge("event", "email"),
+	diagram.Edge("event", "sms"),
+	diagram.Edge("event", "push"),
+	diagram.Edge("event", "hook"),
+	diagram.Edge("event", "audit"),
+	diagram.Edge("event", "metrics"),
+) {
+	@diagram.Node("event", diagram.Stadium(), diagram.WithTone(diagram.ToneAccent)) { Event }
+	@diagram.Node("email") { Email }
+	@diagram.Node("sms") { SMS }
+	// ... push, hook, audit, metrics
+}`
+
 const diagramStateSnippet = `// A cycle lays out fine, and diagram.BiDirectional() draws an arrowhead on
 // both ends — here the two-way transition between Playing and Paused.
 @diagram.New(
@@ -363,6 +382,41 @@ templ Diagram() {
 					}
 					@diagram.Node("revise", diagram.WithTone(diagram.ToneAmber)) {
 						Revising
+					}
+				}
+			</div>
+		}
+		@example("Fan-out on spread ports", diagramFanSnippet) {
+			<div class="w-full overflow-x-auto">
+				@diagram.New(
+					diagram.Ports(diagram.PortsSpread),
+					diagram.Edge("event", "email"),
+					diagram.Edge("event", "sms"),
+					diagram.Edge("event", "push"),
+					diagram.Edge("event", "hook"),
+					diagram.Edge("event", "audit"),
+					diagram.Edge("event", "metrics"),
+				) {
+					@diagram.Node("event", diagram.Stadium(), diagram.WithTone(diagram.ToneAccent)) {
+						Event
+					}
+					@diagram.Node("email") {
+						Email
+					}
+					@diagram.Node("sms") {
+						SMS
+					}
+					@diagram.Node("push") {
+						Push
+					}
+					@diagram.Node("hook") {
+						Webhook
+					}
+					@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) {
+						Audit log
+					}
+					@diagram.Node("metrics", diagram.WithTone(diagram.ToneEmerald)) {
+						Metrics
 					}
 				}
 			</div>
