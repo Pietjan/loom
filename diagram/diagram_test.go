@@ -618,10 +618,9 @@ func edgeCrossings(t *testing.T, out string) int {
 // of the forward edge's, which flips with the direction the corridor runs, so
 // both a leftward and a rightward pair are checked.
 //
-// Scoped to pairs between adjacent layers. Layered layout reduces crossings
-// heuristically rather than eliminating them, and once a cycle is long enough
-// to route through dummies the pair's shape is decided by the ordering phase
-// and by dummy snapping too, which can still leave a weave.
+// Long cycles, routed through dummies, are covered too — see
+// TestLongEdgesDoNotCrossTheirNeighbours for the one routing gap that remains,
+// which turns out not to involve cycles at all.
 func TestAntiparallelEdgesDoNotCross(t *testing.T) {
 	for _, tc := range []struct {
 		name  string
@@ -650,6 +649,34 @@ func TestAntiparallelEdgesDoNotCross(t *testing.T) {
 		if n := edgeCrossings(t, diag(t, tc.nodes, tc.opts...)); n != 0 {
 			t.Errorf("%s: %d edge crossing(s), want 0", tc.name, n)
 		}
+	}
+}
+
+// TestLongEdgesDoNotCrossTheirNeighbours records the one routing gap left.
+// Every edge crossing a layer gap makes its sideways move at the same nominal
+// y — the gap's midpoint — so an edge travelling far sideways cuts straight
+// through the vertical stub of one that stops short. Here a→b runs beside three
+// parallel a→mᵢ→b paths: a→b detours out past m2 and its horizontal run passes
+// through m2's stub, once on the way out and once on the way back.
+//
+// The graph is planar — four parallel routes between the same two nodes — so
+// both crossings belong to the router, not to the graph. It needs no cycle,
+// which is why the fix is not about cycles: the gap between two layers is a
+// routing channel, and its horizontal runs need tracks. Order the runs by which
+// must sit above which, give each its own row, and the crossings go. That is a
+// global pass over every edge in a gap, where orthoRoute today settles each
+// edge's elbow on its own. Unskip when that lands.
+func TestLongEdgesDoNotCrossTheirNeighbours(t *testing.T) {
+	t.Skip("needs channel routing: horizontal runs all share the gap's midline")
+
+	nodes := []templ.Component{node("a", "A"), node("b", "B")}
+	opts := []diagram.Option{diagram.Edge("a", "b")}
+	for _, m := range []string{"m0", "m1", "m2"} {
+		nodes = append(nodes, node(m, m))
+		opts = append(opts, diagram.Edge("a", m), diagram.Edge(m, "b"))
+	}
+	if n := edgeCrossings(t, diag(t, nodes, opts...)); n != 0 {
+		t.Errorf("%d edge crossing(s) in a planar graph, want 0", n)
 	}
 }
 
