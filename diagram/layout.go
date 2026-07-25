@@ -196,41 +196,6 @@ func breakCycles(edges []edge, index map[string]int, n int) []bool {
 	return reversed
 }
 
-// assignLayers gives each node a longest-path layer on the acyclic graph
-// (edges flipped where reversed points them backward).
-func assignLayers(edges []edge, index map[string]int, reversed []bool, n int) []int {
-	adj := make([][]int, n)
-	indeg := make([]int, n)
-	for ei, e := range edges {
-		s, d := index[e.from], index[e.to]
-		if reversed[ei] {
-			s, d = d, s
-		}
-		adj[s] = append(adj[s], d)
-		indeg[d]++
-	}
-	layer := make([]int, n)
-	var queue []int
-	for u := 0; u < n; u++ {
-		if indeg[u] == 0 {
-			queue = append(queue, u)
-		}
-	}
-	for len(queue) > 0 {
-		u := queue[0]
-		queue = queue[1:]
-		for _, v := range adj[u] {
-			if layer[u]+1 > layer[v] {
-				layer[v] = layer[u] + 1
-			}
-			if indeg[v]--; indeg[v] == 0 {
-				queue = append(queue, v)
-			}
-		}
-	}
-	return layer
-}
-
 // reduceCrossings runs median-heuristic sweeps, keeping the best ordering seen.
 func reduceCrossings(layers [][]int, verts []vertex, up, down [][]int) {
 	best := snapshot(layers)
