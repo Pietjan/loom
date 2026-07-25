@@ -62,9 +62,11 @@ audit: test
 
 ## test: run all tests
 # Generates first: without the *_templ.go files the site's pages package does
-# not compile.
+# not compile. Builds the CSS too, because the class-conflict test reads the
+# compiled stylesheet and skips itself when it is missing — a test that opts
+# out silently is worse than no test.
 .PHONY: test
-test: site/generate
+test: site/generate site/css
 	go test -race -buildvcs ./...
 	cd $(site_dir) && go test -race -buildvcs ./...
 
