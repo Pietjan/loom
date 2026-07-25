@@ -652,32 +652,93 @@ func TestAntiparallelEdgesDoNotCross(t *testing.T) {
 	}
 }
 
-// TestLongEdgesDoNotCrossTheirNeighbours records the one routing gap left.
-// Every edge crossing a layer gap makes its sideways move at the same nominal
-// y — the gap's midpoint — so an edge travelling far sideways cuts straight
-// through the vertical stub of one that stops short. Here a→b runs beside three
-// parallel a→mᵢ→b paths: a→b detours out past m2 and its horizontal run passes
-// through m2's stub, once on the way out and once on the way back.
+// TestLongEdgesDoNotCrossTheirNeighbours: an edge that travels far sideways
+// across a layer gap must turn clear of the ones that stop short, not through
+// them. a→b runs beside three parallel a→mᵢ→b paths, so it detours out past m2
+// and back; if every edge turned at the same nominal y its horizontal run would
+// cut m2's vertical stub, once on the way out and once on the way back.
 //
 // The graph is planar — four parallel routes between the same two nodes — so
-// both crossings belong to the router, not to the graph. It needs no cycle,
-// which is why the fix is not about cycles: the gap between two layers is a
-// routing channel, and its horizontal runs need tracks. Order the runs by which
-// must sit above which, give each its own row, and the crossings go. That is a
-// global pass over every edge in a gap, where orthoRoute today settles each
-// edge's elbow on its own. Unskip when that lands.
+// any crossing here belongs to the router, not to the graph. It needs no cycle,
+// which is why the fix was not about cycles: the gap between two layers is a
+// routing channel whose horizontal runs each get their own track, ordered by
+// which must sit above which. The back-edge variant adds a run that has to nest
+// against that fan rather than beside it.
 func TestLongEdgesDoNotCrossTheirNeighbours(t *testing.T) {
-	t.Skip("needs channel routing: horizontal runs all share the gap's midline")
+	for _, tc := range []struct {
+		name string
+		opts []diagram.Option
+	}{
+		{"parallel detours", nil},
+		{"with a back edge", []diagram.Option{diagram.Edge("b", "a")}},
+	} {
+		nodes := []templ.Component{node("a", "A"), node("b", "B")}
+		opts := append([]diagram.Option{diagram.Edge("a", "b")}, tc.opts...)
+		for _, m := range []string{"m0", "m1", "m2"} {
+			nodes = append(nodes, node(m, m))
+			opts = append(opts, diagram.Edge("a", m), diagram.Edge(m, "b"))
+		}
+		if n := edgeCrossings(t, diag(t, nodes, opts...)); n != 0 {
+			t.Errorf("%s: %d edge crossing(s) in a planar graph, want 0", tc.name, n)
+		}
+	}
+}
 
-	nodes := []templ.Component{node("a", "A"), node("b", "B")}
-	opts := []diagram.Option{diagram.Edge("a", "b")}
-	for _, m := range []string{"m0", "m1", "m2"} {
-		nodes = append(nodes, node(m, m))
-		opts = append(opts, diagram.Edge("a", m), diagram.Edge(m, "b"))
+// TestCrowdedGapMakesRoom: a gap seats its tracks at even spacing, so one with
+// more of them than the layer gap can hold has to grow — otherwise the corners
+// fold into each other and a staircase reads as a wobble.
+//
+// A wide fan on spread ports is what reaches that: every edge leaves its own
+// port, so no two runs share an endpoint and each has to step clear of the
+// next. A four-way fan still fits the default gap and must not move the layers
+// at all; past that the gap grows, and the runs stay a corner's width apart
+// however wide the fan gets.
+func TestCrowdedGapMakesRoom(t *testing.T) {
+	fan := func(k int) string {
+		nodes := []templ.Component{node("a", "A")}
+		opts := []diagram.Option{diagram.Ports(diagram.PortsSpread)}
+		for i := 0; i < k; i++ {
+			id := "t" + strconv.Itoa(i)
+			nodes = append(nodes, node(id, id))
+			opts = append(opts, diagram.Edge("a", id))
+		}
+		return diag(t, nodes, opts...)
 	}
-	if n := edgeCrossings(t, diag(t, nodes, opts...)); n != 0 {
-		t.Errorf("%d edge crossing(s) in a planar graph, want 0", n)
+
+	snug := viewBox(t, fan(4)).h
+	for _, k := range []int{6, 8, 10} {
+		out := fan(k)
+		if h := viewBox(t, out).h; h <= snug {
+			t.Errorf("fan of %d: height %v did not grow past the snug %v", k, h, snug)
+		}
+		ys := elbowFlows(t, out)
+		if len(ys) < 3 {
+			t.Errorf("fan of %d: %d track(s), want the fan spread over at least 3", k, len(ys))
+		}
+		for i := 1; i < len(ys); i++ {
+			if d := ys[i] - ys[i-1]; d < 12 {
+				t.Errorf("fan of %d: tracks %v apart, too close to round a corner", k, d)
+			}
+		}
 	}
+}
+
+// elbowFlows reports the distinct heights at which edges make their sideways
+// move — the gap's tracks, as drawn.
+func elbowFlows(t *testing.T, out string) []float64 {
+	t.Helper()
+	seen := map[float64]bool{}
+	for _, e := range dom.FindAll(testutil.NewTree(t, out).Root, dom.ByMarker("diagram-edge")) {
+		for _, m := range pathCorners.FindAllStringSubmatch(dom.GetAttr(e, "d"), -1) {
+			seen[atof(t, m[2])] = true
+		}
+	}
+	ys := make([]float64, 0, len(seen))
+	for y := range seen {
+		ys = append(ys, y)
+	}
+	sort.Float64s(ys)
+	return ys
 }
 
 // TestNoDegenerateBends: an edge never emits a "corner" too small to draw. A
