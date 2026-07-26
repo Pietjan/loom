@@ -23,6 +23,22 @@ const diagramRequestSnippet = `@diagram.New(
 	@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)) { Postgres }
 }`
 
+const diagramProvenanceSnippet = `// BottomTop reflects the drawing on the flow axis, so the edges still run
+// from a dependency to what consumes it - only the layers stack upward.
+@diagram.New(
+	diagram.Dir(diagram.BottomTop),
+	diagram.Edge("src", "compile"),
+	diagram.Edge("vendor", "compile"),
+	diagram.Edge("compile", "binary"),
+	diagram.Edge("binary", "image", diagram.Label("packaged into")),
+) {
+	@diagram.Node("src", diagram.Stadium()) { Source }
+	@diagram.Node("vendor", diagram.Stadium()) { Vendored deps }
+	@diagram.Node("compile", diagram.WithTone(diagram.ToneAccent)) { go build }
+	@diagram.Node("binary", diagram.WithTone(diagram.ToneAmber)) { Binary }
+	@diagram.Node("image", diagram.WithTone(diagram.ToneEmerald)) { Image }
+}`
+
 const diagramSchemaSnippet = `// A node body is any markup - here each table is a small card, so the
 // nodes use diagram.Bare() to skip the default box chrome. Each arrow runs
 // from the table holding the key to the one it points at; users and teams
@@ -264,6 +280,33 @@ templ Diagram() {
 					}
 					@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)) {
 						@iconNode("Postgres", icon.Database)
+					}
+				}
+			</div>
+		}
+		@example("Build provenance", diagramProvenanceSnippet) {
+			<div class="w-full overflow-x-auto">
+				@diagram.New(
+					diagram.Dir(diagram.BottomTop),
+					diagram.Edge("src", "compile"),
+					diagram.Edge("vendor", "compile"),
+					diagram.Edge("compile", "binary"),
+					diagram.Edge("binary", "image", diagram.Label("packaged into")),
+				) {
+					@diagram.Node("src", diagram.Stadium()) {
+						@iconNode("Source", icon.FileCode)
+					}
+					@diagram.Node("vendor", diagram.Stadium()) {
+						@iconNode("Vendored deps", icon.Package)
+					}
+					@diagram.Node("compile", diagram.WithTone(diagram.ToneAccent)) {
+						@iconNode("go build", icon.Wrench)
+					}
+					@diagram.Node("binary", diagram.WithTone(diagram.ToneAmber)) {
+						@iconNode("Binary", icon.Code)
+					}
+					@diagram.Node("image", diagram.WithTone(diagram.ToneEmerald)) {
+						@iconNode("Image", icon.Cube)
 					}
 				}
 			</div>

@@ -22,8 +22,12 @@
 // that brings its own.
 //
 // Linear pipelines and trees are DAG subsets handled for free; cycles lay out
-// and keep their drawn direction; diagram.Dir(diagram.LeftRight) flips the
-// flow axis. Each box face carries at most two edge ports, one per drawn
+// and keep their drawn direction. diagram.Dir picks the flow axis and which way
+// it runs: TopBottom (the default), LeftRight, BottomTop, or RightLeft. All four
+// are one layout - the reversed pair is the forward pair reflected on the flow
+// axis - so a bottom-up drawing is not the same as declaring the graph
+// backwards: the arrowheads still follow the edges as written, and siblings keep
+// the side they were on. Each box face carries at most two edge ports, one per drawn
 // direction, so an outgoing shaft is never laid over an incoming arrowhead;
 // same-direction edges share a port and fan or join from one point.
 // diagram.Ports(diagram.PortsSpread) instead gives every edge its own port.
@@ -85,19 +89,30 @@ var ErrSelfLoop = errors.New("diagram: self-loop is not supported")
 type Direction int
 
 const (
-	// TopBottom flows downward (default).
-	TopBottom Direction = iota
+	// TopBottom flows downward.
+	TopBottom Direction = iota // default
 	// LeftRight flows rightward.
 	LeftRight
+	// BottomTop flows upward.
+	BottomTop
+	// RightLeft flows leftward.
+	RightLeft
 )
+
+// horizontal reports whether the flow axis is x, so the cross axis is y.
+func (d Direction) horizontal() bool { return d == LeftRight || d == RightLeft }
+
+// reversed reports whether flow runs against increasing coordinates, which the
+// layout gets by reflecting the drawing rather than by laying it out backwards.
+func (d Direction) reversed() bool { return d == BottomTop || d == RightLeft }
 
 // PortMode chooses how edges sharing a box face attach to it.
 type PortMode int
 
 const (
 	// PortsShared gives each face at most two ports, one per drawn direction:
-	// same-direction edges share, fanning or joining from one point (default).
-	PortsShared PortMode = iota
+	// same-direction edges share, fanning or joining from one point.
+	PortsShared PortMode = iota // default
 	// PortsSpread gives every edge its own port, spread along the face and
 	// ordered by its neighbour - busier, but each connection is distinct.
 	PortsSpread

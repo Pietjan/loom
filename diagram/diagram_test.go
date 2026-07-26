@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -121,6 +122,88 @@ func TestLeftRightFlow(t *testing.T) {
 	}
 	if !(lr.w > lr.h) {
 		t.Errorf("left-right chain should be wider than tall, got %vx%v", lr.w, lr.h)
+	}
+}
+
+// TestBottomTopFlowsUpward: bottom-top is the mirror of top-bottom, so each
+// node in a chain sits strictly above the previous one.
+func TestBottomTopFlowsUpward(t *testing.T) {
+	out := diag(
+		t,
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Dir(diagram.BottomTop),
+		diagram.Edge("a", "b"), diagram.Edge("b", "c"),
+	)
+	ys := shapeYs(t, out)
+	if len(ys) != 3 {
+		t.Fatalf("want 3 node shapes, got %d", len(ys))
+	}
+	if !(ys[0] > ys[1] && ys[1] > ys[2]) {
+		t.Errorf("chain not bottom-to-top: %v", ys)
+	}
+}
+
+// TestRightLeftFlowsLeftward: likewise right-left runs against x.
+func TestRightLeftFlowsLeftward(t *testing.T) {
+	out := diag(
+		t,
+		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
+		diagram.Dir(diagram.RightLeft),
+		diagram.Edge("a", "b"), diagram.Edge("b", "c"),
+	)
+	xs := shapeXs(t, out)
+	if len(xs) != 3 {
+		t.Fatalf("want 3 node shapes, got %d", len(xs))
+	}
+	if !(xs[0] > xs[1] && xs[1] > xs[2]) {
+		t.Errorf("chain not right-to-left: %v", xs)
+	}
+}
+
+// TestReversedDirectionsKeepTheirSize: a reflection cannot change how much room
+// the drawing needs, so the reversed directions report their forward
+// counterpart's stage exactly. Catches a mirror that drops or double-counts the
+// margin, which the monotonicity tests above would still pass.
+func TestReversedDirectionsKeepTheirSize(t *testing.T) {
+	nodes := []templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")}
+	edges := []diagram.Option{
+		diagram.Edge("a", "b"), diagram.Edge("a", "c"),
+		diagram.Edge("b", "d"), diagram.Edge("c", "d"),
+	}
+	dims := func(d diagram.Direction) dims {
+		return viewBox(t, diag(t, nodes, append(edges, diagram.Dir(d))...))
+	}
+	for _, c := range []struct {
+		name         string
+		fwd, reverse diagram.Direction
+	}{
+		{"vertical", diagram.TopBottom, diagram.BottomTop},
+		{"horizontal", diagram.LeftRight, diagram.RightLeft},
+	} {
+		if f, r := dims(c.fwd), dims(c.reverse); f != r {
+			t.Errorf("%s: reversed stage %vx%v differs from forward %vx%v", c.name, r.w, r.h, f.w, f.h)
+		}
+	}
+}
+
+// TestReversedDirectionsKeepCrossOrder: mirroring the flow axis leaves the
+// cross axis alone, so siblings keep the side they were on. Equal box edges
+// with unchanged sizes mean equal cross positions.
+func TestReversedDirectionsKeepCrossOrder(t *testing.T) {
+	nodes := []templ.Component{node("a", "A"), node("b", "B"), node("c", "C"), node("d", "D")}
+	edges := []diagram.Option{
+		diagram.Edge("a", "b"), diagram.Edge("a", "c"),
+		diagram.Edge("b", "d"), diagram.Edge("c", "d"),
+	}
+	render := func(d diagram.Direction) string {
+		return diag(t, nodes, append(edges, diagram.Dir(d))...)
+	}
+	// The cross axis is whichever one the flow axis is not.
+	if tb, bt := shapeXs(t, render(diagram.TopBottom)), shapeXs(t, render(diagram.BottomTop)); !slices.Equal(tb, bt) {
+		t.Errorf("bottom-top moved nodes across the flow: %v want %v", bt, tb)
+	}
+	if lr, rl := shapeYs(t, render(diagram.LeftRight)), shapeYs(t, render(diagram.RightLeft)); !slices.Equal(lr, rl) {
+		t.Errorf("right-left moved nodes across the flow: %v want %v", rl, lr)
 	}
 }
 
@@ -1017,6 +1100,17 @@ func TestGolden(t *testing.T) {
 		[]templ.Component{node("a", "Build"), node("b", "Test"), node("c", "Deploy")},
 		diagram.Dir(diagram.LeftRight),
 		diagram.Edge("a", "b"), diagram.Edge("b", "c"))
+	// The reversed directions get a branch and a labelled edge rather than a
+	// chain, so a mirrored elbow and a mirrored label dot are both covered.
+	g("diagram-bt",
+		[]templ.Component{node("a", "Binary"), node("b", "Compile"), node("c", "Vendor"), node("d", "Source")},
+		diagram.Dir(diagram.BottomTop),
+		diagram.Edge("d", "b", diagram.Label("build")), diagram.Edge("d", "c"),
+		diagram.Edge("b", "a"), diagram.Edge("c", "a"))
+	g("diagram-rl",
+		[]templ.Component{node("a", "Client"), node("b", "Cache"), node("c", "Origin")},
+		diagram.Dir(diagram.RightLeft),
+		diagram.Edge("c", "b", diagram.Label("warm")), diagram.Edge("b", "a"))
 	g("diagram-cycle",
 		[]templ.Component{node("a", "A"), node("b", "B"), node("c", "C")},
 		diagram.Edge("a", "b"), diagram.Edge("b", "c"), diagram.Edge("c", "a"))

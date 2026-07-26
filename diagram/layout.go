@@ -165,14 +165,59 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, ports 
 
 	// 6. Map abstract (flow, cross) to (x, y) per direction.
 	for vi := range verts {
-		if dir == LeftRight {
+		if dir.horizontal() {
 			verts[vi].x, verts[vi].y = verts[vi].flow, verts[vi].cross
 		} else {
 			verts[vi].x, verts[vi].y = verts[vi].cross, verts[vi].flow
 		}
 	}
 
-	return assemble(dir, direct, sp, len(nodes), verts, edgeChains, reversed, edges, ch), nil
+	// 7. BottomTop and RightLeft are the other two reflected on the flow axis.
+	l := assemble(dir, direct, sp, len(nodes), verts, edgeChains, reversed, edges, ch)
+	if dir.reversed() {
+		mirrorFlow(&l, dir)
+	}
+	return l, nil
+}
+
+// mirrorFlow reflects the finished drawing on the flow axis, which is all
+// BottomTop and RightLeft are: the same layering, the same order across the
+// flow, stacked the other way.
+//
+// Reflecting resolved geometry rather than teaching every phase a sign keeps
+// one code path for all four directions. It is safe because everything drawn
+// downstream derives from these two coordinate sets - an arrowhead from its
+// edge's polyline, a label's dot from that polyline's midpoint, each node's
+// chrome and body from its box centre - and because all three silhouettes are
+// symmetric on both axes. Bodies are positioned, never transformed, so their
+// text stays upright.
+//
+// Only the flow axis is mirrored, so order across it is preserved: a fan keeps
+// its first child on the same side it had flowing the other way.
+func mirrorFlow(l *laid, dir Direction) {
+	extent := l.H
+	if dir.horizontal() {
+		extent = l.W
+	}
+	flip := func(x, y *float64) {
+		if dir.horizontal() {
+			*x = extent - *x
+		} else {
+			*y = extent - *y
+		}
+	}
+	for i := range l.boxes {
+		// A box is positioned by its centre, so reflecting it needs no
+		// correction for its size.
+		flip(&l.boxes[i].x, &l.boxes[i].y)
+	}
+	for ei := range l.edges {
+		// Point order is left alone: the arrowhead belongs at the target end
+		// however the drawing is oriented.
+		for k := range l.edges[ei].pts {
+			flip(&l.edges[ei].pts[k].x, &l.edges[ei].pts[k].y)
+		}
+	}
 }
 
 // breakCycles marks the back edges of a greedy DFS so the graph layers as a
@@ -329,7 +374,7 @@ func countCrossings(layers [][]int, verts []vertex, down [][]int) int {
 // out and the ports spread along.
 func crossExtent(dir Direction, verts []vertex) func(int) float64 {
 	return func(vi int) float64 {
-		if dir == LeftRight {
+		if dir.horizontal() {
 			return verts[vi].bh
 		}
 		return verts[vi].bw
@@ -348,7 +393,7 @@ func crossExtent(dir Direction, verts []vertex) func(int) float64 {
 // sits above the band rather than in it.
 func assignFlow(dir Direction, sp gaps, layers [][]int, verts []vertex, ch *channels) {
 	flowExtent := func(vi int) float64 {
-		if dir == LeftRight {
+		if dir.horizontal() {
 			return verts[vi].bw
 		}
 		return verts[vi].bh
@@ -686,7 +731,7 @@ func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex
 	// The routing was resolved on the cross axis before the layers were stacked;
 	// translating the drawing shifts it by the same amount.
 	crossShift, flowShift := dx, dy
-	if dir == LeftRight {
+	if dir.horizontal() {
 		crossShift, flowShift = dy, dx
 	}
 
@@ -742,7 +787,7 @@ func assemble(dir Direction, direct bool, sp gaps, nodeCount int, verts []vertex
 // faceExit is the point on the box outline an edge leaves along the flow axis,
 // off units along the cross axis from the face centre (its port).
 func faceExit(v vertex, dir Direction, off float64) xy {
-	if dir == LeftRight {
+	if dir.horizontal() {
 		return xy{v.x + v.bw/2 - flowInset(v, dir, off), v.y + off}
 	}
 	return xy{v.x + off, v.y + v.bh/2 - flowInset(v, dir, off)}
@@ -751,7 +796,7 @@ func faceExit(v vertex, dir Direction, off float64) xy {
 // faceEntry is the point on the box outline an edge arrives at, off units along
 // the cross axis from the face centre (its port).
 func faceEntry(v vertex, dir Direction, off float64) xy {
-	if dir == LeftRight {
+	if dir.horizontal() {
 		return xy{v.x - v.bw/2 + flowInset(v, dir, off), v.y + off}
 	}
 	return xy{v.x + off, v.y - v.bh/2 + flowInset(v, dir, off)}
@@ -768,7 +813,7 @@ func flowInset(v vertex, dir Direction, off float64) float64 {
 		return 0
 	}
 	crossHalf, flowHalf := v.bw/2, v.bh/2
-	if dir == LeftRight {
+	if dir.horizontal() {
 		crossHalf, flowHalf = v.bh/2, v.bw/2
 	}
 	if crossHalf == 0 {
@@ -816,7 +861,7 @@ func assignPorts(dir Direction, mode PortMode, verts []vertex, edgeChains [][]in
 	}
 
 	crossExtent := func(vi int) float64 {
-		if dir == LeftRight {
+		if dir.horizontal() {
 			return verts[vi].bh
 		}
 		return verts[vi].bw
@@ -954,7 +999,7 @@ const minBend = 2 * cornerRadius
 
 // setCross moves a point along the cross axis, leaving its flow coordinate be.
 func setCross(p *xy, dir Direction, c float64) {
-	if dir == LeftRight {
+	if dir.horizontal() {
 		p.y = c
 	} else {
 		p.x = c
@@ -971,7 +1016,7 @@ func orthoRoute(dir Direction, stops []xy, track []int, mid []float64) []xy {
 	for k, b := range stops[1:] {
 		if track[k] >= 0 {
 			a := out[len(out)-1]
-			if dir == LeftRight {
+			if dir.horizontal() {
 				out = append(out, xy{mid[k], a.y}, xy{mid[k], b.y})
 			} else {
 				out = append(out, xy{a.x, mid[k]}, xy{b.x, mid[k]})
