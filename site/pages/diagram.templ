@@ -16,11 +16,11 @@ const diagramRequestSnippet = `@diagram.New(
 	diagram.Edge("cache", "db", diagram.Dotted()), // read through on a miss
 ) {
 	@diagram.Node("net", diagram.Stadium()) { Internet }
-	@diagram.Node("lb", diagram.WithTone(diagram.ToneAccent)) { Load balancer }
+	@diagram.Node("lb", diagram.Accent) { Load balancer }
 	@diagram.Node("web1") { web-1 }
 	@diagram.Node("web2") { web-2 }
-	@diagram.Node("cache", diagram.WithTone(diagram.ToneAmber)) { Redis }
-	@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)) { Postgres }
+	@diagram.Node("cache", diagram.Amber) { Redis }
+	@diagram.Node("db", diagram.Emerald) { Postgres }
 }`
 
 const diagramProvenanceSnippet = `// BottomTop reflects the drawing on the flow axis, so the edges still run
@@ -34,9 +34,9 @@ const diagramProvenanceSnippet = `// BottomTop reflects the drawing on the flow 
 ) {
 	@diagram.Node("src", diagram.Stadium()) { Source }
 	@diagram.Node("vendor", diagram.Stadium()) { Vendored deps }
-	@diagram.Node("compile", diagram.WithTone(diagram.ToneAccent)) { go build }
-	@diagram.Node("binary", diagram.WithTone(diagram.ToneAmber)) { Binary }
-	@diagram.Node("image", diagram.WithTone(diagram.ToneEmerald)) { Image }
+	@diagram.Node("compile", diagram.Accent) { go build }
+	@diagram.Node("binary", diagram.Amber) { Binary }
+	@diagram.Node("image", diagram.Emerald) { Image }
 }`
 
 const diagramSchemaSnippet = `// A node body is any markup - here each table is a small card, so the
@@ -75,13 +75,13 @@ const diagramTopologySnippet = `// Physical links have no direction, so every ed
 	// ... app2, nas on sw1; desk, laptop, printer on sw2
 ) {
 	@diagram.Node("net", diagram.Stadium()) { @iconNode("Internet", icon.Globe) }
-	@diagram.Node("edge1", diagram.WithTone(diagram.ToneAccent)) {
+	@diagram.Node("edge1", diagram.Accent) {
 		@iconNode("edge-1", icon.ArrowsSplit)
 	}
-	@diagram.Node("fw", diagram.WithTone(diagram.ToneRose)) {
+	@diagram.Node("fw", diagram.Rose) {
 		@iconNode("firewall", icon.ShieldCheck)
 	}
-	@diagram.Node("core", diagram.WithTone(diagram.ToneIndigo)) {
+	@diagram.Node("core", diagram.Indigo) {
 		@iconNode("core-sw", icon.SquaresFour)
 	}
 	// ... switches and machines
@@ -98,9 +98,9 @@ const diagramWorkflowSnippet = `@diagram.New(
 ) {
 	@diagram.Node("draft", diagram.Stadium()) { Draft }
 	@diagram.Node("review") { In review }
-	@diagram.Node("check", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)) { Approved? }
-	@diagram.Node("publish", diagram.WithTone(diagram.ToneEmerald)) { Published }
-	@diagram.Node("revise", diagram.WithTone(diagram.ToneAmber)) { Revising }
+	@diagram.Node("check", diagram.Diamond(), diagram.Accent) { Approved? }
+	@diagram.Node("publish", diagram.Emerald) { Published }
+	@diagram.Node("revise", diagram.Amber) { Revising }
 }`
 
 const diagramFanSnippet = `// A wide fan is where spread ports earn their keep. The gap between two
@@ -116,7 +116,7 @@ const diagramFanSnippet = `// A wide fan is where spread ports earn their keep. 
 	diagram.Edge("event", "audit"),
 	diagram.Edge("event", "metrics"),
 ) {
-	@diagram.Node("event", diagram.Stadium(), diagram.WithTone(diagram.ToneAccent)) { Event }
+	@diagram.Node("event", diagram.Stadium(), diagram.Accent) { Event }
 	@diagram.Node("email") { Email }
 	@diagram.Node("sms") { SMS }
 	// ... push, hook, audit, metrics
@@ -130,9 +130,9 @@ const diagramStateSnippet = `// A cycle lays out fine, and diagram.BiDirectional
 	diagram.Edge("play", "stop", diagram.Label("stop")),
 	diagram.Edge("pause", "stop", diagram.Label("stop")),
 ) {
-	@diagram.Node("stop", diagram.Stadium(), diagram.WithTone(diagram.ToneRose)) { Stopped }
-	@diagram.Node("play", diagram.Stadium(), diagram.WithTone(diagram.ToneEmerald)) { Playing }
-	@diagram.Node("pause", diagram.Stadium(), diagram.WithTone(diagram.ToneAmber)) { Paused }
+	@diagram.Node("stop", diagram.Stadium(), diagram.Rose) { Stopped }
+	@diagram.Node("play", diagram.Stadium(), diagram.Emerald) { Playing }
+	@diagram.Node("pause", diagram.Stadium(), diagram.Amber) { Paused }
 }`
 
 const diagramOrgSnippet = `// Each parent settles over the midpoint of its children, and diagram.Size
@@ -163,10 +163,10 @@ const diagramArrowSnippet = `// The arrowhead shape is per-edge: a filled triang
 ) {
 	@diagram.Node("circle") { Circle }
 	@diagram.Node("square") { Square }
-	@diagram.Node("shape", diagram.WithTone(diagram.ToneAccent)) { Shape }
-	@diagram.Node("canvas", diagram.WithTone(diagram.ToneIndigo)) { Canvas }
+	@diagram.Node("shape", diagram.Accent) { Shape }
+	@diagram.Node("canvas", diagram.Indigo) { Canvas }
 	@diagram.Node("render") { Renderer }
-	@diagram.Node("gpu", diagram.WithTone(diagram.ToneEmerald)) { GPU }
+	@diagram.Node("gpu", diagram.Emerald) { GPU }
 }`
 
 const diagramOrderSnippet = `// Layout follows the edges, not the order the nodes are written in. Both of
@@ -184,15 +184,15 @@ edges := []diagram.Option{
 @diagram.New(edges...) {
 	@diagram.Node("ingest", diagram.Stadium()) { ingest }
 	@diagram.Node("queue") { queue }
-	@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) { worker }
-	@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) { store }
-	@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) { audit }
+	@diagram.Node("worker", diagram.Accent) { worker }
+	@diagram.Node("store", diagram.Emerald) { store }
+	@diagram.Node("audit", diagram.Amber) { audit }
 }
 
 @diagram.New(edges...) { // same edges, declarations reversed
-	@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) { audit }
-	@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) { store }
-	@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) { worker }
+	@diagram.Node("audit", diagram.Amber) { audit }
+	@diagram.Node("store", diagram.Emerald) { store }
+	@diagram.Node("worker", diagram.Accent) { worker }
 	@diagram.Node("queue") { queue }
 	@diagram.Node("ingest", diagram.Stadium()) { ingest }
 }`
@@ -266,7 +266,7 @@ templ Diagram() {
 					@diagram.Node("net", diagram.Stadium()) {
 						@iconNode("Internet", icon.Globe)
 					}
-					@diagram.Node("lb", diagram.WithTone(diagram.ToneAccent)) {
+					@diagram.Node("lb", diagram.Accent) {
 						@iconNode("Load balancer", icon.ArrowsSplit)
 					}
 					@diagram.Node("web1") {
@@ -275,10 +275,10 @@ templ Diagram() {
 					@diagram.Node("web2") {
 						@iconNode("web-2", icon.Browsers)
 					}
-					@diagram.Node("cache", diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("cache", diagram.Amber) {
 						@iconNode("Redis", icon.Lightning)
 					}
-					@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("db", diagram.Emerald) {
 						@iconNode("Postgres", icon.Database)
 					}
 				}
@@ -299,13 +299,13 @@ templ Diagram() {
 					@diagram.Node("vendor", diagram.Stadium()) {
 						@iconNode("Vendored deps", icon.Package)
 					}
-					@diagram.Node("compile", diagram.WithTone(diagram.ToneAccent)) {
+					@diagram.Node("compile", diagram.Accent) {
 						@iconNode("go build", icon.Wrench)
 					}
-					@diagram.Node("binary", diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("binary", diagram.Amber) {
 						@iconNode("Binary", icon.Code)
 					}
-					@diagram.Node("image", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("image", diagram.Emerald) {
 						@iconNode("Image", icon.Cube)
 					}
 				}
@@ -331,40 +331,40 @@ templ Diagram() {
 					@diagram.Node("net", diagram.Stadium()) {
 						@iconNode("Internet", icon.Globe)
 					}
-					@diagram.Node("edge1", diagram.WithTone(diagram.ToneAccent)) {
+					@diagram.Node("edge1", diagram.Accent) {
 						@iconNode("edge-1", icon.ArrowsSplit)
 					}
-					@diagram.Node("edge2", diagram.WithTone(diagram.ToneAccent)) {
+					@diagram.Node("edge2", diagram.Accent) {
 						@iconNode("edge-2", icon.ArrowsSplit)
 					}
-					@diagram.Node("fw", diagram.WithTone(diagram.ToneRose)) {
+					@diagram.Node("fw", diagram.Rose) {
 						@iconNode("firewall", icon.ShieldCheck)
 					}
-					@diagram.Node("core", diagram.WithTone(diagram.ToneIndigo)) {
+					@diagram.Node("core", diagram.Indigo) {
 						@iconNode("core-sw", icon.SquaresFour)
 					}
-					@diagram.Node("sw1", diagram.WithTone(diagram.ToneIndigo)) {
+					@diagram.Node("sw1", diagram.Indigo) {
 						@iconNode("rack-sw", icon.SquaresFour)
 					}
-					@diagram.Node("sw2", diagram.WithTone(diagram.ToneIndigo)) {
+					@diagram.Node("sw2", diagram.Indigo) {
 						@iconNode("floor-sw", icon.SquaresFour)
 					}
-					@diagram.Node("app1", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("app1", diagram.Emerald) {
 						@iconNode("app-01", icon.HardDrives)
 					}
-					@diagram.Node("app2", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("app2", diagram.Emerald) {
 						@iconNode("app-02", icon.HardDrives)
 					}
-					@diagram.Node("nas", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("nas", diagram.Emerald) {
 						@iconNode("nas-01", icon.Database)
 					}
-					@diagram.Node("desk", diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("desk", diagram.Amber) {
 						@iconNode("desk-01", icon.Desktop)
 					}
-					@diagram.Node("laptop", diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("laptop", diagram.Amber) {
 						@iconNode("laptop-02", icon.Laptop)
 					}
-					@diagram.Node("printer", diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("printer", diagram.Amber) {
 						@iconNode("printer-01", icon.Printer)
 					}
 				}
@@ -417,13 +417,13 @@ templ Diagram() {
 					@diagram.Node("review") {
 						In review
 					}
-					@diagram.Node("check", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)) {
+					@diagram.Node("check", diagram.Diamond(), diagram.Accent) {
 						Approved?
 					}
-					@diagram.Node("publish", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("publish", diagram.Emerald) {
 						Published
 					}
-					@diagram.Node("revise", diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("revise", diagram.Amber) {
 						Revising
 					}
 				}
@@ -440,7 +440,7 @@ templ Diagram() {
 					diagram.Edge("event", "audit"),
 					diagram.Edge("event", "metrics"),
 				) {
-					@diagram.Node("event", diagram.Stadium(), diagram.WithTone(diagram.ToneAccent)) {
+					@diagram.Node("event", diagram.Stadium(), diagram.Accent) {
 						Event
 					}
 					@diagram.Node("email") {
@@ -455,10 +455,10 @@ templ Diagram() {
 					@diagram.Node("hook") {
 						Webhook
 					}
-					@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("audit", diagram.Amber) {
 						Audit log
 					}
-					@diagram.Node("metrics", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("metrics", diagram.Emerald) {
 						Metrics
 					}
 				}
@@ -472,13 +472,13 @@ templ Diagram() {
 					diagram.Edge("play", "stop", diagram.Label("stop")),
 					diagram.Edge("pause", "stop", diagram.Label("stop")),
 				) {
-					@diagram.Node("stop", diagram.Stadium(), diagram.WithTone(diagram.ToneRose)) {
+					@diagram.Node("stop", diagram.Stadium(), diagram.Rose) {
 						@iconNode("Stopped", icon.Stop)
 					}
-					@diagram.Node("play", diagram.Stadium(), diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("play", diagram.Stadium(), diagram.Emerald) {
 						@iconNode("Playing", icon.Play)
 					}
-					@diagram.Node("pause", diagram.Stadium(), diagram.WithTone(diagram.ToneAmber)) {
+					@diagram.Node("pause", diagram.Stadium(), diagram.Amber) {
 						@iconNode("Paused", icon.Pause)
 					}
 				}
@@ -499,16 +499,16 @@ templ Diagram() {
 					@diagram.Node("square") {
 						Square
 					}
-					@diagram.Node("shape", diagram.WithTone(diagram.ToneAccent)) {
+					@diagram.Node("shape", diagram.Accent) {
 						Shape
 					}
-					@diagram.Node("canvas", diagram.WithTone(diagram.ToneIndigo)) {
+					@diagram.Node("canvas", diagram.Indigo) {
 						Canvas
 					}
 					@diagram.Node("render") {
 						Renderer
 					}
-					@diagram.Node("gpu", diagram.WithTone(diagram.ToneEmerald)) {
+					@diagram.Node("gpu", diagram.Emerald) {
 						GPU
 					}
 				}
@@ -551,13 +551,13 @@ templ Diagram() {
 						@diagram.Node("queue") {
 							queue
 						}
-						@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) {
+						@diagram.Node("worker", diagram.Accent) {
 							worker
 						}
-						@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) {
+						@diagram.Node("store", diagram.Emerald) {
 							store
 						}
-						@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) {
+						@diagram.Node("audit", diagram.Amber) {
 							audit
 						}
 					}
@@ -565,13 +565,13 @@ templ Diagram() {
 				<div class="space-y-2">
 					<p class="text-xs font-medium text-base-500 dark:text-base-400">declared audit → ingest</p>
 					@diagram.New(orderDemoEdges()...) {
-						@diagram.Node("audit", diagram.WithTone(diagram.ToneAmber)) {
+						@diagram.Node("audit", diagram.Amber) {
 							audit
 						}
-						@diagram.Node("store", diagram.WithTone(diagram.ToneEmerald)) {
+						@diagram.Node("store", diagram.Emerald) {
 							store
 						}
-						@diagram.Node("worker", diagram.WithTone(diagram.ToneAccent)) {
+						@diagram.Node("worker", diagram.Accent) {
 							worker
 						}
 						@diagram.Node("queue") {

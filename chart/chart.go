@@ -5,7 +5,7 @@
 //		chart.Title("Visitors per month"),
 //		chart.Labels("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
 //		chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}),
-//		chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Colored(chart.Emerald)),
+//		chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Emerald),
 //		chart.Area(), chart.Smooth(), chart.Legend(),
 //	)
 //
@@ -59,6 +59,29 @@ type SeriesOption = func(*series)
 
 // Colored sets the series palette color.
 func Colored(c Color) SeriesOption { return func(s *series) { s.color = c } }
+
+// Pre-baked color options.
+var (
+	Accent  = Colored(ColorAccent)
+	Zinc    = Colored(ColorZinc)
+	Red     = Colored(ColorRed)
+	Orange  = Colored(ColorOrange)
+	Amber   = Colored(ColorAmber)
+	Yellow  = Colored(ColorYellow)
+	Lime    = Colored(ColorLime)
+	Green   = Colored(ColorGreen)
+	Emerald = Colored(ColorEmerald)
+	Teal    = Colored(ColorTeal)
+	Cyan    = Colored(ColorCyan)
+	Sky     = Colored(ColorSky)
+	Blue    = Colored(ColorBlue)
+	Indigo  = Colored(ColorIndigo)
+	Violet  = Colored(ColorViolet)
+	Purple  = Colored(ColorPurple)
+	Fuchsia = Colored(ColorFuchsia)
+	Pink    = Colored(ColorPink)
+	Rose    = Colored(ColorRose)
+)
 
 // Config holds chart options.
 type Config struct {
@@ -370,7 +393,7 @@ func drawXLabels(svg *html.Node, cfg Config, g geometry, n int) {
 
 func drawLines(svg *html.Node, cfg Config, g geometry, n int) {
 	for _, s := range cfg.series {
-		style := palette[s.color]
+		style := styleFor(s.color)
 		pts := make([]xy, n)
 		for i, v := range s.values {
 			pts[i] = xy{g.x(i, n), g.y(v)}
@@ -400,7 +423,7 @@ func drawLines(svg *html.Node, cfg Config, g geometry, n int) {
 // tooltips live in the HTML overlay (appendTooltips).
 func drawPoints(svg *html.Node, cfg Config, g geometry, n int) {
 	for _, s := range cfg.series {
-		style := palette[s.color]
+		style := styleFor(s.color)
 		for i, v := range s.values {
 			dot := dom.CustomEl("circle", dom.Marker("chart-point"),
 				dom.Attr("cx", fmtCoord(g.x(i, n))), dom.Attr("cy", fmtCoord(g.y(v))),
@@ -419,7 +442,7 @@ func drawBars(svg *html.Node, cfg Config, g geometry, n int) {
 	baseline := g.y(max(g.lo, 0))
 
 	for si, s := range cfg.series {
-		style := palette[s.color]
+		style := styleFor(s.color)
 		for i, v := range s.values {
 			x := g.left + band*float64(i) + (band-group)/2 + bar*float64(si)
 			y := g.y(v)
@@ -445,7 +468,7 @@ func legend(cfg Config) *html.Node {
 	for _, s := range cfg.series {
 		item := dom.El(atom.Span, dom.Attr("class", "inline-flex items-center gap-1.5"))
 		swatch := dom.El(atom.Span,
-			dom.Attr("class", legendSwatchClasses(palette[s.color])),
+			dom.Attr("class", legendSwatchClasses(styleFor(s.color))),
 			dom.Attr("aria-hidden", "true"))
 		item.AppendChild(swatch)
 		item.AppendChild(dom.Text(s.name))

@@ -9,8 +9,8 @@ import (
 const chartAreaSnippet = `@chart.New(
 	chart.Title("Visitors per month"),
 	chart.Labels("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
-	chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}, chart.Colored(chart.Indigo)),
-	chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Colored(chart.Emerald)),
+	chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}, chart.Indigo),
+	chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Emerald),
 	chart.Area(), chart.Smooth(), chart.Legend(),
 )`
 
@@ -18,12 +18,21 @@ const chartBarsSnippet = `@chart.New(
 	chart.Title("Revenue per quarter"),
 	chart.Bars(),
 	chart.Labels("Q1", "Q2", "Q3", "Q4"),
-	chart.Series("2025", []float64{110, 140, 125, 180}, chart.Colored(chart.Indigo)),
-	chart.Series("2026", []float64{150, 170, 160, 210}, chart.Colored(chart.Blue)),
+	chart.Series("2025", []float64{110, 140, 125, 180}, chart.Indigo),
+	chart.Series("2026", []float64{150, 170, 160, 210}, chart.Blue),
 	chart.Legend(),
 )`
 
 const chartSparklineSnippet = `@chart.New(chart.Sparkline(), chart.Series("Trend", []float64{4, 7, 5, 9, 8, 12, 10, 14}))`
+
+const chartColorsSnippet = `@chart.New(
+	chart.Title("Requests by region"),
+	chart.Labels("Mon", "Tue", "Wed", "Thu", "Fri"),
+	chart.Series("EU", []float64{40, 55, 48, 70, 62}, chart.Teal),
+	chart.Series("US", []float64{30, 38, 52, 45, 58}, chart.Pink),
+	chart.Series("APAC", []float64{18, 24, 21, 33, 40}, chart.Sky),
+	chart.Legend(),
+)`
 
 templ Chart() {
 	@componentPage("chart") {
@@ -36,8 +45,8 @@ templ Chart() {
 				@chart.New(
 					chart.Title("Visitors per month"),
 					chart.Labels("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
-					chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}, chart.Colored(chart.Indigo)),
-					chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Colored(chart.Emerald)),
+					chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}, chart.Indigo),
+					chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Emerald),
 					chart.Area(), chart.Smooth(), chart.Legend(),
 				)
 			</div>
@@ -48,8 +57,20 @@ templ Chart() {
 					chart.Title("Revenue per quarter"),
 					chart.Bars(),
 					chart.Labels("Q1", "Q2", "Q3", "Q4"),
-					chart.Series("2025", []float64{110, 140, 125, 180}, chart.Colored(chart.Indigo)),
-					chart.Series("2026", []float64{150, 170, 160, 210}, chart.Colored(chart.Blue)),
+					chart.Series("2025", []float64{110, 140, 125, 180}, chart.Indigo),
+					chart.Series("2026", []float64{150, 170, 160, 210}, chart.Blue),
+					chart.Legend(),
+				)
+			</div>
+		}
+		@example("Palette colors", chartColorsSnippet) {
+			<div class="w-full">
+				@chart.New(
+					chart.Title("Requests by region"),
+					chart.Labels("Mon", "Tue", "Wed", "Thu", "Fri"),
+					chart.Series("EU", []float64{40, 55, 48, 70, 62}, chart.Teal),
+					chart.Series("US", []float64{30, 38, 52, 45, 58}, chart.Pink),
+					chart.Series("APAC", []float64{18, 24, 21, 33, 40}, chart.Sky),
 					chart.Legend(),
 				)
 			</div>

@@ -60,6 +60,7 @@ type Config struct {
 	Color Color
 	Size  Size
 	pill  bool
+	solid bool
 }
 
 // Option configures a badge.
@@ -79,6 +80,9 @@ func WithSize(s Size) Option { return func(cfg *Config) { cfg.Size = s } }
 
 // Pill rounds the badge fully.
 func Pill() Option { return func(cfg *Config) { cfg.pill = true } }
+
+// Solid makes the badge a solid color rather than a tinted background.
+func Solid() Option { return func(cfg *Config) { cfg.solid = true } }
 
 // Pre-baked color and size options.
 var (

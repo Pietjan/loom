@@ -15,7 +15,7 @@ func TestLineChart(t *testing.T) {
 		chart.Title("Visitors per month"),
 		chart.Labels("Jan", "Feb", "Mar", "Apr"),
 		chart.Series("Visitors", []float64{120, 190, 170, 260}),
-		chart.Series("Signups", []float64{40, 60, 55, 100}, chart.Colored(chart.Emerald)),
+		chart.Series("Signups", []float64{40, 60, 55, 100}, chart.Emerald),
 		chart.Area(), chart.Smooth(), chart.Legend(),
 	)
 	out := testutil.Render(t, c)

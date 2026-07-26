@@ -118,16 +118,33 @@ const (
 	PortsSpread
 )
 
-// Tone accents a node's outline.
-type Tone int
+// Color accents a node's outline: the theme accent, or any hue from the
+// shared palette (the same set badge offers). It is a color rather than a
+// tone - Tone elsewhere in loom (link, text, callout, flash) names an
+// intent or an emphasis, which this is not.
+type Color string
 
 const (
-	ToneDefault Tone = iota
-	ToneAccent
-	ToneIndigo
-	ToneEmerald
-	ToneAmber
-	ToneRose
+	ColorDefault Color = "" // neutral chrome, like every other node
+	ColorAccent  Color = "accent"
+	ColorZinc    Color = "zinc"
+	ColorRed     Color = "red"
+	ColorOrange  Color = "orange"
+	ColorAmber   Color = "amber"
+	ColorYellow  Color = "yellow"
+	ColorLime    Color = "lime"
+	ColorGreen   Color = "green"
+	ColorEmerald Color = "emerald"
+	ColorTeal    Color = "teal"
+	ColorCyan    Color = "cyan"
+	ColorSky     Color = "sky"
+	ColorBlue    Color = "blue"
+	ColorIndigo  Color = "indigo"
+	ColorViolet  Color = "violet"
+	ColorPurple  Color = "purple"
+	ColorFuchsia Color = "fuchsia"
+	ColorPink    Color = "pink"
+	ColorRose    Color = "rose"
 )
 
 // shape is a node's silhouette.
@@ -144,7 +161,7 @@ const (
 const (
 	attrID    = "data-node-id"
 	attrShape = "data-node-shape"
-	attrTone  = "data-node-tone"
+	attrColor = "data-node-color"
 	attrBare  = "data-node-bare"
 	attrW     = "data-node-w"
 	attrH     = "data-node-h"
@@ -312,7 +329,7 @@ func Edge(from, to string, options ...EdgeOption) Option {
 // nodeConfig collects a Node's options.
 type nodeConfig struct {
 	shape shape
-	tone  Tone
+	color Color
 	bare  bool
 	w, h  float64
 }
@@ -330,8 +347,31 @@ func Stadium() NodeOption { return func(n *nodeConfig) { n.shape = stadium } }
 // card) isn't double-framed.
 func Bare() NodeOption { return func(n *nodeConfig) { n.bare = true } }
 
-// WithTone accents a node's outline.
-func WithTone(t Tone) NodeOption { return func(n *nodeConfig) { n.tone = t } }
+// WithColor accents a node's outline.
+func WithColor(c Color) NodeOption { return func(n *nodeConfig) { n.color = c } }
+
+// Pre-baked color options.
+var (
+	Accent  = WithColor(ColorAccent)
+	Zinc    = WithColor(ColorZinc)
+	Red     = WithColor(ColorRed)
+	Orange  = WithColor(ColorOrange)
+	Amber   = WithColor(ColorAmber)
+	Yellow  = WithColor(ColorYellow)
+	Lime    = WithColor(ColorLime)
+	Green   = WithColor(ColorGreen)
+	Emerald = WithColor(ColorEmerald)
+	Teal    = WithColor(ColorTeal)
+	Cyan    = WithColor(ColorCyan)
+	Sky     = WithColor(ColorSky)
+	Blue    = WithColor(ColorBlue)
+	Indigo  = WithColor(ColorIndigo)
+	Violet  = WithColor(ColorViolet)
+	Purple  = WithColor(ColorPurple)
+	Fuchsia = WithColor(ColorFuchsia)
+	Pink    = WithColor(ColorPink)
+	Rose    = WithColor(ColorRose)
+)
 
 // Size fixes a node's box, overriding the inferred size.
 func Size(w, h int) NodeOption {
@@ -351,8 +391,8 @@ func Node(id string, options ...NodeOption) templ.Component {
 		if nc.shape != rounded {
 			dom.SetAttr(div, attrShape, shapeName(nc.shape))
 		}
-		if nc.tone != ToneDefault {
-			dom.SetAttr(div, attrTone, toneName(nc.tone))
+		if nc.color != ColorDefault {
+			dom.SetAttr(div, attrColor, string(nc.color))
 		}
 		if nc.bare {
 			dom.SetAttr(div, attrBare, "")
@@ -384,7 +424,7 @@ func New(options ...Option) templ.Component {
 type collected struct {
 	id    string
 	shape shape
-	tone  Tone
+	color Color
 	bare  bool
 	w, h  float64
 	body  *html.Node // the rendered node element, holding the body
@@ -408,7 +448,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 		c := collected{
 			id:    dom.GetAttr(el, attrID),
 			shape: parseShape(dom.GetAttr(el, attrShape)),
-			tone:  parseTone(dom.GetAttr(el, attrTone)),
+			color: Color(dom.GetAttr(el, attrColor)),
 			bare:  dom.HasAttr(el, attrBare),
 			body:  el,
 			lines: contentLines(el),
@@ -423,7 +463,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 				c.w, c.h = c.w*1.5, c.h*1.7
 			}
 		}
-		for _, a := range []string{attrID, attrShape, attrTone, attrBare, attrW, attrH} {
+		for _, a := range []string{attrID, attrShape, attrColor, attrBare, attrW, attrH} {
 			dom.DelAttr(el, a)
 		}
 		nodes[i] = c
@@ -562,7 +602,7 @@ func drawShape(n collected, b box) *html.Node {
 		return dom.CustomEl("polygon",
 			dom.Marker("diagram-shape"),
 			dom.Attr("points", diamondPoints(b.x, b.y, b.w, b.h)),
-			dom.Attr("class", nodeShapeClasses(n.tone)))
+			dom.Attr("class", nodeShapeClasses(n.color)))
 	}
 	rx := "6" // rounded-md, loom's radius for compact elements
 	if n.shape == stadium {
@@ -575,7 +615,7 @@ func drawShape(n collected, b box) *html.Node {
 		dom.Attr("width", fmtCoord(b.w)),
 		dom.Attr("height", fmtCoord(b.h)),
 		dom.Attr("rx", rx),
-		dom.Attr("class", nodeShapeClasses(n.tone)))
+		dom.Attr("class", nodeShapeClasses(n.color)))
 }
 
 // nodeBody positions the node's rendered body over its box as plain HTML.
@@ -702,22 +742,6 @@ func parseShape(s string) shape {
 	default:
 		return rounded
 	}
-}
-
-var toneNames = map[Tone]string{
-	ToneAccent: "accent", ToneIndigo: "indigo", ToneEmerald: "emerald",
-	ToneAmber: "amber", ToneRose: "rose",
-}
-
-func toneName(t Tone) string { return toneNames[t] }
-
-func parseTone(s string) Tone {
-	for t, name := range toneNames {
-		if name == s {
-			return t
-		}
-	}
-	return ToneDefault
 }
 
 func atof(s string) float64 {

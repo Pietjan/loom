@@ -3,18 +3,53 @@ package pages
 import "github.com/pietjan/loom/progress"
 
 const progressSnippet = `@progress.New(progress.Value(70))
-@progress.New(progress.Value(40), progress.WithEmerald)
-@progress.New(progress.Value(90), progress.WithAmber)
+@progress.New(progress.Value(40), progress.Emerald)
+@progress.New(progress.Value(90), progress.Amber)
 @progress.New(progress.Indeterminate())`
+
+const progressColorsSnippet = `@progress.New(progress.Value(60), progress.Zinc)
+@progress.New(progress.Value(60), progress.Red)
+@progress.New(progress.Value(60), progress.Orange)
+// ... every hue the palette carries, plus the default accent`
+
+// progressPaletteRow is one labelled bar in the palette example.
+templ progressPaletteRow(name string, color progress.Option) {
+	<div class="flex items-center gap-3">
+		<span class="w-16 shrink-0 text-xs text-base-500 dark:text-base-400">{ name }</span>
+		@progress.New(progress.Value(60), color)
+	</div>
+}
 
 templ Progress() {
 	@componentPage("progress") {
 		@example("Determinate and indeterminate", progressSnippet) {
 			<div class="w-full max-w-md space-y-3">
 				@progress.New(progress.Value(70))
-				@progress.New(progress.Value(40), progress.WithEmerald)
-				@progress.New(progress.Value(90), progress.WithAmber)
+				@progress.New(progress.Value(40), progress.Emerald)
+				@progress.New(progress.Value(90), progress.Amber)
 				@progress.New(progress.Indeterminate())
+			</div>
+		}
+		@example("Colors", progressColorsSnippet) {
+			<div class="grid w-full gap-3 sm:grid-cols-2">
+				@progressPaletteRow("zinc", progress.Zinc)
+				@progressPaletteRow("red", progress.Red)
+				@progressPaletteRow("orange", progress.Orange)
+				@progressPaletteRow("amber", progress.Amber)
+				@progressPaletteRow("yellow", progress.Yellow)
+				@progressPaletteRow("lime", progress.Lime)
+				@progressPaletteRow("green", progress.Green)
+				@progressPaletteRow("emerald", progress.Emerald)
+				@progressPaletteRow("teal", progress.Teal)
+				@progressPaletteRow("cyan", progress.Cyan)
+				@progressPaletteRow("sky", progress.Sky)
+				@progressPaletteRow("blue", progress.Blue)
+				@progressPaletteRow("indigo", progress.Indigo)
+				@progressPaletteRow("violet", progress.Violet)
+				@progressPaletteRow("purple", progress.Purple)
+				@progressPaletteRow("fuchsia", progress.Fuchsia)
+				@progressPaletteRow("pink", progress.Pink)
+				@progressPaletteRow("rose", progress.Rose)
 			</div>
 		}
 	}

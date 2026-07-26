@@ -1,18 +1,22 @@
 package diagram
 
-import "github.com/pietjan/loom/internal/styles"
+import (
+	"github.com/pietjan/loom/internal/palette"
+	"github.com/pietjan/loom/internal/styles"
+)
 
-// toneStroke maps a node tone to its complete outline classes. The default
-// tone is in the map too, so exactly one stroke utility is emitted per node
-// (no conflicting stroke-* classes whose CSS source order would decide the
-// winner). Complete literals, so the Tailwind scanner sees them.
-var toneStroke = map[Tone]string{
-	ToneDefault: "stroke-base-300 dark:stroke-base-600",
-	ToneAccent:  "stroke-accent",
-	ToneIndigo:  "stroke-indigo-400 dark:stroke-indigo-500",
-	ToneEmerald: "stroke-emerald-400 dark:stroke-emerald-500",
-	ToneAmber:   "stroke-amber-400 dark:stroke-amber-500",
-	ToneRose:    "stroke-rose-400 dark:stroke-rose-500",
+// outlineStroke resolves a node's accent color to its outline classes. The
+// three cases are exhaustive and each contributes exactly one stroke
+// utility, so no node ever wears conflicting stroke-* classes whose CSS
+// source order would decide the winner.
+func outlineStroke(c Color) string {
+	if c == ColorAccent {
+		return "stroke-accent" // a theme token, with no palette row
+	}
+	if s, ok := palette.Of(palette.Color(c)); ok {
+		return s.Stroke
+	}
+	return "stroke-base-300 dark:stroke-base-600"
 }
 
 // rootClasses styles the stage: a positioned box of the diagram's natural
@@ -31,10 +35,10 @@ func canvasClasses() string {
 }
 
 // Strokes are 1px to match loom's borders, which are `border` everywhere.
-func nodeShapeClasses(t Tone) string {
+func nodeShapeClasses(c Color) string {
 	var b styles.Builder
 	b.Add("fill-white stroke-1 dark:fill-base-800")
-	styles.Match(&b, t, toneStroke)
+	b.Add(outlineStroke(c))
 	return b.String()
 }
 

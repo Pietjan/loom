@@ -59,9 +59,9 @@ http.ListenAndServe(":8080", loom.Middleware(mux))
 text, link, separator, card, callout, chart.
 
 **Data display** - avatar (photo/initials, status, stacking), breadcrumbs,
-progress (determinate + indeterminate), skeleton, pagination (link-based), stat
-(KPI tile - compose a delta badge as children, a sparkline as the
-background), timeline
+progress (determinate + indeterminate, full palette), skeleton, pagination
+(link-based), stat (KPI tile - compose a delta badge as children, a sparkline as
+the background), timeline
 (composable indicators, statuses, horizontal mode), kanban (board/column/card -
 static markup; reordering is your app's concern), description (`<dl>`
 term/detail), kbd. All pure markup + CSS.
@@ -76,7 +76,7 @@ percentages over the scaling SVG - reused, not reinvented, still no JS):
 	chart.Title("Visitors per month"),
 	chart.Labels("Jan", "Feb", "Mar", "Apr", "May", "Jun"),
 	chart.Series("Visitors", []float64{120, 190, 170, 220, 300, 260}),
-	chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Colored(chart.Emerald)),
+	chart.Series("Signups", []float64{40, 60, 55, 90, 120, 100}, chart.Emerald),
 	chart.Area(), chart.Smooth(), chart.Legend(),
 )
 ```
@@ -158,9 +158,14 @@ post-processing, tests, and your own CSS.
 
 Styling is Tailwind class strings in Go (`style.go` per component, complete
 literals only - the scanner must see them), merged with user classes via
-tailwind-merge (user wins), sorted canonically for stable output. Structural CSS
-that utilities can't express (popover fallbacks, `::picker(select)`, sidebar
-media rules, dialog transitions) lives in `cmd/css/loom.css` - embedded into the
+tailwind-merge (user wins), sorted canonically for stable output. Hue shades are
+not per-component: the 18 colors and the shade each role needs (tinted surface,
+solid surface, mark) live once in `internal/palette`, so a badge, a timeline
+indicator, a progress bar, a chart series and a diagram node outline of one hue
+are the same color; every one of them names it the same way too - `ColorRed` the
+constant, `Red` the pre-baked option. Structural CSS that utilities can't
+express (popover fallbacks, `::picker(select)`, sidebar media rules, dialog
+transitions) lives in `cmd/css/loom.css` - embedded into the
 generated entry file by `cmd/css`, keyed on `data-ui` markers, inside
 `@layer components` so your CSS always overrides it.
 

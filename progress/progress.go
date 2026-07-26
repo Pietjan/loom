@@ -21,14 +21,30 @@ import (
 	"github.com/pietjan/loom/internal/render"
 )
 
-// Color selects the bar color.
+// Color selects the bar color: the theme accent, or any hue from the
+// shared palette (the same set badge offers).
 type Color string
 
 const (
-	Accent  Color = "accent" // default
-	Emerald Color = "emerald"
-	Amber   Color = "amber"
-	Red     Color = "red"
+	ColorAccent  Color = "accent" // default
+	ColorZinc    Color = "zinc"
+	ColorRed     Color = "red"
+	ColorOrange  Color = "orange"
+	ColorAmber   Color = "amber"
+	ColorYellow  Color = "yellow"
+	ColorLime    Color = "lime"
+	ColorGreen   Color = "green"
+	ColorEmerald Color = "emerald"
+	ColorTeal    Color = "teal"
+	ColorCyan    Color = "cyan"
+	ColorSky     Color = "sky"
+	ColorBlue    Color = "blue"
+	ColorIndigo  Color = "indigo"
+	ColorViolet  Color = "violet"
+	ColorPurple  Color = "purple"
+	ColorFuchsia Color = "fuchsia"
+	ColorPink    Color = "pink"
+	ColorRose    Color = "rose"
 )
 
 // Config holds progress options.
@@ -70,9 +86,25 @@ func WithColor(col Color) Option { return func(c *Config) { c.Color = col } }
 
 // Pre-baked color options.
 var (
-	WithEmerald = WithColor(Emerald)
-	WithAmber   = WithColor(Amber)
-	WithRed     = WithColor(Red)
+	Accent  = WithColor(ColorAccent)
+	Zinc    = WithColor(ColorZinc)
+	Red     = WithColor(ColorRed)
+	Orange  = WithColor(ColorOrange)
+	Amber   = WithColor(ColorAmber)
+	Yellow  = WithColor(ColorYellow)
+	Lime    = WithColor(ColorLime)
+	Green   = WithColor(ColorGreen)
+	Emerald = WithColor(ColorEmerald)
+	Teal    = WithColor(ColorTeal)
+	Cyan    = WithColor(ColorCyan)
+	Sky     = WithColor(ColorSky)
+	Blue    = WithColor(ColorBlue)
+	Indigo  = WithColor(ColorIndigo)
+	Violet  = WithColor(ColorViolet)
+	Purple  = WithColor(ColorPurple)
+	Fuchsia = WithColor(ColorFuchsia)
+	Pink    = WithColor(ColorPink)
+	Rose    = WithColor(ColorRose)
 )
 
 // New renders a progress bar as a templ component.
@@ -84,7 +116,7 @@ func New(options ...Option) templ.Component {
 
 // Node builds the progress node.
 func Node(_ context.Context, options ...Option) (*html.Node, error) {
-	cfg := Config{Max: 100, Color: Accent}
+	cfg := Config{Max: 100, Color: ColorAccent}
 	for _, opt := range options {
 		opt(&cfg)
 	}

@@ -1088,9 +1088,9 @@ func TestGolden(t *testing.T) {
 	g("diagram-decision",
 		[]templ.Component{
 			node("start", "Start", diagram.Stadium()),
-			node("ok", "OK?", diagram.Diamond(), diagram.WithTone(diagram.ToneAccent)),
-			node("yes", "Ship", diagram.WithTone(diagram.ToneEmerald)),
-			node("no", "Fix", diagram.WithTone(diagram.ToneRose)),
+			node("ok", "OK?", diagram.Diamond(), diagram.Accent),
+			node("yes", "Ship", diagram.Emerald),
+			node("no", "Fix", diagram.Rose),
 		},
 		diagram.Edge("start", "ok"),
 		diagram.Edge("ok", "yes", diagram.Label("yes")),

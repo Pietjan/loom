@@ -15,6 +15,44 @@ const badgeSnippet = `@badge.New() { Zinc }
 	With icon
 }`
 
+const badgeColorsSnippet = `@badge.New(badge.Zinc) { Zinc }
+@badge.New(badge.Red) { Red }
+@badge.New(badge.Orange) { Orange }
+@badge.New(badge.Amber) { Amber }
+@badge.New(badge.Yellow) { Yellow }
+@badge.New(badge.Lime) { Lime }
+@badge.New(badge.Green) { Green }
+@badge.New(badge.Emerald) { Emerald }
+@badge.New(badge.Teal) { Teal }
+@badge.New(badge.Cyan) { Cyan }
+@badge.New(badge.Sky) { Sky }
+@badge.New(badge.Blue) { Blue }
+@badge.New(badge.Indigo) { Indigo }
+@badge.New(badge.Violet) { Violet }
+@badge.New(badge.Purple) { Purple }
+@badge.New(badge.Fuchsia) { Fuchsia }
+@badge.New(badge.Pink) { Pink }
+@badge.New(badge.Rose) { Rose }`
+
+const badgeSolidSnippet = `@badge.New(badge.Zinc, badge.Solid()) { Zinc }
+@badge.New(badge.Red, badge.Solid()) { Red }
+@badge.New(badge.Orange, badge.Solid()) { Orange }
+@badge.New(badge.Amber, badge.Solid()) { Amber }
+@badge.New(badge.Yellow, badge.Solid()) { Yellow }
+@badge.New(badge.Lime, badge.Solid()) { Lime }
+@badge.New(badge.Green, badge.Solid()) { Green }
+@badge.New(badge.Emerald, badge.Solid()) { Emerald }
+@badge.New(badge.Teal, badge.Solid()) { Teal }
+@badge.New(badge.Cyan, badge.Solid()) { Cyan }
+@badge.New(badge.Sky, badge.Solid()) { Sky }
+@badge.New(badge.Blue, badge.Solid()) { Blue }
+@badge.New(badge.Indigo, badge.Solid()) { Indigo }
+@badge.New(badge.Violet, badge.Solid()) { Violet }
+@badge.New(badge.Purple, badge.Solid()) { Purple }
+@badge.New(badge.Fuchsia, badge.Solid()) { Fuchsia }
+@badge.New(badge.Pink, badge.Solid()) { Pink }
+@badge.New(badge.Rose, badge.Solid()) { Rose }`
+
 templ Badge() {
 	@componentPage("badge") {
 		@example("Variants", badgeSnippet) {
@@ -36,6 +74,118 @@ templ Badge() {
 			@badge.New(badge.Green) {
 				@icon.New(icon.CheckCircle)
 				With icon
+			}
+		}
+		@example("Colors", badgeColorsSnippet) {
+			@badge.New(badge.Zinc) {
+				Zinc
+			}
+			@badge.New(badge.Red) {
+				Red
+			}
+			@badge.New(badge.Orange) {
+				Orange
+			}
+			@badge.New(badge.Amber) {
+				Amber
+			}
+			@badge.New(badge.Yellow) {
+				Yellow
+			}
+			@badge.New(badge.Lime) {
+				Lime
+			}
+			@badge.New(badge.Green) {
+				Green
+			}
+			@badge.New(badge.Emerald) {
+				Emerald
+			}
+			@badge.New(badge.Teal) {
+				Teal
+			}
+			@badge.New(badge.Cyan) {
+				Cyan
+			}
+			@badge.New(badge.Sky) {
+				Sky
+			}
+			@badge.New(badge.Blue) {
+				Blue
+			}
+			@badge.New(badge.Indigo) {
+				Indigo
+			}
+			@badge.New(badge.Violet) {
+				Violet
+			}
+			@badge.New(badge.Purple) {
+				Purple
+			}
+			@badge.New(badge.Fuchsia) {
+				Fuchsia
+			}
+			@badge.New(badge.Pink) {
+				Pink
+			}
+			@badge.New(badge.Rose) {
+				Rose
+			}
+		}
+		@example("Solid", badgeSolidSnippet) {
+			@badge.New(badge.Zinc, badge.Solid()) {
+				Zinc
+			}
+			@badge.New(badge.Red, badge.Solid()) {
+				Red
+			}
+			@badge.New(badge.Orange, badge.Solid()) {
+				Orange
+			}
+			@badge.New(badge.Amber, badge.Solid()) {
+				Amber
+			}
+			@badge.New(badge.Yellow, badge.Solid()) {
+				Yellow
+			}
+			@badge.New(badge.Lime, badge.Solid()) {
+				Lime
+			}
+			@badge.New(badge.Green, badge.Solid()) {
+				Green
+			}
+			@badge.New(badge.Emerald, badge.Solid()) {
+				Emerald
+			}
+			@badge.New(badge.Teal, badge.Solid()) {
+				Teal
+			}
+			@badge.New(badge.Cyan, badge.Solid()) {
+				Cyan
+			}
+			@badge.New(badge.Sky, badge.Solid()) {
+				Sky
+			}
+			@badge.New(badge.Blue, badge.Solid()) {
+				Blue
+			}
+			@badge.New(badge.Indigo, badge.Solid()) {
+				Indigo
+			}
+			@badge.New(badge.Violet, badge.Solid()) {
+				Violet
+			}
+			@badge.New(badge.Purple, badge.Solid()) {
+				Purple
+			}
+			@badge.New(badge.Fuchsia, badge.Solid()) {
+				Fuchsia
+			}
+			@badge.New(badge.Pink, badge.Solid()) {
+				Pink
+			}
+			@badge.New(badge.Rose, badge.Solid()) {
+				Rose
 			}
 		}
 	}

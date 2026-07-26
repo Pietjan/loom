@@ -1,82 +1,68 @@
 package chart
 
-import "github.com/pietjan/loom/internal/styles"
+import (
+	"github.com/pietjan/loom/internal/palette"
+	"github.com/pietjan/loom/internal/styles"
+)
 
-// Color selects a series palette. The first series defaults to Accent,
-// later ones walk defaultOrder.
+// Color selects a series color: the theme accent, or any hue from the
+// shared palette (the same set badge offers). The first series defaults
+// to ColorAccent, later ones walk defaultOrder.
 type Color string
 
 const (
-	Accent  Color = "accent"
-	Indigo  Color = "indigo"
-	Blue    Color = "blue"
-	Emerald Color = "emerald"
-	Amber   Color = "amber"
-	Rose    Color = "rose"
-	Violet  Color = "violet"
-	Cyan    Color = "cyan"
+	ColorAccent  Color = "accent"
+	ColorZinc    Color = "zinc"
+	ColorRed     Color = "red"
+	ColorOrange  Color = "orange"
+	ColorAmber   Color = "amber"
+	ColorYellow  Color = "yellow"
+	ColorLime    Color = "lime"
+	ColorGreen   Color = "green"
+	ColorEmerald Color = "emerald"
+	ColorTeal    Color = "teal"
+	ColorCyan    Color = "cyan"
+	ColorSky     Color = "sky"
+	ColorBlue    Color = "blue"
+	ColorIndigo  Color = "indigo"
+	ColorViolet  Color = "violet"
+	ColorPurple  Color = "purple"
+	ColorFuchsia Color = "fuchsia"
+	ColorPink    Color = "pink"
+	ColorRose    Color = "rose"
 )
 
-var defaultOrder = []Color{Accent, Indigo, Blue, Emerald, Amber, Rose, Violet, Cyan}
+// defaultOrder is the walk for unnamed series - a hand-picked subset, not
+// the whole palette: eight hues far enough apart to stay distinguishable
+// beside each other, which the full eighteen are not.
+var defaultOrder = []Color{ColorAccent, ColorIndigo, ColorBlue, ColorEmerald, ColorAmber, ColorRose, ColorViolet, ColorCyan}
 
-// seriesStyle maps a palette color to the classes for each SVG part.
-// Complete literals, so the Tailwind scanner sees them.
+// seriesStyle is the set of classes one series wears, one per SVG part.
 type seriesStyle struct {
 	line string // stroke on the line path
-	fill string // translucent fill on the area path / bars
-	dot  string // point markers
+	fill string // translucent fill on the area path
+	dot  string // point markers, bars
 	swat string // legend swatch
 }
 
-var palette = map[Color]seriesStyle{
-	Accent: {
-		line: "stroke-accent",
-		fill: "fill-accent/15",
-		dot:  "fill-accent",
-		swat: "bg-accent",
-	},
-	Indigo: {
-		line: "stroke-indigo-500",
-		fill: "fill-indigo-500/15",
-		dot:  "fill-indigo-500",
-		swat: "bg-indigo-500",
-	},
-	Blue: {
-		line: "stroke-blue-500",
-		fill: "fill-blue-500/15",
-		dot:  "fill-blue-500",
-		swat: "bg-blue-500",
-	},
-	Emerald: {
-		line: "stroke-emerald-500",
-		fill: "fill-emerald-500/15",
-		dot:  "fill-emerald-500",
-		swat: "bg-emerald-500",
-	},
-	Amber: {
-		line: "stroke-amber-500",
-		fill: "fill-amber-500/15",
-		dot:  "fill-amber-500",
-		swat: "bg-amber-500",
-	},
-	Rose: {
-		line: "stroke-rose-500",
-		fill: "fill-rose-500/15",
-		dot:  "fill-rose-500",
-		swat: "bg-rose-500",
-	},
-	Violet: {
-		line: "stroke-violet-500",
-		fill: "fill-violet-500/15",
-		dot:  "fill-violet-500",
-		swat: "bg-violet-500",
-	},
-	Cyan: {
-		line: "stroke-cyan-500",
-		fill: "fill-cyan-500/15",
-		dot:  "fill-cyan-500",
-		swat: "bg-cyan-500",
-	},
+// accentStyle is the theme accent, which is a token rather than a hue and
+// so has no row in the shared palette.
+var accentStyle = seriesStyle{
+	line: "stroke-accent",
+	fill: "fill-accent/15",
+	dot:  "fill-accent",
+	swat: "bg-accent",
+}
+
+// styleFor resolves a series color to its classes. The hue rows come from
+// the shared palette at mark strength, so a chart line, a progress bar and
+// a solid badge of one hue are the same color.
+func styleFor(c Color) seriesStyle {
+	s, ok := palette.Of(palette.Color(c))
+	if !ok {
+		return accentStyle
+	}
+	return seriesStyle{line: s.Stroke, fill: s.Wash, dot: s.Fill, swat: s.Bg}
 }
 
 func rootClasses() string {
