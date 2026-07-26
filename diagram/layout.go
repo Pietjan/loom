@@ -62,7 +62,7 @@ type vertex struct {
 }
 
 // layout runs the full Sugiyama pipeline. Every phase iterates slices in
-// insertion order and tie-breaks by index — never map iteration — so the
+// insertion order and tie-breaks by index - never map iteration - so the
 // output is deterministic and golden files don't flake.
 func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, ports PortMode, sp gaps) (laid, error) {
 	if len(nodes) == 0 {
@@ -150,7 +150,7 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, ports 
 	brandesKopf(layers, verts, up, down, crossExtent(dir, verts), sp.node)
 
 	// 5. Resolve the routing on the cross axis, then stack the layers along the
-	// flow axis — in that order, because a gap crowded with cross-runs needs
+	// flow axis - in that order, because a gap crowded with cross-runs needs
 	// more room between its layers than one an edge crosses straight.
 	//
 	// Both steps are for orthogonal routing only: Direct mode draws each edge
@@ -179,8 +179,8 @@ func layout(nodes []layoutNode, edges []edge, dir Direction, direct bool, ports 
 // DAG; their drawn direction is restored later.
 //
 // Which edge of a cycle ends up reversed decides the whole shape of a cyclic
-// drawing — the node that keeps its outgoing edge lays out above the one that
-// gives its up — so where the traversal starts matters a great deal. Starting
+// drawing - the node that keeps its outgoing edge lays out above the one that
+// gives its up - so where the traversal starts matters a great deal. Starting
 // at whichever node happened to be declared first meant moving two
 // @diagram.Node blocks past each other could silently redraw the diagram.
 //
@@ -325,7 +325,7 @@ func countCrossings(layers [][]int, verts []vertex, down [][]int) int {
 	return total
 }
 
-// crossExtent measures a vertex across the flow — the axis Brandes–Köpf lays
+// crossExtent measures a vertex across the flow - the axis Brandes–Köpf lays
 // out and the ports spread along.
 func crossExtent(dir Direction, verts []vertex) func(int) float64 {
 	return func(vi int) float64 {
@@ -340,7 +340,7 @@ func crossExtent(dir Direction, verts []vertex) func(int) float64 {
 // tracks inside the band between them.
 //
 // A gap holds its tracks at even spacing, and grows past the configured layer
-// gap only when it has more of them than will fit — so an ordinary drawing
+// gap only when it has more of them than will fit - so an ordinary drawing
 // keeps exactly the spacing it asks for, and a crowded one stops folding its
 // corners into each other. The band runs from the bottom of the thickest box in
 // the layer above to the top of the thickest in the layer below, so every stub
@@ -380,7 +380,7 @@ func assignFlow(dir Direction, sp gaps, layers [][]int, verts []vertex, ch *chan
 		height := sp.layer
 		if n > 0 {
 			// A track needs a corner's worth of clearance on each side, but
-			// never more than half the gap it was given — a deliberately tight
+			// never more than half the gap it was given - a deliberately tight
 			// gap draws tight corners rather than being overruled.
 			if need := float64(n+1) * math.Min(minBend, sp.layer/2); need > height {
 				height = need
@@ -399,8 +399,8 @@ func assignFlow(dir Direction, sp gaps, layers [][]int, verts []vertex, ch *chan
 //
 // Each vertex is aligned with a median neighbor, chaining vertices into blocks
 // that share one coordinate; the blocks are then compacted against the minimum
-// gap. That runs four times — aligning against the layer above and against the
-// one below, packing toward each side of the cross axis — and the four
+// gap. That runs four times - aligning against the layer above and against the
+// one below, packing toward each side of the cross axis - and the four
 // candidates are averaged, so no single pass's directional bias survives. Long
 // edges come out straight and a parent settles on the true midpoint of its
 // children, which the naive averaging sweep only approximated.
@@ -796,13 +796,13 @@ type portPlan struct {
 // whether they run along the flow or were reversed to break a cycle, and the
 // lanes keep the same order on every face: forward edges on the low side, back
 // edges on the high side. Using the same convention at both ends is what stops
-// an edge and the back edge beside it from swapping sides and crossing over —
+// an edge and the back edge beside it from swapping sides and crossing over -
 // ordering the lanes per face (by drawn direction, or by where the neighbours
 // sit) puts the back edge on the left at one node and the right at the other,
 // which is exactly the X it is meant to avoid.
 //
 // Within a lane the edges share one port, so fans and joins read as one point.
-// PortsSpread instead gives every edge its own port, ordered by its neighbour —
+// PortsSpread instead gives every edge its own port, ordered by its neighbour -
 // busier, but each connection stays visually distinct.
 func assignPorts(dir Direction, mode PortMode, verts []vertex, edgeChains [][]int, reversed []bool) portPlan {
 	// Ports sit this far apart, capped so a wide box doesn't fling them to the
@@ -859,8 +859,8 @@ func assignPorts(dir Direction, mode PortMode, verts []vertex, edgeChains [][]in
 				}
 			} else {
 				// Two lanes: edges running along the flow, and back edges.
-				// Order them by where they actually head — the mean position of
-				// the next stop along each chain — so a lane sits on the side
+				// Order them by where they actually head - the mean position of
+				// the next stop along each chain - so a lane sits on the side
 				// its edges travel toward. That matters for a long edge, whose
 				// next stop is a routing dummy the ordering phase has already
 				// placed: put the lane on the other side and the edge weaves
@@ -890,8 +890,8 @@ func assignPorts(dir Direction, mode PortMode, verts []vertex, edgeChains [][]in
 					if lanes[a].mean != lanes[b].mean {
 						return lanes[a].mean < lanes[b].mean
 					}
-					// Both lanes head for the same place — an antiparallel pair
-					// between adjacent layers — so position says nothing. Fall
+					// Both lanes head for the same place - an antiparallel pair
+					// between adjacent layers - so position says nothing. Fall
 					// back to the flow lane first. This tie-break must resolve
 					// the same way at both ends of an edge, which is why it keys
 					// off the reversal flag and not the direction the arrow
@@ -919,7 +919,7 @@ func assignPorts(dir Direction, mode PortMode, verts []vertex, edgeChains [][]in
 }
 
 // straighten pulls an edge's two ports onto a common cross coordinate when they
-// sit closer than minBend — a step that small cannot render as a corner (see
+// sit closer than minBend - a step that small cannot render as a corner (see
 // minBend), so it would come out as a wobble.
 //
 // Only a port that is its face's sole attachment may move: one that belongs to

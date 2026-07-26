@@ -12,7 +12,7 @@ tools = -modfile=tools/go.mod
 site_tools = -modfile=../tools/go.mod
 
 # Live-reload watcher. The path is the repo root rather than site/, so editing
-# a component rebuilds the page that demonstrates it — and because the site's
+# a component rebuilds the page that demonstrates it - and because the site's
 # reference sections are parsed from the library's source at startup, a doc
 # comment would otherwise stay stale until the server was restarted by hand.
 watch_path = .
@@ -63,7 +63,7 @@ audit: test
 ## test: run all tests
 # Generates first: without the *_templ.go files the site's pages package does
 # not compile. Builds the CSS too, because the class-conflict test reads the
-# compiled stylesheet and skips itself when it is missing — a test that opts
+# compiled stylesheet and skips itself when it is missing - a test that opts
 # out silently is worse than no test.
 .PHONY: test
 test: site/generate site/css

@@ -1,6 +1,6 @@
 // Filters the icon browser grid as you type. Progressive enhancement: with
 // the script blocked, the grid still renders every icon and the browser's own
-// find-in-page still works — only the search box goes away.
+// find-in-page still works - only the search box goes away.
 (function () {
 	var root = document.querySelector('[data-icon-browser]');
 	if (!root) return;

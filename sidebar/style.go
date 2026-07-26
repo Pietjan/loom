@@ -4,7 +4,7 @@ import "github.com/pietjan/loom/internal/styles"
 
 // classes style the sidebar surface. Its responsive popover-vs-static
 // behavior (display/position/inset overrides, slide-in transition,
-// backdrop) is structural CSS in css/loom.css ([data-ui=sidebar]) — it
+// backdrop) is structural CSS in css/loom.css ([data-ui=sidebar]) - it
 // must override popover user-agent styles, which utility classes must not
 // try to fight.
 func classes() string {

@@ -2,7 +2,7 @@
 //
 // Each component keeps its class recipe in a single classes(cfg) function
 // in its style.go, built with Builder. Class strings must be complete
-// literals in Go source — never assembled with fmt.Sprintf fragments — or
+// literals in Go source - never assembled with fmt.Sprintf fragments - or
 // the Tailwind CLI scanner will not see them and the utilities will be
 // missing from the compiled CSS.
 package styles
@@ -30,7 +30,7 @@ func (b *Builder) If(cond bool, classes string) {
 	}
 }
 
-// Match appends the fragment mapped to key, if any — the variant/size
+// Match appends the fragment mapped to key, if any - the variant/size
 // switch replacement.
 func Match[K comparable](b *Builder, key K, m map[K]string) {
 	if classes, ok := m[key]; ok {
@@ -44,7 +44,7 @@ func (b *Builder) String() string {
 }
 
 // Merge resolves Tailwind conflicts between the component recipe and
-// user-supplied classes — user always wins — and returns the result in
+// user-supplied classes - user always wins - and returns the result in
 // canonical order (stable golden files).
 func Merge(component, user string) string {
 	if user == "" {

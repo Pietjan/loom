@@ -18,7 +18,7 @@ const tmpl = `/*
  * Design tokens for loom components: the base neutral palette
  * (--color-base-*) and the accent triple (--color-accent*).
  *
- * @theme is a native Tailwind v4 directive — it emits these as :root
+ * @theme is a native Tailwind v4 directive - it emits these as :root
  * custom properties AND registers them as utilities (bg-accent,
  * text-base-500, ...). The dark-mode accent overrides below are plain
  * CSS in @layer theme, not part of @theme.
@@ -45,7 +45,7 @@ const tmpl = `/*
     /* Dark accent tracks Tailwind's default dark: variant (media query),
      * and also a manual .dark class for apps using a class toggle. */
     @media (prefers-color-scheme: dark) {
-        /* :root:not(.light) — a real 0,2,0 selector, not :where(), so it
+        /* :root:not(.light) - a real 0,2,0 selector, not :where(), so it
          * beats the @theme :root light default; an explicit .light opts out. */
         :root:not(.light) {
             --color-accent: var({{.Accent.Dark.Accent}});
@@ -114,7 +114,7 @@ type AccentDark struct {
 }
 
 // Accents is the curated accent table: per color, which shades work as
-// accent surface, accent-colored text, and text on the accent surface —
+// accent surface, accent-colored text, and text on the accent surface -
 // in light and dark mode.
 var Accents = map[Color]Accent{
 	Slate:   monochromeAccent(Slate),

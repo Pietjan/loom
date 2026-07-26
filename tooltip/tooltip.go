@@ -7,7 +7,7 @@
 //	}
 //
 // The tooltip shows on hover and on keyboard focus (:hover /
-// :focus-within — works in every browser). The wrapped element gets
+// :focus-within - works in every browser). The wrapped element gets
 // aria-describedby pointing at the tooltip text. Where the Interest
 // Invokers API exists (Chromium), interestfor is added to a wrapped
 // button/link as progressive enhancement (hover-intent delay, Esc to

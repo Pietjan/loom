@@ -10,7 +10,7 @@
 // via button.Label (or an aria-label attribute); rendering fails otherwise.
 // Group arranges buttons as a segmented control.
 //
-// button.Href renders an <a> instead — a link wearing a button's clothes,
+// button.Href renders an <a> instead - a link wearing a button's clothes,
 // for navigation that should look like an action:
 //
 //	@button.New(button.Primary, button.Href("/signup")) { Get started }
@@ -34,12 +34,12 @@ import (
 )
 
 // ErrNoAccessibleName is returned for icon-only buttons without a label.
-var ErrNoAccessibleName = errors.New("button: icon-only button needs an accessible name — add button.Label(...) or an aria-label attribute")
+var ErrNoAccessibleName = errors.New("button: icon-only button needs an accessible name - add button.Label(...) or an aria-label attribute")
 
 // ErrHrefWithType is returned when a link button is also given a type. An
 // anchor cannot submit or reset a form, so the combination would silently
 // render a link that does nothing the caller asked for.
-var ErrHrefWithType = errors.New("button: button.Href cannot be combined with button.WithType — an anchor cannot submit or reset a form")
+var ErrHrefWithType = errors.New("button: button.Href cannot be combined with button.WithType - an anchor cannot submit or reset a form")
 
 // New renders a button as a templ component.
 func New(options ...Option) templ.Component {
@@ -48,7 +48,7 @@ func New(options ...Option) templ.Component {
 	})
 }
 
-// Node builds the <button> node — or, with Href, the <a> (or, when also
+// Node builds the <button> node - or, with Href, the <a> (or, when also
 // disabled, the inert <span>) that wears the same clothes.
 func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 	cfg := Config{Variant: VariantOutline, Size: SizeBase}
@@ -98,7 +98,7 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 }
 
 // element picks the tag: a real button unless Href asked for a link, and
-// a span rather than an href-less anchor when that link is disabled —
+// a span rather than an href-less anchor when that link is disabled -
 // anchors without href are not focusable, and span says so honestly.
 func element(c Config) atom.Atom {
 	switch {

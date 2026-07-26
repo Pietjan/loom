@@ -2,7 +2,7 @@ package timeline
 
 import "github.com/pietjan/loom/internal/styles"
 
-// Tinted circle palette — the same recipe as badge, so colored indicators
+// Tinted circle palette - the same recipe as badge, so colored indicators
 // and badges on one page read as a single system.
 var colorClasses = map[Color]string{
 	ColorZinc:    "bg-zinc-400/15 text-zinc-700 dark:bg-zinc-400/25 dark:text-zinc-300",

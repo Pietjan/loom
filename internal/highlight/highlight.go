@@ -13,7 +13,7 @@ import (
 )
 
 // Into fills parent with the highlighted source. No language, an unknown
-// language, and a tokenizer error all degrade to a plain text child —
+// language, and a tokenizer error all degrade to a plain text child -
 // highlighting never breaks a page render.
 func Into(parent *html.Node, src, lang string) {
 	if lang == "" {

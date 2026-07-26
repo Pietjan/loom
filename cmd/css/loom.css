@@ -32,7 +32,7 @@
 
 @layer components {
     /* Typography defaults for the base font stack are intentionally NOT
-     * set here — loom styles components, not your document. */
+     * set here - loom styles components, not your document. */
 
     /* Range slider: reset the native control, then draw a track and a
      * thumb. The pseudo-elements can't be reached by Tailwind. */
@@ -185,7 +185,7 @@
      * checkmark is a mask filled with --color-accent-foreground rather
      * than a hardcoded white glyph: neutral accents invert in dark mode
      * (white surface, dark foreground), and amber/yellow/lime already sit
-     * dark-on-light in both modes — a white checkmark vanishes on both. */
+     * dark-on-light in both modes - a white checkmark vanishes on both. */
     [data-ui="checkbox"]:checked::after {
         content: "";
         display: block;
@@ -259,7 +259,7 @@
         }
 
         /* The closed-state clone of the selected option: the browser
-         * copies the option's children, not its layout — lay them out
+         * copies the option's children, not its layout - lay them out
          * like an option row, and drop the cloned checkmark icon. */
         select[data-ui="picker"] selectedcontent {
             display: flex;
@@ -285,7 +285,7 @@
     /* A <details name> disclosure group laid out as tabs: summaries form
      * row 1 (the tab bar), the open panel spans row 2. Requires
      * ::details-content; without it the group stays a vertical accordion
-     * — content is never lost. grid-template-columns is a per-instance
+     * - content is never lost. grid-template-columns is a per-instance
      * inline style (one column per handle + 1fr filler). */
     @supports selector(::details-content) {
         [data-ui="tabs-group"] {
@@ -306,7 +306,7 @@
             display: contents;
         }
 
-        /* The open tab can't be mouse-closed (keyboard still can — the
+        /* The open tab can't be mouse-closed (keyboard still can - the
          * one honest wart of disclosure-as-tabs). */
         [data-ui="tabs-group"] > details[open] > summary {
             pointer-events: none;
@@ -392,7 +392,7 @@
 
     /* ---- sidebar ---- */
 
-    /* Narrow viewports: the sidebar is a popover — hidden until toggled,
+    /* Narrow viewports: the sidebar is a popover - hidden until toggled,
      * then a full-height slide-in panel with backdrop, light dismiss and
      * Esc from the platform. */
     [data-ui="sidebar"] {
@@ -427,7 +427,7 @@
         }
     }
 
-    /* Wide viewports: override the popover's hidden state — the sidebar
+    /* Wide viewports: override the popover's hidden state - the sidebar
      * is statically visible in the layout and the toggle disappears
      * (lg:hidden in its classes). */
     @media (min-width: 64rem) {
@@ -491,7 +491,7 @@
     [data-ui="code"] .gi {
         color: var(--loom-code-ins);
     }
-    /* Mode-independent token colors — no dark override needed. */
+    /* Mode-independent token colors - no dark override needed. */
     [data-ui="code"] :is(.m, .mb, .mf, .mh, .mi, .il, .mo) {
         color: #cc3ef6;
     } /* numbers */

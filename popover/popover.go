@@ -1,4 +1,4 @@
-// Package popover renders a floating panel anchored to a trigger — richer
+// Package popover renders a floating panel anchored to a trigger - richer
 // than a tooltip, more free-form than a dropdown menu:
 //
 //	@popover.Root() {

@@ -3,8 +3,8 @@
 //
 // When the request context was prepared with loom.NewContext (or
 // loom.Middleware), IDs are sequential per render pass: deterministic for
-// golden tests, unique within a page. Without it — e.g. HTMX fragments
-// rendered with a bare context — IDs fall back to crypto/rand, which is
+// golden tests, unique within a page. Without it - e.g. HTMX fragments
+// rendered with a bare context - IDs fall back to crypto/rand, which is
 // never deterministic but also never collides across fragments.
 package ids
 

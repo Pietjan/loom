@@ -91,7 +91,7 @@ func TestContracts(t *testing.T) {
 }
 
 // assertReferencesResolve checks every ID-reference attribute points at an
-// element that exists in the same document — the invariant whose violation
+// element that exists in the same document - the invariant whose violation
 // made pulseui's navlist silently dead.
 func assertReferencesResolve(t *testing.T, tree *html.Node) {
 	t.Helper()

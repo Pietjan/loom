@@ -16,7 +16,7 @@ import (
 // values are fixed and known, so a node's body can be measured rather than
 // guessed: padding, borders, gaps, fixed sizes, font sizes, line heights and
 // flex direction all read straight off the markup. What the classes cannot
-// give us is glyph advance — that lives in the font file. Monospace is exact
+// give us is glyph advance - that lives in the font file. Monospace is exact
 // (IBM Plex Mono advances a constant 0.6em); proportional text uses a
 // per-character width table, which is an estimate but a far closer one than a
 // single average.
@@ -175,7 +175,7 @@ func applySpacing(s *style, c string) {
 }
 
 // spacing resolves a Tailwind spacing step ("2", "1.5") or an arbitrary pixel
-// value ("[10px]") to pixels. Relative units (full, auto, %) report false —
+// value ("[10px]") to pixels. Relative units (full, auto, %) report false -
 // they size against the parent and so contribute no intrinsic width.
 func spacing(v string) (float64, bool) {
 	if strings.HasPrefix(v, "[") && strings.HasSuffix(v, "]") {

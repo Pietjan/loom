@@ -140,7 +140,7 @@ func TestBranchSpreads(t *testing.T) {
 }
 
 // TestParentCentersOverChildren: coordinate assignment puts a parent exactly
-// on the midpoint of its children — including a root whose two children are a
+// on the midpoint of its children - including a root whose two children are a
 // two-child subtree and a wider childless sibling, which the earlier averaging
 // sweep left visibly off-center.
 func TestParentCentersOverChildren(t *testing.T) {
@@ -201,7 +201,7 @@ func TestBareOmitsChrome(t *testing.T) {
 }
 
 // TestMeasuresTailwindBoxModel: a bare node's box is computed from the
-// Tailwind classes on its body — padding, border and monospace advance are all
+// Tailwind classes on its body - padding, border and monospace advance are all
 // known values, so the result is exact rather than estimated.
 func TestMeasuresTailwindBoxModel(t *testing.T) {
 	// 10 mono chars at 11px (0.6em advance) = 66, + px-2.5 (20) + border (2).
@@ -455,7 +455,7 @@ func TestArrowShapes(t *testing.T) {
 	}
 
 	// The diamond has four points (tip, two sides, back); the solid triangle
-	// three — a quick guard that the diamond geometry is actually distinct.
+	// three - a quick guard that the diamond geometry is actually distinct.
 	if got := len(strings.Fields(dom.GetAttr(arrow(diagram.DiamondArrow()), "points"))); got != 4 {
 		t.Errorf("diamond points = %d, want 4", got)
 	}
@@ -512,7 +512,7 @@ func pathEnds(t *testing.T, d string) (first, last [2]float64) {
 		[2]float64{atof(t, n[len(n)-2]), atof(t, n[len(n)-1])}
 }
 
-// TestPortsSeparateOppositeEdges: the reported bug — a 2-cycle A⇄B anchored both
+// TestPortsSeparateOppositeEdges: the reported bug - a 2-cycle A⇄B anchored both
 // edges at the same face point, drawing one shaft over the other's arrowhead.
 // Distributed ports must give them distinct anchors on each node.
 func TestPortsSeparateOppositeEdges(t *testing.T) {
@@ -627,11 +627,11 @@ func edgeCrossings(t *testing.T, out string) int {
 
 // TestAntiparallelEdgesDoNotCross: a forward edge and the back edge sharing its
 // corridor must nest in their own lanes, not weave over each other. The lane
-// side alone isn't enough — the back edge's elbow has to fall on the far side
+// side alone isn't enough - the back edge's elbow has to fall on the far side
 // of the forward edge's, which flips with the direction the corridor runs, so
 // both a leftward and a rightward pair are checked.
 //
-// Long cycles, routed through dummies, are covered too — see
+// Long cycles, routed through dummies, are covered too - see
 // TestLongEdgesDoNotCrossTheirNeighbours for the one routing gap that remains,
 // which turns out not to involve cycles at all.
 func TestAntiparallelEdgesDoNotCross(t *testing.T) {
@@ -677,7 +677,7 @@ func TestAntiparallelEdgesDoNotCross(t *testing.T) {
 // and back; if every edge turned at the same nominal y its horizontal run would
 // cut m2's vertical stub, once on the way out and once on the way back.
 //
-// The graph is planar — four parallel routes between the same two nodes — so
+// The graph is planar - four parallel routes between the same two nodes - so
 // any crossing here belongs to the router, not to the graph. It needs no cycle,
 // which is why the fix was not about cycles: the gap between two layers is a
 // routing channel whose horizontal runs each get their own track, ordered by
@@ -704,7 +704,7 @@ func TestLongEdgesDoNotCrossTheirNeighbours(t *testing.T) {
 }
 
 // TestCrowdedGapMakesRoom: a gap seats its tracks at even spacing, so one with
-// more of them than the layer gap can hold has to grow — otherwise the corners
+// more of them than the layer gap can hold has to grow - otherwise the corners
 // fold into each other and a staircase reads as a wobble.
 //
 // A wide fan on spread ports is what reaches that: every edge leaves its own
@@ -743,7 +743,7 @@ func TestCrowdedGapMakesRoom(t *testing.T) {
 }
 
 // elbowFlows reports the distinct heights at which edges make their sideways
-// move — the gap's tracks, as drawn.
+// move - the gap's tracks, as drawn.
 func elbowFlows(t *testing.T, out string) []float64 {
 	t.Helper()
 	seen := map[float64]bool{}
@@ -790,7 +790,7 @@ func TestNoDegenerateBends(t *testing.T) {
 }
 
 // TestFanPortsStaySymmetric: straightening a near-aligned edge must not drag a
-// port that belongs to a fan — its branches would then sit lopsided about the
+// port that belongs to a fan - its branches would then sit lopsided about the
 // node's centreline. Only a face's sole attachment is free to slide, so here
 // the branch to Published is straightened by moving its far end instead.
 func TestFanPortsStaySymmetric(t *testing.T) {
@@ -838,7 +838,7 @@ func TestFanPortsStaySymmetric(t *testing.T) {
 // Which layer each node lands on is asserted, not where it sits along that
 // layer: the left-to-right arrangement of siblings does follow declaration
 // order, deliberately, so that declaring one branch before another puts it on
-// the left. Reordering can therefore still mirror a diagram — it just cannot
+// the left. Reordering can therefore still mirror a diagram - it just cannot
 // re-layer it.
 func TestLayoutIgnoresDeclarationOrder(t *testing.T) {
 	edges := []diagram.Option{
@@ -914,7 +914,7 @@ func curveRadii(t *testing.T, out string) []float64 {
 	t.Helper()
 	var radii []float64
 	for _, d := range regexp.MustCompile(`d="([^"]*)"`).FindAllStringSubmatch(out, -1) {
-		// "L x y Q cx cy x2 y2" — the gap between the L point and the control
+		// "L x y Q cx cy x2 y2" - the gap between the L point and the control
 		// point is the pull-back distance.
 		for _, m := range regexp.MustCompile(`L ([\d.]+) ([\d.]+) Q ([\d.]+) ([\d.]+)`).FindAllStringSubmatch(d[1], -1) {
 			lx, ly := atof(t, m[1]), atof(t, m[2])

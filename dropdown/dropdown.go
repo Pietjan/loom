@@ -1,4 +1,4 @@
-// Package dropdown renders popover menus anchored to their trigger — no
+// Package dropdown renders popover menus anchored to their trigger - no
 // JavaScript:
 //
 //	@dropdown.Root() {
@@ -17,7 +17,7 @@
 // button gets command="toggle-popover" + an anchor-name; the menu is a
 // [popover] panel with the matching position-anchor. Positioning uses CSS
 // anchor positioning where supported (Chromium), with a plain
-// flow-position fallback (absolute under the wrapper) everywhere else —
+// flow-position fallback (absolute under the wrapper) everywhere else -
 // rules in css/loom.css. Light dismiss and Esc come from the popover.
 //
 // The panel is deliberately NOT role="menu": the ARIA menu pattern

@@ -2,7 +2,7 @@ package picker
 
 import "github.com/pietjan/loom/internal/styles"
 
-// classes style the <select> itself — its closed appearance in both
+// classes style the <select> itself - its closed appearance in both
 // worlds (base-select and classic). Flex layout keeps the browser's
 // ::picker-icon on the same row as the value (block would wrap it);
 // classic selects ignore inner layout, so it is harmless there.
@@ -28,7 +28,7 @@ func buttonClasses() string {
 }
 
 // optionClasses style each option inside the base-select picker panel.
-// Non-supporting browsers ignore option classes — harmless.
+// Non-supporting browsers ignore option classes - harmless.
 func optionClasses() string {
 	var b styles.Builder
 	b.Add("flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer")
@@ -41,7 +41,7 @@ func optionClasses() string {
 }
 
 // arrowClasses style the icon replacing ::picker-icon; :open on the
-// ancestor select rotates it. Scoped to select:open — a bare in-open:
+// ancestor select rotates it. Scoped to select:open - a bare in-open:
 // would also match an open <details> ancestor (accordion, navlist group).
 func arrowClasses() string {
 	var b styles.Builder

@@ -20,7 +20,7 @@
 // Header children are trailing actions (buttons, a dropdown); Card
 // children are the card body, with CardHeader (badges above the heading)
 // and CardFooter (metadata below it) as optional slots. To make a card
-// navigable, compose a link inside it. The board is static markup + CSS —
+// navigable, compose a link inside it. The board is static markup + CSS -
 // reordering is your application's concern.
 package kanban
 
@@ -171,7 +171,7 @@ func Footer(options ...Option) templ.Component {
 	})
 }
 
-// Card renders one item. The Heading sits above the card's children —
+// Card renders one item. The Heading sits above the card's children -
 // or, when the block starts with a CardHeader, directly after it.
 func Card(options ...Option) templ.Component {
 	return render.Component(func(ctx context.Context) (*html.Node, error) {
@@ -200,7 +200,7 @@ func Card(options ...Option) templ.Component {
 	})
 }
 
-// CardHeader is the slot above a card's heading — badges, labels.
+// CardHeader is the slot above a card's heading - badges, labels.
 func CardHeader(options ...Option) templ.Component {
 	return render.Component(func(ctx context.Context) (*html.Node, error) {
 		cfg := Config{}
@@ -216,7 +216,7 @@ func CardHeader(options ...Option) templ.Component {
 	})
 }
 
-// CardFooter is the slot below a card's body — avatars, metadata.
+// CardFooter is the slot below a card's body - avatars, metadata.
 func CardFooter(options ...Option) templ.Component {
 	return render.Component(func(ctx context.Context) (*html.Node, error) {
 		cfg := Config{}

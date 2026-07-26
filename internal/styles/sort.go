@@ -4,8 +4,8 @@ package styles
 // two tokenizer fixes: leading whitespace no longer leaks into the next
 // token, and whitespace inside [arbitrary values] is preserved instead of
 // dropped. Sorting is purely cosmetic (conflicts are resolved by tw-merge
-// before sorting) but keeps rendered class attributes — and therefore
-// golden files — stable.
+// before sorting) but keeps rendered class attributes - and therefore
+// golden files - stable.
 
 import (
 	"regexp"
@@ -230,7 +230,7 @@ func Sort(class string) string {
 		}
 		// Total-order tiebreak on the class text. Without this, classes
 		// with equal sort keys (e.g. negative -translate-* that match no
-		// prefix, or two arbitrary variants) keep their input order — and
+		// prefix, or two arbitrary variants) keep their input order - and
 		// that input is tailwind-merge's output, which is NOT stable
 		// across processes. A lexical tiebreak makes Sort deterministic
 		// regardless, keeping golden files reproducible.

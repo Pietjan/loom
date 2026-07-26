@@ -6,7 +6,7 @@
 //		Failed
 //	}
 //
-// Icons inside a badge are sized down via CSS — no tree surgery.
+// Icons inside a badge are sized down via CSS - no tree surgery.
 package badge
 
 import (

@@ -1,7 +1,7 @@
 // Package assets embeds the Phosphor SVG sources consumed by the icon
 // package. The SVG files are self-consistent (every weight paints with
 // fill="currentColor" on a 0 0 256 256 viewBox, with no width/height, so
-// CSS sizing wins) — loaders must not override their presentation
+// CSS sizing wins) - loaders must not override their presentation
 // attributes.
 package assets
 

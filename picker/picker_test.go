@@ -11,7 +11,7 @@ import (
 
 // Raw string assertions: the golden Parse/Format path would strip the
 // customizable-select internals, because x/net/html's in-select parsing
-// mode predates them. Serialization (what browsers receive) is correct —
+// mode predates them. Serialization (what browsers receive) is correct -
 // that is what we assert on.
 func TestCustomizableSelectMarkup(t *testing.T) {
 	c := testutil.WithChildren(

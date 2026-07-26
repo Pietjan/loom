@@ -4,7 +4,7 @@
 //	@markdown.New(comment, markdown.Unsafe())
 //
 // The source is parsed with goldmark (GFM: tables, strikethrough, task
-// lists, autolinks) and the AST is rendered onto loom components —
+// lists, autolinks) and the AST is rendered onto loom components -
 // headings, text, links, and separators are the real loom primitives, so
 // markdown output matches the rest of the page. Code fences are
 // highlighted server-side with chroma; token colors ship in loom.css.
@@ -42,7 +42,7 @@ var (
 )
 
 // Unsafe passes raw HTML blocks and inline HTML in the source through to
-// the output. The default drops them — goldmark's own safe default.
+// the output. The default drops them - goldmark's own safe default.
 func Unsafe() Option { return func(c *Config) { c.unsafe = true } }
 
 // parser is shared across renders; a goldmark parser is safe for

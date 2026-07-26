@@ -88,11 +88,11 @@ func TestComponentImportGraph(t *testing.T) {
 				continue // whitelisted for everyone
 			}
 			if isL1[pkg] {
-				t.Errorf("L1 package %q imports component package %q — primitives import only internal/*", pkg, rel)
+				t.Errorf("L1 package %q imports component package %q - primitives import only internal/*", pkg, rel)
 				continue
 			}
 			if !contains(allowedEdges[pkg], rel) {
-				t.Errorf("package %q imports %q — not an allowed scope edge; components cooperate via ctx scopes and post-passes, not cross-package Node() calls", pkg, rel)
+				t.Errorf("package %q imports %q - not an allowed scope edge; components cooperate via ctx scopes and post-passes, not cross-package Node() calls", pkg, rel)
 			}
 		}
 	}

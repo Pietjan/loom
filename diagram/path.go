@@ -68,7 +68,7 @@ func toward(p, t xy, d float64) xy {
 
 func dist(a, b xy) float64 { return math.Hypot(b.x-a.x, b.y-a.y) }
 
-// simplify drops interior points the path runs straight through — a routing
+// simplify drops interior points the path runs straight through - a routing
 // waypoint that introduces no turn would otherwise be rounded into a
 // pointless curve.
 func simplify(pts []xy) []xy {
@@ -200,7 +200,7 @@ func arrowDot(pts []xy) (cx, cy, r float64) {
 func add(p, v xy, d float64) xy { return xy{p.x + v.x*d, p.y + v.y*d} }
 
 // headInset is how far an arrowhead of the given shape reaches back from the
-// tip — where the shaft should stop so it meets the head cleanly instead of
+// tip - where the shaft should stop so it meets the head cleanly instead of
 // running under it.
 func headInset(head arrowShape) float64 {
 	switch head {

@@ -10,7 +10,7 @@ import (
 // registered in Categories.
 templ componentPage(slug string) {
 	{{ p, _ := Find(slug) }}
-	@layout(p.Title+" — loom", p.Slug) {
+	@layout(p.Title+" - loom", p.Slug) {
 		<div class="space-y-2">
 			@heading.New(heading.Level(1), heading.XL) {
 				{ p.Title }

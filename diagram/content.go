@@ -46,7 +46,7 @@ func contentLines(n *html.Node) []string {
 }
 
 // inferSize measures a node's box from its rendered content by walking the
-// markup and resolving the Tailwind classes on it (see measure.go) — padding,
+// markup and resolving the Tailwind classes on it (see measure.go) - padding,
 // borders, gaps, fixed sizes, font sizes and line heights are all known
 // values, so this is a real box-model calculation rather than a guess. Only
 // proportional glyph advances remain estimated; monospace is exact.

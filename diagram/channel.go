@@ -5,7 +5,7 @@ import "math"
 // The gap between two layers is a routing channel. Every edge crossing it makes
 // one sideways move, and if they all make it at the same flow coordinate an
 // edge travelling far sideways cuts straight through the vertical stub of one
-// that stops short — a crossing the graph never asked for. So the runs are
+// that stops short - a crossing the graph never asked for. So the runs are
 // ordered by which must sit above which and each is given its own track.
 //
 // A segment runs from an upper stop at cross a down to a lower stop at cross b:
@@ -20,7 +20,7 @@ import "math"
 // Note those are not strict. Two runs on one track touch where a stub meets
 // them and never cross, and that is the shape a fan wants: every edge leaving a
 // port turns at the same height and drops off its bar one at a time. Ordering
-// alone is what the drawing needs — the old routing settled each elbow from its
+// alone is what the drawing needs - the old routing settled each elbow from its
 // own two endpoints, so an edge bound for a routing dummy (an 8px box against a
 // 28px node) turned a few pixels lower than its neighbours and sliced through
 // them on the way past.
@@ -28,14 +28,14 @@ import "math"
 // A pair does need its own tracks when it is constrained one way only and
 // shares neither endpoint: their runs would otherwise overlap along a stretch
 // that belongs to both, drawing two edges as one line. That is the case an edge
-// and the back edge beside it fall into — different port lanes at both ends —
+// and the back edge beside it fall into - different port lanes at both ends -
 // so the jog that used to be hand-picked per direction now falls out of the
 // same rule as everything else. Constrained both ways is the opposite: one run
 // nested strictly inside another can only avoid cutting it by sharing its
 // track, so those must stay equal.
 //
 // Two edges that genuinely have to cross make the constraints contradict, so
-// the relation is a graph rather than an order and cycles have to be broken —
+// the relation is a graph rather than an order and cycles have to be broken -
 // dropping a constraint just accepts a crossing that was unavoidable anyway.
 
 const (
@@ -73,7 +73,7 @@ type segment struct {
 
 // planChannels resolves every edge's stops on the cross axis and allocates the
 // gaps' tracks. It runs before the flow axis is settled, because both only need
-// the cross coordinates Brandes–Köpf has already fixed — and because the number
+// the cross coordinates Brandes–Köpf has already fixed - and because the number
 // of tracks a gap ends up with decides how much room it needs.
 func planChannels(verts []vertex, edgeChains [][]int, plan portPlan, layerCount int) channels {
 	ch := channels{
@@ -116,7 +116,7 @@ func planChannels(verts []vertex, edgeChains [][]int, plan portPlan, layerCount 
 
 // resolveStops fixes an edge's stops on the cross axis and reports which of its
 // segments step across. Offsets under align are flattened rather than drawn as
-// a corner, which moves the stop — including a port, whose arrowhead follows —
+// a corner, which moves the stop - including a port, whose arrowhead follows -
 // so this has to settle before spans are measured: whether a segment bends at
 // all, and how wide its run is, must read the same to the allocator and to the
 // router.
@@ -134,7 +134,7 @@ func resolveStops(cross []float64) ([]float64, []bool) {
 }
 
 // snapStops flattens a long edge's routing dummies onto their neighbours where
-// the offset between them is under minBend — too small to draw as a corner.
+// the offset between them is under minBend - too small to draw as a corner.
 // Only the intermediate stops move; the first and last are the edge's ports and
 // stay put, so arrowheads keep their place on the box.
 func snapStops(cross []float64) []float64 {
@@ -155,7 +155,7 @@ func snapStops(cross []float64) []float64 {
 	return out
 }
 
-// above is a constraint "u sits on a track at least step above v" — step 0 for
+// above is a constraint "u sits on a track at least step above v" - step 0 for
 // an ordering that a shared track satisfies, 1 where the two need their own.
 type above struct {
 	u, v, step int
@@ -202,7 +202,7 @@ func allocate(segs []segment) []int {
 	return layerTracks(n, breakConstraintCycles(n, cons))
 }
 
-// breakConstraintCycles drops the constraints that close a cycle — those pairs
+// breakConstraintCycles drops the constraints that close a cycle - those pairs
 // cross whatever we do. Constraints are visited in the order they were built,
 // which is by segment index, so the choice stays deterministic like every other
 // phase of the pipeline.

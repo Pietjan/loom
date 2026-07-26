@@ -5,7 +5,7 @@ import "github.com/pietjan/loom/internal/styles"
 func classes(c Config) string {
 	var b styles.Builder
 
-	// Inside an input group: no shell of its own — fill the row, stay
+	// Inside an input group: no shell of its own - fill the row, stay
 	// transparent, let the group draw the border/background/ring.
 	if c.grouped {
 		b.Add("min-w-0 flex-1 h-full px-3 text-sm bg-transparent text-base-800 placeholder:text-base-400")

@@ -16,7 +16,7 @@ func thumbClasses() string {
 	// White on the unchecked track; on the checked (accent) track the thumb
 	// takes --color-accent-foreground, same reasoning as the checkbox glyph:
 	// neutral accents invert in dark mode (white surface) and amber/yellow/
-	// lime are light in both — a white thumb disappears on those.
+	// lime are light in both - a white thumb disappears on those.
 	b.Add("bg-white peer-checked:bg-accent-foreground")
 	b.Add("peer-checked:translate-x-4 rtl:peer-checked:-translate-x-4")
 	return b.String()

@@ -88,7 +88,7 @@ func init() {
 			{Slug: "sidebar", Title: "Sidebar", Description: "Responsive sidebar: popover on small screens, pinned on wide.", Body: Sidebar},
 			{Slug: "navbar", Title: "Navbar", Description: "Horizontal navigation with current item and badges.", Body: Navbar},
 			{Slug: "navlist", Title: "Navlist", Description: "Vertical navigation lists with labels and collapsible groups.", Body: Navlist},
-			{Slug: "tabs", Title: "Tabs", Description: "Tabs on exclusive details — the platform switches panels.", Body: Tabs},
+			{Slug: "tabs", Title: "Tabs", Description: "Tabs on exclusive details - the platform switches panels.", Body: Tabs},
 		}},
 	}
 }

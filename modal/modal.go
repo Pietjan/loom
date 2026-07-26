@@ -45,18 +45,18 @@ import (
 // ErrNoTarget is returned when a Trigger or Close cannot resolve its
 // dialog: not inside modal.Root and no modal.For given. Failing loudly
 // beats emitting a dead button.
-var ErrNoTarget = errors.New("modal: trigger has no target — wrap it in modal.Root or pass modal.For(...)")
+var ErrNoTarget = errors.New("modal: trigger has no target - wrap it in modal.Root or pass modal.For(...)")
 
 // ErrNoButton is returned when a Trigger or Close block contains no button
 // to wire.
 var ErrNoButton = errors.New("modal: trigger needs a <button> in its block (e.g. @button.New())")
 
 // ErrNoContentID is returned when modal content cannot be given an id.
-var ErrNoContentID = errors.New("modal: content has no id — wrap it in modal.Root or pass modal.Name(...)")
+var ErrNoContentID = errors.New("modal: content has no id - wrap it in modal.Root or pass modal.Name(...)")
 
 // errNoDialogID is the shared cause behind ErrNoTarget and ErrNoContentID:
 // neither a modal.Root scope nor an explicit name supplied an id. It carries
-// no advice of its own, so each caller wraps it with guidance that fits —
+// no advice of its own, so each caller wraps it with guidance that fits -
 // a trigger is told about modal.For, content about modal.Name.
 var errNoDialogID = errors.New("no dialog id in scope")
 

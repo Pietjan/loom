@@ -1,4 +1,4 @@
-// Package description renders a term/detail list (<dl>) — the read-only
+// Package description renders a term/detail list (<dl>) - the read-only
 // counterpart to a form:
 //
 //	@description.New() {

@@ -111,7 +111,7 @@ func WithStatus(s Status) Option { return func(c *Config) { c.Status = s } }
 // WithColor tints the indicator (on Indicator).
 func WithColor(col Color) Option { return func(c *Config) { c.Color = col } }
 
-// Bare strips the indicator's circle — no background, no fixed size — so
+// Bare strips the indicator's circle - no background, no fixed size - so
 // a custom child like an avatar stands alone.
 func Bare() Option { return func(c *Config) { c.bare = true } }
 
@@ -204,8 +204,8 @@ func Item(options ...Option) templ.Component {
 	})
 }
 
-// Indicator renders the item's marker — children (an icon, a step
-// number, an avatar) centered in a circle, or a plain dot when empty —
+// Indicator renders the item's marker - children (an icon, a step
+// number, an avatar) centered in a circle, or a plain dot when empty -
 // plus the connector segment to the next item.
 func Indicator(options ...Option) templ.Component {
 	return render.Component(func(ctx context.Context) (*html.Node, error) {

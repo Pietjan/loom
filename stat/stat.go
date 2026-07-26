@@ -1,4 +1,4 @@
-// Package stat renders a KPI tile — a label, a big value, and optional
+// Package stat renders a KPI tile - a label, a big value, and optional
 // supporting content (a delta badge, a sparkline) passed as children:
 //
 //	@stat.New(stat.Label("Revenue"), stat.Value("$48.2k")) {

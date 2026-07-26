@@ -315,7 +315,7 @@ func (w *walker) inline(n gast.Node, parent *html.Node) error {
 	return nil
 }
 
-// plainText flattens a node's descendant text — the spec-correct alt for
+// plainText flattens a node's descendant text - the spec-correct alt for
 // images.
 func plainText(n gast.Node, source []byte) string {
 	var sb strings.Builder
@@ -336,7 +336,7 @@ func collectText(n gast.Node, source []byte, sb *strings.Builder) {
 	}
 }
 
-// appendFragment parses raw HTML against the real parent — the same
+// appendFragment parses raw HTML against the real parent - the same
 // parser-context rule internal/render documents: a neutral context would
 // silently drop table-structure elements.
 func appendFragment(parent *html.Node, raw string) error {

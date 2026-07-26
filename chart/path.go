@@ -24,7 +24,7 @@ func linePath(pts []xy) string {
 }
 
 // smoothPath builds a Catmull-Rom spline through the points, converted to
-// cubic Béziers — passes through every data point, no overshoot drama at
+// cubic Béziers - passes through every data point, no overshoot drama at
 // typical dashboard densities.
 func smoothPath(pts []xy) string {
 	if len(pts) < 3 {

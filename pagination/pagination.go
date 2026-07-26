@@ -1,4 +1,4 @@
-// Package pagination renders page navigation as links — the server
+// Package pagination renders page navigation as links - the server
 // renders the target page:
 //
 //	@pagination.New() {

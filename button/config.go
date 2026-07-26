@@ -59,7 +59,7 @@ var (
 // WithType sets the button type.
 func WithType(t Type) Option { return func(c *Config) { c.Type = t } }
 
-// Href renders the button as an anchor pointing at href — a link that
+// Href renders the button as an anchor pointing at href - a link that
 // looks like a button. Every variant, size and the icon-only rules apply
 // unchanged; Disabled renders an inert span instead of a dead link.
 func Href(href string) Option { return func(c *Config) { c.Href = href } }

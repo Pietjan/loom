@@ -40,7 +40,7 @@ func headingClasses() string {
 	return b.String()
 }
 
-// cardHeadingClasses wraps instead of truncating — card titles run long.
+// cardHeadingClasses wraps instead of truncating - card titles run long.
 func cardHeadingClasses() string {
 	var b styles.Builder
 	b.Add("text-sm font-medium text-base-800 dark:text-white")

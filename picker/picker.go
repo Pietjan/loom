@@ -7,7 +7,7 @@
 //	}
 //
 // In Chromium the picker is fully styled and options may hold rich content
-// (icons). Everywhere else it degrades — by the spec's own design — to a
+// (icons). Everywhere else it degrades - by the spec's own design - to a
 // classic select: the internal <button><selectedcontent> is ignored and
 // option content collapses to text. Submission semantics are identical in
 // both worlds. The base-select rules live in css/loom.css.
@@ -75,7 +75,7 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 
 	// The customizable-select internal button: ignored (harmless) by
 	// non-supporting browsers, the styled closed state in Chromium. The
-	// arrow is a real icon — the browser's ::picker-icon is hidden in
+	// arrow is a real icon - the browser's ::picker-icon is hidden in
 	// css/loom.css, since pseudo-element content can't use currentColor or
 	// our transitions.
 	btn := dom.El(atom.Button, dom.Attr("class", buttonClasses()))
@@ -128,7 +128,7 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 // allowed; non-supporting browsers collapse it to its text.
 //
 // Each option carries a trailing icon checkmark, visible only while
-// checked — the browser's ::checkmark pseudo is hidden in css/loom.css.
+// checked - the browser's ::checkmark pseudo is hidden in css/loom.css.
 // The data-picker-check attribute lets loom.css hide the checkmark's
 // clone inside <selectedcontent> (the browser copies the checked option's
 // children verbatim).

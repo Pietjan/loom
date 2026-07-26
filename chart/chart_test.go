@@ -40,7 +40,7 @@ func TestLineChart(t *testing.T) {
 		}
 	}
 
-	// The accessible name lives on aria-label only — no <title>, which
+	// The accessible name lives on aria-label only - no <title>, which
 	// browsers would surface as a native hover tooltip over our own.
 	if strings.Contains(out, "<title") {
 		t.Errorf("chart should not emit <title> (native hover tooltip); accessible name is on aria-label")
@@ -53,7 +53,7 @@ func TestLineChart(t *testing.T) {
 	}
 
 	// Hover values reuse the ordinary tooltip component in an HTML
-	// overlay — one per datum, positioned in percentages.
+	// overlay - one per datum, positioned in percentages.
 	tips := dom.FindAll(tree.Root, dom.ByMarker("tooltip-content"))
 	if len(tips) != 8 {
 		t.Fatalf("expected 8 tooltips, got %d", len(tips))

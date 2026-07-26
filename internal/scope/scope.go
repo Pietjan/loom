@@ -4,12 +4,12 @@
 // rendering its children (via render.Children's enrich functions); any
 // component rendered inside the block reads it with From. This works
 // because templ child blocks receive the context passed at render time,
-// not the one present at declaration time — pinned by a test in
+// not the one present at declaration time - pinned by a test in
 // internal/render.
 //
 // Scopes carry state that changes how a child renders itself (IDs to
 // adopt, invalid/required/disabled flags, size inheritance). They must not
-// carry sibling-relational wiring — that is what post-passes over the
+// carry sibling-relational wiring - that is what post-passes over the
 // materialized tree are for (see internal/dom).
 package scope
 

@@ -1,5 +1,5 @@
-// Package inputgroup joins an input with leading/trailing addons — an
-// icon, a text label, or a small button — inside one bordered control:
+// Package inputgroup joins an input with leading/trailing addons - an
+// icon, a text label, or a small button - inside one bordered control:
 //
 //	@inputgroup.New() {
 //		@inputgroup.Addon() { @icon.New(icon.MagnifyingGlass, icon.Small) }
@@ -13,7 +13,7 @@
 //
 // Addons before the input are leading, after are trailing (source order).
 // The group owns the border, background, and focus ring; the inner input
-// goes borderless (cmd/css/loom.css). Works inside a field — the field
+// goes borderless (cmd/css/loom.css). Works inside a field - the field
 // wires its label and aria to the input through the group.
 package inputgroup
 
@@ -33,7 +33,7 @@ import (
 
 // Scope tells a control it is inside an input group, so it renders
 // without its own border/background/rounding (the group owns those). A
-// marker value — its presence is the signal.
+// marker value - its presence is the signal.
 type Scope struct{}
 
 // Config holds input-group options.

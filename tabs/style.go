@@ -5,7 +5,7 @@ import "github.com/pietjan/loom/internal/styles"
 // groupClasses style the tabs container; its grid layout is structural
 // CSS in css/loom.css (needs ::details-content + @supports fallback), the
 // column template is a per-instance inline style. The column gap sets the
-// spacing between tab handles; rows keep no gap — the panel's own padding
+// spacing between tab handles; rows keep no gap - the panel's own padding
 // spaces it.
 func groupClasses() string {
 	var b styles.Builder
@@ -29,7 +29,7 @@ func sectionPanelClasses() string {
 }
 
 // sectionTabClasses style a section's summary as a tab handle. Active
-// state is the direct parent's [open] — deliberately not in-open:, which
+// state is the direct parent's [open] - deliberately not in-open:, which
 // would also match any open <details> further up (accordion, navlist).
 // relative z-10: the -mb-px overlap must paint over the panel's top
 // border, and the later-in-DOM panel wins without it.

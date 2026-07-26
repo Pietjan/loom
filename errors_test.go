@@ -16,7 +16,7 @@ import (
 // TestErrorsAreMatchable: a component that fails loudly must do so with an
 // error a caller can identify. Several of these carry detail (which series,
 // which node id) around a wrapped sentinel, so only errors.Is can see through
-// to the cause — a plain equality check would pass today and rot the moment
+// to the cause - a plain equality check would pass today and rot the moment
 // the message gains context.
 func TestErrorsAreMatchable(t *testing.T) {
 	node := func(id string) templ.Component {
@@ -100,7 +100,7 @@ func TestErrorsAreMatchable(t *testing.T) {
 }
 
 // TestModalFailuresStayDistinct: a trigger and a piece of content both fail
-// for the same underlying reason — no dialog id in scope — and each wraps that
+// for the same underlying reason - no dialog id in scope - and each wraps that
 // cause with the option that would fix it. Sharing the cause must not make the
 // two indistinguishable, or a caller cannot tell which end is misconfigured.
 func TestModalFailuresStayDistinct(t *testing.T) {

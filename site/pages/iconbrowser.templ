@@ -27,7 +27,6 @@ templ iconBrowser() {
 			</div>
 			@text.New(text.Subtle, text.Small) {
 				<span data-icon-count>{ strconv.Itoa(len(names)) } icons</span>
-				— click a name to select it, or use { "⌘" }F to find one.
 			}
 			// Cells are spaced rather than separated by rules: a gap-px grid
 			// over a tinted container leaves the partly-filled last row
@@ -47,7 +46,7 @@ templ iconBrowser() {
 					</li>
 				}
 			</ul>
-			// Visibility is the hidden attribute's job alone — a Tailwind
+			// Visibility is the hidden attribute's job alone - a Tailwind
 			// "hidden" class here would outlive the script setting it false.
 			<p class="py-8 text-center text-sm text-base-500 dark:text-base-400" hidden data-icon-empty>
 				No icon matches that search.

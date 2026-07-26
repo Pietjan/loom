@@ -1,7 +1,7 @@
 package diagram
 
-// Layering decides which layer each node sits on — its position along the flow
-// axis — before any of the ordering, coordinate or routing work.
+// Layering decides which layer each node sits on - its position along the flow
+// axis - before any of the ordering, coordinate or routing work.
 //
 // The obvious method is longest path: give every node a layer one past its
 // deepest predecessor. It is quick and it never breaks a constraint, but it
@@ -109,8 +109,8 @@ func feasibleRanks(es []layerEdge, rank []int) bool {
 }
 
 // weakComponents groups nodes joined by edges in either direction. Nodes are
-// visited in index order and edges in insertion order, so the grouping — and
-// with it every choice made from it — is deterministic.
+// visited in index order and edges in insertion order, so the grouping - and
+// with it every choice made from it - is deterministic.
 func weakComponents(es []layerEdge, n int) []layerComponent {
 	inc := make([][]int, n)
 	for i, e := range es {
@@ -231,7 +231,7 @@ func networkSimplex(es []layerEdge, c layerComponent, rank []int) {
 	// Now optimise. A tree edge's cut value is the weight crossing its split in
 	// its own direction minus the weight crossing back; where that is negative,
 	// the total shortens by swapping it for an edge going the other way. The
-	// iteration cap is belt and braces — cut values strictly decrease the
+	// iteration cap is belt and braces - cut values strictly decrease the
 	// objective, so this terminates on its own.
 	head := make([]bool, n)
 	for iter := 0; iter < 4*len(c.edges)+16; iter++ {

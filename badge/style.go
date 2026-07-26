@@ -26,7 +26,7 @@ var colorClasses = map[Color]string{
 func classes(c Config) string {
 	var b styles.Builder
 	b.Add("inline-flex items-center gap-1 font-medium whitespace-nowrap")
-	// Icons shrink to fit the badge — CSS, not tree surgery.
+	// Icons shrink to fit the badge - CSS, not tree surgery.
 	b.Add("**:data-[ui=icon]:size-4")
 	styles.Match(&b, c.Size, map[Size]string{
 		SizeSmall: "text-xs px-1.5 py-0.5 **:data-[ui=icon]:size-3",

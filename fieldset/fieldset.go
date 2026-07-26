@@ -5,7 +5,7 @@
 //		@field.Root() { ... }
 //	}
 //
-// Disabling the fieldset disables every control inside it — that cascade
+// Disabling the fieldset disables every control inside it - that cascade
 // is the platform's own (<fieldset disabled>), not library code.
 package fieldset
 

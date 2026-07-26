@@ -1,5 +1,5 @@
 // Package opts provides the common options every component package
-// re-exports — Class, ID, Attr — implemented once, generically, instead of
+// re-exports - Class, ID, Attr - implemented once, generically, instead of
 // hand-copied into every package.
 //
 // A component config embeds Common and instantiates the generics as
@@ -75,7 +75,7 @@ func (c *Common) UserID() string {
 // Apply finishes a component's root node: user attributes are copied onto
 // the node (overriding component defaults of the same name, except the
 // data-ui marker), and the class attribute is set to the tw-merge of the
-// component recipe with user classes — user classes win.
+// component recipe with user classes - user classes win.
 func (c *Common) Apply(n *html.Node, componentClasses string) {
 	for _, a := range c.Attrs {
 		if a.Key == "class" || a.Key == dom.MarkerAttr {

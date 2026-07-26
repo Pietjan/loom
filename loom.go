@@ -6,7 +6,7 @@
 //
 //	@button.New(button.Primary) { Save }
 //
-// Interactivity comes from modern web platform primitives — the Popover
+// Interactivity comes from modern web platform primitives - the Popover
 // API, invoker commands (commandfor/command), <dialog>, <details name>.
 // Components add no script of their own, so anything you layer on top is
 // the only JavaScript on the page. Styling is Tailwind; compile your CSS
@@ -31,7 +31,7 @@ func NewContext(ctx context.Context) context.Context {
 
 // Middleware installs a fresh ID counter per request, so full-page renders
 // get deterministic sequential IDs. Handlers rendering fragments (HTMX
-// partials) work without it — IDs fall back to random, collision-free
+// partials) work without it - IDs fall back to random, collision-free
 // values.
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

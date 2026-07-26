@@ -11,7 +11,7 @@
 //		}
 //	}
 //
-// Expandable groups are plain <details><summary> — self-contained
+// Expandable groups are plain <details><summary> - self-contained
 // platform disclosure, with no cross-component coordination (the
 // predecessor's group toggling was JS keyed to markup that was never
 // emitted; nothing here can drift like that). The current page is marked

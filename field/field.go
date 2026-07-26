@@ -1,5 +1,5 @@
 // Package field composes a form control with its label, description, and
-// error message — all wiring (for/id, aria-describedby, aria-invalid,
+// error message - all wiring (for/id, aria-describedby, aria-invalid,
 // required, disabled) is automatic:
 //
 //	@field.Root(field.Error(msg), field.Required()) {

@@ -7,7 +7,7 @@
 //	@sidebar.Toggle()
 //
 // The trick: the sidebar element carries the popover attribute. On narrow
-// viewports it behaves as a popover — hidden until the Toggle button
+// viewports it behaves as a popover - hidden until the Toggle button
 // (command="toggle-popover") opens it as a slide-in overlay with light
 // dismiss and Esc, courtesy of the platform. On wide viewports structural
 // CSS (css/loom.css) overrides the popover's hidden state so the sidebar

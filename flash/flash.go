@@ -1,4 +1,4 @@
-// Package flash renders a server-rendered flash message — the alert you
+// Package flash renders a server-rendered flash message - the alert you
 // show after a redirect (post/redirect/get). Dismissal and auto-hide are
 // CSS:
 //

@@ -1,7 +1,7 @@
 package loom_test
 
 // Tier B form controls: slider, file upload, input group and the plain
-// controls — plus the field-through-input-group wiring.
+// controls - plus the field-through-input-group wiring.
 
 import (
 	"strings"
@@ -96,7 +96,7 @@ func TestFieldWiresThroughInputGroup(t *testing.T) {
 		t.Fatal("control (inside input-group) did not get an id from the field")
 	}
 	if dom.GetAttr(label, "for") != id {
-		t.Fatalf("label for=%q, control id=%q — field did not wire through the group", dom.GetAttr(label, "for"), id)
+		t.Fatalf("label for=%q, control id=%q - field did not wire through the group", dom.GetAttr(label, "for"), id)
 	}
 	if dom.GetAttr(control, "aria-invalid") != "true" {
 		t.Fatal("error state did not reach the control inside the group")

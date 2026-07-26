@@ -9,7 +9,7 @@ func classes(c Config) string {
 	// no-underline because an Href button renders as an <a>, which the
 	// surrounding prose styles may underline; harmless on a <button>.
 	b.Add("no-underline")
-	// aria-disabled mirrors the :disabled rules for the link form — a
+	// aria-disabled mirrors the :disabled rules for the link form - a
 	// <span>/<a> never matches :disabled.
 	b.Add("disabled:opacity-75 disabled:cursor-default disabled:pointer-events-none")
 	b.Add("aria-disabled:opacity-75 aria-disabled:cursor-default aria-disabled:pointer-events-none")

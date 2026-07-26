@@ -23,7 +23,7 @@ const diagramRequestSnippet = `@diagram.New(
 	@diagram.Node("db", diagram.WithTone(diagram.ToneEmerald)) { Postgres }
 }`
 
-const diagramSchemaSnippet = `// A node body is any markup — here each table is a small card, so the
+const diagramSchemaSnippet = `// A node body is any markup - here each table is a small card, so the
 // nodes use diagram.Bare() to skip the default box chrome. Each arrow runs
 // from the table holding the key to the one it points at; users and teams
 // reference each other, and the cycle lays out without special handling.
@@ -107,7 +107,7 @@ const diagramFanSnippet = `// A wide fan is where spread ports earn their keep. 
 }`
 
 const diagramStateSnippet = `// A cycle lays out fine, and diagram.BiDirectional() draws an arrowhead on
-// both ends — here the two-way transition between Playing and Paused.
+// both ends - here the two-way transition between Playing and Paused.
 @diagram.New(
 	diagram.Edge("stop", "play", diagram.Label("play")),
 	diagram.Edge("play", "pause", diagram.Label("pause"), diagram.BiDirectional()),
@@ -137,7 +137,7 @@ const diagramOrgSnippet = `// Each parent settles over the midpoint of its child
 }`
 
 const diagramArrowSnippet = `// The arrowhead shape is per-edge: a filled triangle by default, or hollow,
-// open, diamond, or dot — here reading like a UML relationship diagram.
+// open, diamond, or dot - here reading like a UML relationship diagram.
 @diagram.New(
 	diagram.Edge("circle", "shape", diagram.HollowArrow()),
 	diagram.Edge("square", "shape", diagram.HollowArrow()),
@@ -154,7 +154,7 @@ const diagramArrowSnippet = `// The arrowhead shape is per-edge: a filled triang
 }`
 
 const diagramOrderSnippet = `// Layout follows the edges, not the order the nodes are written in. Both of
-// these declare the same graph — retry cycle and all — with the node blocks
+// these declare the same graph - retry cycle and all - with the node blocks
 // in opposite orders, and both lay out identically.
 edges := []diagram.Option{
 	diagram.Edge("ingest", "queue"),
@@ -232,8 +232,8 @@ templ orgNode(name, role, initials string) {
 templ Diagram() {
 	@componentPage("diagram") {
 		@prose() {
-			Diagrams render server-side as SVG. Declare nodes as children — each body is
-			any templ component — and wire them with edges; the component breaks cycles,
+			Diagrams render server-side as SVG. Declare nodes as children - each body is
+			any templ component - and wire them with edges; the component breaks cycles,
 			assigns layers, and places everything automatically.
 		}
 		@example("Request path", diagramRequestSnippet) {

@@ -39,7 +39,7 @@ func nodeShapeClasses(t Tone) string {
 }
 
 // contentClasses positions and centers a node's body over its box. Bare nodes
-// get only layout — their body brings its own chrome and type.
+// get only layout - their body brings its own chrome and type.
 func contentClasses(bare bool) string {
 	var b styles.Builder
 	b.Add("absolute flex items-center justify-center text-center leading-tight")
@@ -105,8 +105,8 @@ func edgeDotClasses() string {
 	return b.String()
 }
 
-// edgeHitClasses styles the target sitting over that dot. It is transparent —
-// the dot itself is painted in the canvas — and exists to carry the hover and
+// edgeHitClasses styles the target sitting over that dot. It is transparent -
+// the dot itself is painted in the canvas - and exists to carry the hover and
 // focus the tooltip opens on, so it is sized a little larger than the dot to
 // stay comfortable to hit. Focus has to show here rather than on the dot,
 // which is in the SVG and out of this element's reach.

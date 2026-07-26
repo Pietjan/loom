@@ -7,7 +7,7 @@ import (
 )
 
 // loom deliberately styles no raw tags globally, so every element the
-// walker emits carries its full recipe — a per-element "prose". Block
+// walker emits carries its full recipe - a per-element "prose". Block
 // spacing is mt-* with first:mt-0 rather than a uniform space-y-*.
 
 func classes(Config) string {

@@ -1,7 +1,7 @@
 // Package apidoc extracts a component package's public API from its source,
 // so each documentation page can render a reference that cannot drift.
 //
-// Every loom component package follows the same shape — New/Root plus part
+// Every loom component package follows the same shape - New/Root plus part
 // functions returning templ.Component, option constructors returning Option,
 // pre-baked option vars, typed string enums whose default carries a "default"
 // line comment, and fail-loud error vars. That regularity means the AST alone
@@ -56,7 +56,7 @@ type Decl struct {
 	Default   bool   // constant marked with a "default" line comment
 }
 
-// Group is a named run of declarations — the constructors for one option
+// Group is a named run of declarations - the constructors for one option
 // type, or the constants of one enum. Groups are complete: how many of a
 // long one to show is the caller's decision.
 type Group struct {
@@ -97,7 +97,7 @@ func Load(root string) (map[string]*API, error) {
 }
 
 // parsePackage reads one directory, returning nil when it is not a component
-// package rather than an error — Load walks every sibling directory.
+// package rather than an error - Load walks every sibling directory.
 func parsePackage(dir string) (*API, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -107,7 +107,7 @@ func parsePackage(dir string) (*API, error) {
 	fset := token.NewFileSet()
 
 	// Parsed a file at a time rather than with parser.ParseDir, which is
-	// deprecated as of Go 1.25 — as is the ast.Package it returns.
+	// deprecated as of Go 1.25 - as is the ast.Package it returns.
 	var files []*ast.File
 	for _, e := range entries {
 		fname := e.Name()
@@ -150,7 +150,7 @@ func parsePackage(dir string) (*API, error) {
 	return api, nil
 }
 
-// optionTypeNames returns the package's option types — Option, plus the
+// optionTypeNames returns the package's option types - Option, plus the
 // narrower ones a few packages add (chart.SeriesOption, diagram.EdgeOption
 // and NodeOption). Matching on the suffix picks those up without a list.
 func optionTypeNames(d *doc.Package) map[string]string {
@@ -251,7 +251,7 @@ func collectVars(api *API, d *doc.Package, fset *token.FileSet, optionTypes map[
 	}
 }
 
-// collectValues gathers each typed constant group — Variant, Size, Color —
+// collectValues gathers each typed constant group - Variant, Size, Color -
 // marking the value whose line comment says it is the default.
 func collectValues(api *API, d *doc.Package, fset *token.FileSet) {
 	for _, t := range d.Types {
@@ -297,7 +297,7 @@ func collectValues(api *API, d *doc.Package, fset *token.FileSet) {
 }
 
 // sortGroups puts every list in reading order. Components keep source order,
-// which is composition order — table reads New, Header, Body, Row, Column,
+// which is composition order - table reads New, Header, Body, Row, Column,
 // Cell rather than alphabetically scrambled. Options lead with the presets,
 // since those are the idiomatic call form.
 func sortGroups(api *API) {
@@ -323,7 +323,7 @@ func sortGroups(api *API) {
 }
 
 // isPreset reports whether a decl is a pre-baked option value rather than a
-// constructor — presets render as a bare name, constructors carry parens.
+// constructor - presets render as a bare name, constructors carry parens.
 func isPreset(d Decl) bool { return !strings.Contains(d.Signature, "(") }
 
 func appendToGroup(groups []Group, name, doc string, decls []Decl) []Group {
@@ -340,7 +340,7 @@ func appendToGroup(groups []Group, name, doc string, decls []Decl) []Group {
 //
 // go/doc files a function under the type it returns, so the option
 // constructors live in the Option type's Funcs rather than in Package.Funcs;
-// only those returning a type from another package — templ.Component — stay
+// only those returning a type from another package - templ.Component - stay
 // at the top level. Merging both and re-sorting by position undoes that
 // grouping and restores source order, which for a multi-part package is the
 // composition order: table reads New, Header, Body, Row, Column, Cell.
@@ -389,8 +389,8 @@ func optionResultOf(d *doc.Package, fn string, optionTypes map[string]string) st
 	return ""
 }
 
-// presetDoc describes a preset. Most carry no comment of their own — they sit
-// in a shared "Pre-baked options" var block — so fall back to the call that
+// presetDoc describes a preset. Most carry no comment of their own - they sit
+// in a shared "Pre-baked options" var block - so fall back to the call that
 // defines them, which says exactly what the preset does: WithVariant(VariantPrimary).
 func presetDoc(fset *token.FileSet, docText string, call *ast.CallExpr) string {
 	if s := firstSentence(docText); s != "" {
@@ -438,7 +438,7 @@ func isDefaultMarked(spec *ast.ValueSpec) bool {
 }
 
 // valueSpecs returns every ValueSpec of a var or const declaration. A grouped
-// declaration — var ( Submit = …; Reset = … ) — is a single doc.Value holding
+// declaration - var ( Submit = …; Reset = … ) - is a single doc.Value holding
 // one spec per line, so all of them have to be walked.
 func valueSpecs(v *doc.Value) []*ast.ValueSpec {
 	if v.Decl == nil {
@@ -454,7 +454,7 @@ func valueSpecs(v *doc.Value) []*ast.ValueSpec {
 }
 
 // declDoc prefers a declaration's own comment, falling back to the enclosing
-// block's only when that block declares this one thing — otherwise the block
+// block's only when that block declares this one thing - otherwise the block
 // comment ("Pre-baked options.") would be repeated on every row.
 func declDoc(v *doc.Value, spec *ast.ValueSpec) string {
 	if s := firstSentence(spec.Doc.Text()); s != "" {

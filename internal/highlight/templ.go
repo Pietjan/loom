@@ -11,7 +11,7 @@ import (
 // token, so the Go arguments and string literals lose their own colors. Since
 // loom snippets are dominated by such calls, we register a richer lexer here:
 // component calls are split into the `@`, the dotted path, and an argument
-// state that tokenises the Go expressions inside — including nested calls and
+// state that tokenises the Go expressions inside - including nested calls and
 // composite literals like []float64{...}.
 var templLexer = buildTemplLexer()
 

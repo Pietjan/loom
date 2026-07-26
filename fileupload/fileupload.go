@@ -5,7 +5,7 @@
 //
 // The browser draws the "choose file" button and the selected file name;
 // loom styles the button (::file-selector-button in cmd/css/loom.css).
-// Showing a rich drop-zone preview would need JS — out of scope; the
+// Showing a rich drop-zone preview would need JS - out of scope; the
 // native control shows the file name for free. Inside a field it adopts
 // the field's id and disabled state.
 package fileupload

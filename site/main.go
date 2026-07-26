@@ -30,7 +30,7 @@ func main() {
 		usage()
 	}
 	// The reference sections are read from the component packages' source at
-	// startup, which sits one directory up — the same tree the replace
+	// startup, which sits one directory up - the same tree the replace
 	// directive in go.mod points at. Failing here is deliberate: a page whose
 	// reference silently vanished would be worse than a build that stops.
 	parsed, err := apidoc.Load("..")

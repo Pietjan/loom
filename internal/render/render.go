@@ -7,7 +7,7 @@
 //     component invoked without its own block would re-render the
 //     parent's children inside it (worst case: infinite recursion).
 //  2. html.ParseFragment must be given the REAL parent node as parsing
-//     context — parsing against a generic <div> silently drops
+//     context - parsing against a generic <div> silently drops
 //     table-structure elements like <tr>.
 package render
 
@@ -49,7 +49,7 @@ func Coordinator(fn func(ctx context.Context) (context.Context, error)) templ.Co
 
 // Children renders the templ child block into parent, appending the
 // resulting nodes. Each enrich function transforms the context the
-// children render with — the standard way to install scopes
+// children render with - the standard way to install scopes
 // (scope.With(...)).
 func Children(ctx context.Context, parent *html.Node, enrich ...func(context.Context) context.Context) error {
 	return ChildrenAs(ctx, parent, parent, enrich...)
@@ -60,7 +60,7 @@ func Children(ctx context.Context, parent *html.Node, enrich ...func(context.Con
 // x/net/html's "in select" mode strips the rich option content the
 // customizable-select spec now allows, so picker parses its children
 // against a neutral <div> and appends them to the real <select>. Prefer
-// Children — parsing against the real parent is what keeps table
+// Children - parsing against the real parent is what keeps table
 // fragments intact.
 func ChildrenAs(ctx context.Context, parent, parseCtx *html.Node, enrich ...func(context.Context) context.Context) error {
 	children := templ.GetChildren(ctx)

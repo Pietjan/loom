@@ -9,7 +9,7 @@
 //		}
 //	}
 //
-// Exclusive() makes opening one item close the others — the platform's
+// Exclusive() makes opening one item close the others - the platform's
 // own <details name> behavior. The chevron rotation is CSS.
 package accordion
 

@@ -1,5 +1,5 @@
-// Package avatar renders a user avatar — a photo, or initials as a
-// fallback — with optional size, status dot, and stacking:
+// Package avatar renders a user avatar - a photo, or initials as a
+// fallback - with optional size, status dot, and stacking:
 //
 //	@avatar.New(avatar.Src("/u/olivia.jpg"), avatar.Alt("Olivia Martin"))
 //	@avatar.New(avatar.Initials("OM"), avatar.Alt("Olivia Martin"), avatar.Status(avatar.Online))

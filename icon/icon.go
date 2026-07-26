@@ -1,5 +1,5 @@
-// Package icon renders Phosphor icons in two variants — regular (stroked,
-// the default) and fill — at three sizes: base (24px), small (20px), and
+// Package icon renders Phosphor icons in two variants - regular (stroked,
+// the default) and fill - at three sizes: base (24px), small (20px), and
 // extra small (16px).
 //
 //	@icon.New(icon.Bell)

@@ -1,4 +1,4 @@
-// Package navbar renders horizontal navigation — a <nav> of inline links,
+// Package navbar renders horizontal navigation - a <nav> of inline links,
 // typically inside a header:
 //
 //	@navbar.New() {

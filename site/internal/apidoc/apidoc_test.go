@@ -22,8 +22,8 @@ func load(t *testing.T) map[string]*apidoc.API {
 
 // TestEveryPageHasAReference is the load-bearing check: every documented
 // component must resolve to a package whose API could be extracted. It fails
-// when a page is added without a package, when a package is renamed, and —
-// most usefully — when a package stops following the New/Option shape the
+// when a page is added without a package, when a package is renamed, and -
+// most usefully - when a package stops following the New/Option shape the
 // extraction relies on, which nothing else in the repo enforces.
 func TestEveryPageHasAReference(t *testing.T) {
 	apis := load(t)
@@ -36,8 +36,8 @@ func TestEveryPageHasAReference(t *testing.T) {
 		if len(api.Components) == 0 {
 			t.Errorf("%s: no exported func returns templ.Component", p.Slug)
 		}
-		// Options are deliberately not required. A handful of packages —
-		// table, kbd, description, inputgroup, dropdown, popover — have a
+		// Options are deliberately not required. A handful of packages -
+		// table, kbd, description, inputgroup, dropdown, popover - have a
 		// Config of nothing but opts.Common, so the shared Class/ID/Attr
 		// triple is their entire option set and the group renders empty.
 		if want := apidoc.ImportBase + "/" + p.Slug; api.ImportPath != want {
@@ -92,7 +92,7 @@ func TestClassification(t *testing.T) {
 }
 
 // TestComponentOrder checks that parts are listed in composition order rather
-// than alphabetically — a table's reference should read the way its markup is
+// than alphabetically - a table's reference should read the way its markup is
 // written, not start at Body.
 func TestComponentOrder(t *testing.T) {
 	var got []string
@@ -130,7 +130,7 @@ func TestNodeBuilderExcluded(t *testing.T) {
 }
 
 // TestValuesAreComplete checks that groups are returned whole. Truncating is
-// the renderer's job — the icon browser needs every name, and gets them from
+// the renderer's job - the icon browser needs every name, and gets them from
 // here rather than from a second source that could disagree.
 func TestValuesAreComplete(t *testing.T) {
 	for _, g := range load(t)["icon"].Values {

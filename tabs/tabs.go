@@ -1,5 +1,5 @@
 // Package tabs renders client-side tabbed content on a <details name>
-// disclosure group — all panels ship in the page and the platform
+// disclosure group - all panels ship in the page and the platform
 // switches them:
 //
 //	@tabs.New(tabs.Label("Account sections")) {
@@ -8,7 +8,7 @@
 //	}
 //
 // The tab layout relies on ::details-content (Baseline 2025); older
-// browsers fall back to a vertical accordion via @supports — content is
+// browsers fall back to a vertical accordion via @supports - content is
 // never lost. Screen readers announce disclosure semantics ("expanded/
 // collapsed"), which is what this honestly is. Known caveat: keyboard
 // users can close the open section (Enter on its summary), leaving all
@@ -16,7 +16,7 @@
 //
 // Honest limitation, by design: the full ARIA tabs pattern (role=tab,
 // arrow-key roving) cannot be met by the platform alone, and components
-// add no script of their own — so it is out of scope here rather than
+// add no script of their own - so it is out of scope here rather than
 // half-implemented.
 package tabs
 

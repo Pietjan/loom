@@ -73,7 +73,7 @@ func TestSortDeduplicates(t *testing.T) {
 
 // TestSortIsTotalOrder guards against golden flakiness: tailwind-merge's
 // output order is not stable across processes, so Sort must produce the
-// same result for any input permutation — including classes that match no
+// same result for any input permutation - including classes that match no
 // sort prefix (negative -translate-*) or share an arbitrary variant.
 func TestSortIsTotalOrder(t *testing.T) {
 	perms := [][]string{

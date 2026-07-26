@@ -1,4 +1,4 @@
-// Package header renders a full-width top application bar — the header
+// Package header renders a full-width top application bar - the header
 // layout, as an alternative to a left sidebar:
 //
 //	@header.New(header.Sticky()) {
@@ -15,7 +15,7 @@
 //		...page content...
 //	}
 //
-// It is a plain <header> flex row — brand, horizontal navbar, a spacer,
+// It is a plain <header> flex row - brand, horizontal navbar, a spacer,
 // and actions. Sticky pins it to the top on scroll; Container constrains
 // its content to a centered max width (pair with header.Main(Container())).
 package header

@@ -16,7 +16,7 @@ var apis map[string]*apidoc.API
 func SetAPI(parsed map[string]*apidoc.API) { apis = parsed }
 
 // apiFor returns the reference for a component page, or nil when the page has
-// no matching package — the reference sections are then skipped.
+// no matching package - the reference sections are then skipped.
 func apiFor(slug string) *apidoc.API { return apis[slug] }
 
 // goGetSnippet is the one-time module install, shown above every import.
@@ -50,8 +50,8 @@ func importSnippet(api *apidoc.API) string {
 }
 
 // optionsTitle names an option group: the plain Option type is simply
-// "Options", while a narrower one — chart's SeriesOption, diagram's
-// EdgeOption — is titled after what it configures.
+// "Options", while a narrower one - chart's SeriesOption, diagram's
+// EdgeOption - is titled after what it configures.
 func optionsTitle(g apidoc.Group) string {
 	if g.Name == "Option" {
 		return "Options"

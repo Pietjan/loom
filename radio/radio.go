@@ -1,5 +1,5 @@
 // Package radio renders radio buttons, grouped by a Group that shares the
-// form name via scope — items never repeat it:
+// form name via scope - items never repeat it:
 //
 //	@radio.Group(radio.Name("plan"), radio.Legend("Plan")) {
 //		@radio.New(radio.Value("free"), radio.Label("Free"))
@@ -25,9 +25,9 @@ import (
 	"github.com/pietjan/loom/internal/scope"
 )
 
-// ErrNoName is returned when a radio renders without a name — neither its
+// ErrNoName is returned when a radio renders without a name - neither its
 // own Name option nor a surrounding Group provides one.
-var ErrNoName = errors.New("radio: no name — set radio.Name(...) on the Group (or the radio itself)")
+var ErrNoName = errors.New("radio: no name - set radio.Name(...) on the Group (or the radio itself)")
 
 // groupScope shares the group's form name with its items.
 type groupScope struct {

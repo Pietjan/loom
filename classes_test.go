@@ -179,19 +179,19 @@ func eachRule(css string, fn func(selector, body string)) {
 	}
 }
 
-// classesOf returns the classes a selector styles — plural, because Tailwind
+// classesOf returns the classes a selector styles - plural, because Tailwind
 // groups rules as `:where(.kd,.kr,.kt)`.
 //
 // Only the subject of the selector counts: the rightmost compound is the
 // element the declarations land on. That is what keeps `.space-y-2>:not(
-// :last-child)` out of the table — it sets a margin on the children of a
+// :last-child)` out of the table - it sets a margin on the children of a
 // space-y-2 element, not on the element itself, so it cannot conflict with
 // anything else in the same class attribute.
 func classesOf(selector string) []string {
 	selector = strings.TrimSpace(selector)
 	// Tailwind wraps grouped rules in :where(...) / :is(...) to flatten
 	// specificity; the interesting part is inside. Unwrap only when the
-	// function spans the whole selector — `:where(.a):where(.b)` is two
+	// function spans the whole selector - `:where(.a):where(.b)` is two
 	// compounds, and slicing off its ends would produce nonsense.
 	if inner, ok := unwrap(selector); ok {
 		selector = inner
@@ -199,7 +199,7 @@ func classesOf(selector string) []string {
 	var out []string
 	for _, part := range splitTopLevel(selector, ',') {
 		subject := subjectOf(part)
-		// A grouped subject — `[data-ui=code] :where(.kd,.kr)` — is still the
+		// A grouped subject - `[data-ui=code] :where(.kd,.kr)` - is still the
 		// element being styled, so look inside it.
 		if inner, ok := unwrap(subject); ok {
 			for _, group := range splitTopLevel(inner, ',') {
@@ -243,7 +243,7 @@ func unwrap(selector string) (string, bool) {
 	return "", false
 }
 
-// subjectOf returns the rightmost compound of a complex selector — the part a
+// subjectOf returns the rightmost compound of a complex selector - the part a
 // combinator does not disqualify.
 func subjectOf(selector string) string {
 	selector = strings.TrimSpace(selector)
@@ -288,8 +288,8 @@ func splitTopLevel(s string, sep byte) []string {
 }
 
 // classOf returns the class a compound selector is built on. Tailwind v4 puts
-// the variant in the selector itself — `.focus-visible\:outline-2:focus-visible`
-// — so the class name ends at the first unescaped pseudo.
+// the variant in the selector itself - `.focus-visible\:outline-2:focus-visible`
+// - so the class name ends at the first unescaped pseudo.
 func classOf(compound string) string {
 	if !strings.HasPrefix(compound, ".") {
 		return ""
@@ -371,7 +371,7 @@ func variantOf(class string) string {
 var classAttr = regexp.MustCompile(`class="([^"]*)"`)
 
 // goldenClassAttrs returns every distinct class attribute recorded in a golden
-// file. Goldens are the rendered truth — post-merge, post-wiring — and cover
+// file. Goldens are the rendered truth - post-merge, post-wiring - and cover
 // every component without this test having to render anything itself.
 func goldenClassAttrs(t *testing.T) []string {
 	t.Helper()

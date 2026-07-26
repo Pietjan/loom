@@ -1,4 +1,4 @@
-// Package chart renders data as SVG on the server — line, area, and bar
+// Package chart renders data as SVG on the server - line, area, and bar
 // charts plus sparklines:
 //
 //	@chart.New(
@@ -10,7 +10,7 @@
 //	)
 //
 // Hovering a data point or bar reveals its value in a regular loom
-// tooltip — still no JS. HTML can't live inside SVG, but the SVG scales
+// tooltip - still no JS. HTML can't live inside SVG, but the SVG scales
 // proportionally, so viewBox coordinates map 1:1 to percentage positions
 // in an HTML overlay; each point gets a small anchored hit area wrapped
 // by the tooltip component. Sparklines are the same chart with chrome
@@ -20,7 +20,7 @@
 //
 // Honest limitation, by design: a synced crosshair cursor with a live
 // multi-value tooltip (à la Flux's chart.cursor) requires JavaScript, which
-// components do not add — per-point tooltips are the offering.
+// components do not add - per-point tooltips are the offering.
 package chart
 
 import (
@@ -222,7 +222,7 @@ func appendTooltips(ctx context.Context, plot *html.Node, cfg Config, n int) err
 
 			var class, style string
 			if cfg.bars {
-				// Cover the whole bar rect — matches drawBars geometry.
+				// Cover the whole bar rect - matches drawBars geometry.
 				x := g.left + band*float64(i) + (band-group)/2 + bar*float64(si)
 				top, height := g.y(v), baseline-g.y(v)
 				if height < 0 {
@@ -294,7 +294,7 @@ func draw(cfg Config, n int) *html.Node {
 	}
 	// aria-label on role="img" is the accessible name screen readers
 	// announce. A <title> would name it too but also renders as a native
-	// browser tooltip on hover — noise over our own point/bar tooltips —
+	// browser tooltip on hover - noise over our own point/bar tooltips -
 	// so we deliberately omit it.
 	dom.SetAttr(svg, "aria-label", label)
 
@@ -386,7 +386,7 @@ func drawLines(svg *html.Node, cfg Config, g geometry, n int) {
 	}
 }
 
-// drawPoints marks each datum with a dot. Purely visual — the hover
+// drawPoints marks each datum with a dot. Purely visual - the hover
 // tooltips live in the HTML overlay (appendTooltips).
 func drawPoints(svg *html.Node, cfg Config, g geometry, n int) {
 	for _, s := range cfg.series {

@@ -3,7 +3,7 @@
 //	@toggle.New(toggle.Name("notifications"), toggle.Label("Email me"))
 //
 // Structure: an unmarked wrapper span holds the appearance-none input (the
-// track) and a sibling thumb that slides via peer-checked — no
+// track) and a sibling thumb that slides via peer-checked - no
 // pseudo-elements on the input, which Firefox doesn't support.
 package toggle
 

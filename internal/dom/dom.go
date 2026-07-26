@@ -37,7 +37,7 @@ func Text(text string) *html.Node {
 	return &html.Node{Type: html.TextNode, Data: text}
 }
 
-// CustomEl constructs an element the atom table doesn't know — new
+// CustomEl constructs an element the atom table doesn't know - new
 // platform elements like <selectedcontent>.
 func CustomEl(tag string, attrs ...html.Attribute) *html.Node {
 	return &html.Node{Type: html.ElementNode, Data: tag, Attr: attrs}

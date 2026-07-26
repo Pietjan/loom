@@ -14,7 +14,7 @@
 //	}
 //
 // The wrapper scrolls horizontally on overflow. Fragment parsing happens
-// against the real table ancestors, so <tr>/<td> survive — the exact
+// against the real table ancestors, so <tr>/<td> survive - the exact
 // parser trap the predecessor's AsNode fell into.
 package table
 

@@ -1,6 +1,6 @@
 // Package diagram renders a directed-graph flowchart as SVG on the server.
-// Nodes are declared as children — each carrying any templ
-// component as its body — and edges wire them by id; the component lays them
+// Nodes are declared as children - each carrying any templ
+// component as its body - and edges wire them by id; the component lays them
 // out automatically with a layered (Sugiyama-style) algorithm and draws the
 // boxes, connectors, and arrowheads:
 //
@@ -15,8 +15,8 @@
 //
 // The result has two layers inside a stage of the diagram's natural size: an
 // SVG holding the connectors and each node's chrome, and the node bodies as
-// plain HTML positioned over it. Bodies stay real HTML — not <foreignObject>,
-// whose overflow handling is inconsistent across browsers — so a body can hold
+// plain HTML positioned over it. Bodies stay real HTML - not <foreignObject>,
+// whose overflow handling is inconsistent across browsers - so a body can hold
 // anything (an icon and label, a badge, a card) and is never clipped. By
 // default each node gets loom's box chrome; diagram.Bare() drops it for a body
 // that brings its own.
@@ -38,19 +38,19 @@
 //
 // Naming note: this package deliberately deviates from loom's convention of
 // exporting Node(ctx, ...) as the raw-node render entry. Here Node(id, ...) is
-// the node constructor the builder API needs — it returns a templ.Component
-// whose children are the body — so the render function is unexported (build).
+// the node constructor the builder API needs - it returns a templ.Component
+// whose children are the body - so the render function is unexported (build).
 // diagram is an L1, non-embeddable component, and tests and the site only use
 // New(), so nothing needs a diagram.Node(ctx, ...).
 //
 // Sizing, honestly: the server can't measure rendered HTML, so a node's box is
 // inferred from its content's text (widest line × a fixed glyph advance, line
-// count for height) — good for labels and small chips, approximate for rich
+// count for height) - good for labels and small chips, approximate for rich
 // bodies. diagram.Size(w, h) overrides it. The box is what layout reserves and
 // what edges attach to; a body bigger than its box overflows visibly rather
 // than clipping, so an off estimate degrades gracefully instead of losing
 // content. The stage is a fixed pixel size (the SVG and HTML must not scale
-// apart) — wrap it in an overflow-x-auto container on narrow screens.
+// apart) - wrap it in an overflow-x-auto container on narrow screens.
 package diagram
 
 import (
@@ -99,7 +99,7 @@ const (
 	// same-direction edges share, fanning or joining from one point (default).
 	PortsShared PortMode = iota
 	// PortsSpread gives every edge its own port, spread along the face and
-	// ordered by its neighbour — busier, but each connection is distinct.
+	// ordered by its neighbour - busier, but each connection is distinct.
 	PortsSpread
 )
 
@@ -259,7 +259,7 @@ func Dashed() EdgeOption { return func(e *edge) { e.style = lineDashed } }
 // Dotted draws an edge as a dotted line instead of a solid one.
 func Dotted() EdgeOption { return func(e *edge) { e.style = lineDotted } }
 
-// NoArrow draws an edge as a plain connector with no arrowhead — an
+// NoArrow draws an edge as a plain connector with no arrowhead - an
 // undirected association rather than a flow.
 func NoArrow() EdgeOption { return func(e *edge) { e.arrows = arrowNone } }
 
@@ -270,7 +270,7 @@ func BiDirectional() EdgeOption { return func(e *edge) { e.arrows = arrowBoth } 
 // HollowArrow draws the arrowhead as an outlined (unfilled) triangle.
 func HollowArrow() EdgeOption { return func(e *edge) { e.head = arrowHollow } }
 
-// OpenArrow draws the arrowhead as an open barb — two strokes meeting at the
+// OpenArrow draws the arrowhead as an open barb - two strokes meeting at the
 // tip, with no fill.
 func OpenArrow() EdgeOption { return func(e *edge) { e.head = arrowOpen } }
 
@@ -404,7 +404,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 			c.w, c.h = inferSize(el, c.bare)
 			if c.shape == diamond {
 				// A rhombus needs a bigger box to keep the body clear of its
-				// slanted edges — only when we inferred the size.
+				// slanted edges - only when we inferred the size.
 				c.w, c.h = c.w*1.5, c.h*1.7
 			}
 		}
@@ -425,7 +425,7 @@ func build(ctx context.Context, cfg Config) (*html.Node, error) {
 // emit builds the two-layer result: an SVG holding the edges and node chrome,
 // and the node bodies as real HTML positioned over it. Bodies stay HTML (not
 // <foreignObject>) so oversized content overflows reliably instead of being
-// clipped — foreignObject's overflow handling is inconsistent across browsers.
+// clipped - foreignObject's overflow handling is inconsistent across browsers.
 // The stage is a fixed pixel size so the SVG and the HTML never scale apart.
 func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Node, error) {
 	stage := dom.El(atom.Div,
@@ -482,7 +482,7 @@ func emit(ctx context.Context, cfg Config, nodes []collected, l laid) (*html.Nod
 }
 
 // labelPoint is where a labelled edge's dot sits: the midpoint of the drawn
-// shaft. That is the trimmed polyline, not the routed one — the shaft stops at
+// shaft. That is the trimmed polyline, not the routed one - the shaft stops at
 // the arrowhead's base, so measuring on the untrimmed points would put the dot
 // half an arrowhead past the middle of the line anyone can see, a fifth of the
 // way along a short edge.
@@ -509,7 +509,7 @@ func edgeDot(e routed) *html.Node {
 // opens from. The dot itself is drawn in the canvas; this only has to
 // be in the right place and catch a pointer or a focus.
 func edgeTip(ctx context.Context, e routed) (*html.Node, error) {
-	// tabindex makes it focusable so the tooltip's :focus-within path can fire —
+	// tabindex makes it focusable so the tooltip's :focus-within path can fire -
 	// otherwise the label would be unreachable by keyboard.
 	dot := render.Component(func(context.Context) (*html.Node, error) {
 		return dom.El(atom.Span, dom.Marker("diagram-edge-hit"),

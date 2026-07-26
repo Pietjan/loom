@@ -23,7 +23,7 @@ go run github.com/pietjan/loom/cmd/css -o css/input.css
 tailwindcss -i css/input.css -o static/styles.css --minify`
 
 templ Index() {
-	@layout("loom — components for Go + templ", "") {
+	@layout("loom - components for Go + templ", "") {
 		<div class="space-y-4">
 			@heading.New(heading.Level(1), heading.XL) {
 				loom

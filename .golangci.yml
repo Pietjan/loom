@@ -38,8 +38,8 @@ linters:
           - gocyclo
           - gosec
         path: _test\.go
-      # These write build output into the developer's own tree — generated Go,
-      # CSS, vendored SVGs, golden HTML — which must stay world-readable.
+      # These write build output into the developer's own tree - generated Go,
+      # CSS, vendored SVGs, golden HTML - which must stay world-readable.
       # gosec's 0600/0750 expectations are for secrets, and its file-inclusion
       # warning is for untrusted input, neither of which applies here.
       - linters:

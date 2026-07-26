@@ -137,7 +137,7 @@ func classes(c Config) string {
 
 func diffLineClass(k lineKind) string {
 	var b styles.Builder
-	// min-h-lh keeps empty lines one line tall — an empty block would
+	// min-h-lh keeps empty lines one line tall - an empty block would
 	// otherwise collapse. The lh utilities arrived after Tailwind 4.0, which
 	// emitted nothing at all for this class; 4.1 is the floor.
 	b.Add("block min-h-lh px-5")
