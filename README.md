@@ -60,7 +60,8 @@ text, link, separator, card, callout, chart.
 
 **Data display** - avatar (photo/initials, status, stacking), breadcrumbs,
 progress (determinate + indeterminate), skeleton, pagination (link-based), stat
-(KPI tile - compose a delta badge or sparkline as children), timeline
+(KPI tile - compose a delta badge as children, a sparkline as the
+background), timeline
 (composable indicators, statuses, horizontal mode), kanban (board/column/card -
 static markup; reordering is your app's concern), description (`<dl>`
 term/detail), kbd. All pure markup + CSS.

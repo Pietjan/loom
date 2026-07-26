@@ -71,6 +71,7 @@ type Config struct {
 	smooth    bool
 	bars      bool
 	sparkline bool
+	inset     float64
 	legend    bool
 	ticks     int
 	format    func(float64) string
@@ -125,6 +126,14 @@ func Bars() Option { return func(c *Config) { c.bars = true } }
 // Sparkline strips axes, grid, labels, and points for inline use.
 func Sparkline() Option { return func(c *Config) { c.sparkline = true } }
 
+// Inset sets the sparkline's margin between the drawing and the edge of
+// the box, in viewBox units. The default 2 is half the stroke width, so
+// the line never clips. Inset(0) draws edge to edge - what a sparkline
+// sitting behind something wants (stat.Background), at the cost of the
+// stroke clipping to half width where it touches a side. Full charts
+// ignore it: their margins are what holds the tick labels.
+func Inset(units float64) Option { return func(c *Config) { c.inset = units } }
+
 // Legend renders series names with color swatches under the chart.
 func Legend() Option { return func(c *Config) { c.legend = true } }
 
@@ -144,7 +153,7 @@ func New(options ...Option) templ.Component {
 // Node builds the chart node: a <figure> holding the SVG (with its
 // tooltip overlay) and an optional legend.
 func Node(ctx context.Context, options ...Option) (*html.Node, error) {
-	cfg := Config{ticks: 4, format: formatValue}
+	cfg := Config{ticks: 4, format: formatValue, inset: 2}
 	for _, opt := range options {
 		opt(&cfg)
 	}
@@ -271,7 +280,8 @@ func (g geometry) y(v float64) float64 {
 
 func plotGeometry(cfg Config) geometry {
 	if cfg.sparkline {
-		return geometry{left: 2, top: 2, right: cfg.W - 2, bottom: cfg.H - 2}
+		i := cfg.inset
+		return geometry{left: i, top: i, right: cfg.W - i, bottom: cfg.H - i}
 	}
 	return geometry{left: 36, top: 10, right: cfg.W - 8, bottom: cfg.H - 22}
 }

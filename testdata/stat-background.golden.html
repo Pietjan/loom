@@ -1,0 +1,19 @@
+<div data-ui="stat" class="flex flex-col overflow-hidden relative gap-1 p-5 bg-white rounded-lg border border-base-200 shadow-xs dark:bg-base-700 dark:border-base-600">
+  <div data-ui="stat-background" class="absolute bottom-0 inset-x-0 opacity-70 pointer-events-none mask-t-from-50%">
+    <figure data-ui="chart" class="w-full">
+      <div class="relative">
+        <svg data-ui="chart-svg" viewBox="0 0 160 40" role="img" class="w-full h-auto" aria-label="Revenue">
+          <path d="M 0 28 L 32 22 L 64 25 L 96 16 L 128 18 L 160 9 L 160 40 L 0 40 Z" class="fill-accent/15">
+          </path>
+          <path d="M 0 28 L 32 22 L 64 25 L 96 16 L 128 18 L 160 9" stroke-linecap="round" stroke-linejoin="round" class="fill-none stroke-2 stroke-accent">
+          </path>
+        </svg>
+      </div>
+    </figure>
+  </div>
+  <div data-ui="stat-label" class="relative font-medium text-base-500 text-sm dark:text-base-400">Revenue</div>
+  <div class="flex relative gap-2 items-center">
+    <div data-ui="stat-value" class="font-semibold text-2xl text-base-800 tracking-tight dark:text-white">$48.2k</div>
+    <span data-ui="badge" class="inline-flex gap-1 items-center px-2 py-1 font-medium text-green-800 text-sm whitespace-nowrap bg-green-400/15 rounded-md **:data-[ui=icon]:size-4 dark:text-green-300 dark:bg-green-400/25">+12%</span>
+  </div>
+</div>

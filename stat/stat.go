@@ -6,6 +6,18 @@
 //	}
 //
 // It is a composition container: drop any loom components into the block.
+// Background takes a second, decorative component that fills the bottom of
+// the tile behind the text - a sparkline is what it is for:
+//
+//	@stat.New(
+//		stat.Label("Revenue"), stat.Value("$48.2k"),
+//		stat.Background(chart.New(
+//			chart.Sparkline(), chart.Area(), chart.Smooth(), chart.Inset(0),
+//			chart.Series("Revenue", revenue),
+//		)),
+//	) {
+//		@badge.New(badge.Green) { +12% }
+//	}
 package stat
 
 import (
@@ -23,8 +35,9 @@ import (
 // Config holds stat options.
 type Config struct {
 	opts.Common
-	LabelText string
-	ValueText string
+	LabelText  string
+	ValueText  string
+	background templ.Component
 }
 
 // Option configures a stat.
@@ -42,6 +55,14 @@ func Label(text string) Option { return func(c *Config) { c.LabelText = text } }
 // Value sets the metric value.
 func Value(text string) Option { return func(c *Config) { c.ValueText = text } }
 
+// Background renders a component as a decorative layer across the bottom
+// of the tile, behind the label and value - intended for a sparkline
+// (chart.Sparkline(), with chart.Inset(0) so it meets the tile's border
+// rather than floating off it). The layer is muted and does not take
+// pointer events; the component keeps whatever accessible name it
+// carries.
+func Background(c templ.Component) Option { return func(cfg *Config) { cfg.background = c } }
+
 // New renders a stat tile as a templ component.
 func New(options ...Option) templ.Component {
 	return render.Component(func(ctx context.Context) (*html.Node, error) {
@@ -58,13 +79,26 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 
 	root := dom.El(atom.Div, dom.Marker("stat"))
 
+	// First in source order so it paints under everything; the content
+	// below carries its own positioning to stay on top.
+	if cfg.background != nil {
+		layer := dom.El(atom.Div, dom.Marker("stat-background"), dom.Attr("class", backgroundClasses()))
+		// Cleared children: the tile's block belongs to the content row,
+		// not to whatever component was handed in as the background.
+		if err := render.Fragment(templ.ClearChildren(ctx), cfg.background, layer); err != nil {
+			return nil, err
+		}
+		root.AppendChild(layer)
+	}
+
 	if cfg.LabelText != "" {
-		label := dom.El(atom.Div, dom.Marker("stat-label"), dom.Attr("class", labelClasses()))
+		label := dom.El(atom.Div, dom.Marker("stat-label"),
+			dom.Attr("class", labelClasses(cfg.background != nil)))
 		label.AppendChild(dom.Text(cfg.LabelText))
 		root.AppendChild(label)
 	}
 
-	row := dom.El(atom.Div, dom.Attr("class", "flex items-center gap-2"))
+	row := dom.El(atom.Div, dom.Attr("class", rowClasses(cfg.background != nil)))
 	if cfg.ValueText != "" {
 		value := dom.El(atom.Div, dom.Marker("stat-value"), dom.Attr("class", valueClasses()))
 		value.AppendChild(dom.Text(cfg.ValueText))
@@ -76,6 +110,6 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 	}
 	root.AppendChild(row)
 
-	cfg.Apply(root, classes())
+	cfg.Apply(root, classes(cfg.background != nil))
 	return root, nil
 }

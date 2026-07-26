@@ -11,6 +11,7 @@ import (
 	"github.com/pietjan/loom/avatar"
 	"github.com/pietjan/loom/badge"
 	"github.com/pietjan/loom/breadcrumbs"
+	"github.com/pietjan/loom/chart"
 	"github.com/pietjan/loom/description"
 	"github.com/pietjan/loom/icon"
 	"github.com/pietjan/loom/internal/dom"
@@ -139,6 +140,14 @@ func TestGoldens(t *testing.T) {
 	t.Run("stat", func(t *testing.T) {
 		testutil.Golden(t, "stat", testutil.WithChildren(
 			stat.New(stat.Label("Revenue"), stat.Value("$48.2k")),
+			testutil.WithChildren(badge.New(badge.Green), testutil.Text("+12%")),
+		))
+	})
+	t.Run("stat/background", func(t *testing.T) {
+		testutil.Golden(t, "stat-background", testutil.WithChildren(
+			stat.New(stat.Label("Revenue"), stat.Value("$48.2k"),
+				stat.Background(chart.New(chart.Sparkline(), chart.Area(), chart.Inset(0),
+					chart.Series("Revenue", []float64{12, 18, 15, 24, 22, 31})))),
 			testutil.WithChildren(badge.New(badge.Green), testutil.Text("+12%")),
 		))
 	})

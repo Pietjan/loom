@@ -100,6 +100,33 @@ func TestSparklineIsBare(t *testing.T) {
 	}
 }
 
+// Inset(0) makes a sparkline draw edge to edge - line and fill together,
+// which is what a backdrop (stat.Background) needs so it does not float a
+// hairline off its container's border. The default inset keeps the stroke
+// off the box edge instead.
+func TestSparklineInset(t *testing.T) {
+	series := chart.Series("Trend", []float64{1, 3, 2, 5})
+
+	bleed := testutil.Render(t, chart.New(chart.Sparkline(), chart.Area(), chart.Inset(0), series))
+	if !strings.Contains(bleed, `L 160 40 L 0 40 Z`) {
+		t.Errorf("Inset(0) area does not close on the box corners: %s", bleed)
+	}
+	if !strings.Contains(bleed, `d="M 0 33.33`) || !strings.Contains(bleed, `L 160 6.67"`) {
+		t.Errorf("Inset(0) line does not span the box edge to edge: %s", bleed)
+	}
+
+	def := testutil.Render(t, chart.New(chart.Sparkline(), chart.Area(), series))
+	if !strings.Contains(def, `L 158 38 L 2 38 Z`) {
+		t.Errorf("default sparkline lost its 2-unit inset: %s", def)
+	}
+
+	// A full chart ignores it: those margins hold the tick labels.
+	full := testutil.Render(t, chart.New(chart.Area(), chart.Inset(0), series))
+	if !strings.Contains(full, `L 592 218 L 36 218 Z`) {
+		t.Errorf("Inset moved a full chart's plot box: %s", full)
+	}
+}
+
 func TestFailsLoudly(t *testing.T) {
 	if err := testutil.RenderErr(chart.New()); !errors.Is(err, chart.ErrNoSeries) {
 		t.Fatalf("expected ErrNoSeries, got %v", err)
