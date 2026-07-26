@@ -446,15 +446,20 @@
      * without a rule inherit the <pre> text color; mode-independent colors
      * (numbers, comments, operators) need no dark override. The <pre> box
      * recipe lives in code/code.go. */
-    /* Flippable token colors as custom properties: each selector below is
-     * stated once and reads a var; only the vars flip for dark mode. */
+    /* Every token color is a custom property: each selector below is stated
+     * once and reads a var, so retheming a token means setting one var. Only
+     * the first group flips for dark mode. */
     [data-ui="code"] {
-        --loom-code-ns: #3b9fec; /* namespace keywords, preprocessor */
+        --loom-code-ns: #157fd2; /* namespace keywords, preprocessor */
         --loom-code-kw: #157fd2; /* keywords, tags, diff hunks */
+        --loom-code-op: #157fd2; /* operators */
         --loom-code-fn: #d050a3; /* attributes, functions, builtins */
         --loom-code-str: #0eb0a9; /* class names, strings */
         --loom-code-del: #82071e; /* GenericDeleted */
         --loom-code-ins: #116329; /* GenericInserted */
+        /* Mode-independent - no dark override needed. */
+        --loom-code-num: #cc3ef6; /* numbers */
+        --loom-code-com: #8e908c; /* comments */
     }
     [data-ui="code"] :is(.kn, .kp, .cp, .cpf) {
         color: var(--loom-code-ns);
@@ -491,16 +496,15 @@
     [data-ui="code"] .gi {
         color: var(--loom-code-ins);
     }
-    /* Mode-independent token colors - no dark override needed. */
     [data-ui="code"] :is(.m, .mb, .mf, .mh, .mi, .il, .mo) {
-        color: #cc3ef6;
-    } /* numbers */
+        color: var(--loom-code-num);
+    }
     [data-ui="code"] :is(.c, .ch, .cm, .c1, .cs) {
-        color: #8e908c;
-    } /* comments */
+        color: var(--loom-code-com);
+    }
     [data-ui="code"] :is(.o, .ow, .or) {
-        color: #88ddff;
-    } /* operators */
+        color: var(--loom-code-op);
+    }
     [data-ui="code"] .ge {
         font-style: italic;
     }
@@ -515,7 +519,8 @@
      * zero-JS default, opted out of by an explicit .light. */
     :where(.dark) [data-ui="code"] {
         --loom-code-ns: #88ddff;
-        --loom-code-kw: #81e6ff;
+        --loom-code-kw: #88ddff;
+        --loom-code-op: #88ddff;
         --loom-code-fn: #75ffc7;
         --loom-code-str: #ff9bde;
         --loom-code-del: #ffa198;
@@ -524,7 +529,8 @@
     @media (prefers-color-scheme: dark) {
         :where(html:not(.light)) [data-ui="code"] {
             --loom-code-ns: #88ddff;
-            --loom-code-kw: #81e6ff;
+            --loom-code-kw: #88ddff;
+            --loom-code-op: #88ddff;
             --loom-code-fn: #75ffc7;
             --loom-code-str: #ff9bde;
             --loom-code-del: #ffa198;
