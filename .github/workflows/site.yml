@@ -25,7 +25,7 @@ jobs:
       - name: Install tailwindcss standalone
         run: |
           curl -sSL -o /usr/local/bin/tailwindcss \
-            https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.17/tailwindcss-linux-x64
+            https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-linux-x64
           chmod +x /usr/local/bin/tailwindcss
       # *_templ.go is generated output and is not committed, so the pages
       # package does not compile until the runner generates it. The templ CLI

@@ -37,6 +37,10 @@ go run github.com/pietjan/loom/cmd/css -accent indigo -o assets/css/input.css
 tailwindcss -i assets/css/input.css -o assets/static/styles.css
 ```
 
+Tailwind 4.1 or newer. Components use utilities added after 4.0 — `min-h-lh`
+among them — and Tailwind emits nothing at all for a utility it does not
+know, so an older CLI produces subtly broken styling rather than an error.
+
 Re-run `cmd/css` after upgrading loom — the `@source` path is
 version-pinned and the structural CSS is snapshotted into the file, so
 both refresh together. A `//go:generate` line is a natural home for it.
