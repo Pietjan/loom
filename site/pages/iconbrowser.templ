@@ -40,7 +40,7 @@ templ iconBrowser() {
 						@icon.New(icon.Name(name.Value))
 						// Names wrap rather than truncate: three of them start
 						// "AlignCenter" and an ellipsis makes them identical.
-						<code class="w-full font-mono text-[0.6875rem] leading-tight break-words text-base-500 select-all dark:text-base-400">
+						<code class="w-full font-mono text-[0.6875rem] leading-tight wrap-break-word text-base-500 select-all dark:text-base-400">
 							{ name.Name }
 						</code>
 					</li>
