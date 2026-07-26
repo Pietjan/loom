@@ -1,9 +1,10 @@
 // Applies the stored theme and wires the header toggle.
 //
-// Loaded as a blocking script in <head>: the theme has to be on <html> before
-// the first paint, so this must not be deferred or a light-themed frame shows
-// before the dark one. The toggle half waits for the DOM, since the button it
-// binds to has not been parsed yet at that point.
+// Inlined into <head> by pages/scripts.go, and blocking: the theme has to be
+// on <html> before the first paint, or a light-themed frame shows before the
+// dark one. Inline is what makes that cheap - an external script would block
+// the paint on a round trip instead. The toggle half waits for the DOM, since
+// the button it binds to has not been parsed yet at that point.
 (function () {
 	var root = document.documentElement;
 

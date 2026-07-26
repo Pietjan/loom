@@ -17,7 +17,8 @@ site_tools = -modfile=../tools/go.mod
 # comment would otherwise stay stale until the server was restarted by hand.
 watch_path = .
 # templ's default pattern covers .go, .templ and _templ.txt. The site also has
-# hand-written JS in static/ and the Tailwind source in css/.
+# hand-written JS in pages/scripts/ (embedded into the pages, so editing one
+# needs a Go rebuild) and the Tailwind source in css/.
 watch_pattern = (.+\.go$$)|(.+\.templ$$)|(.+_templ\.txt$$)|(.+\.js$$)|(.+\.css$$)
 # Everything the build writes back into the tree. Without these the watcher
 # would see its own output and rebuild in a loop.

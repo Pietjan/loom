@@ -51,7 +51,7 @@ templ iconBrowser() {
 			<p class="py-8 text-center text-sm text-base-500 dark:text-base-400" hidden data-icon-empty>
 				No icon matches that search.
 			</p>
-			<script src={ href(ctx, "/static/icon-browser.js") } defer></script>
+			@inlineScript(iconBrowserJS)
 		</section>
 	}
 }

@@ -17,9 +17,7 @@ templ layout(title, activeSlug string) {
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ title }</title>
-			// Deliberately not deferred: the theme has to land on <html>
-			// before the first paint.
-			<script src={ href(ctx, "/static/theme.js") }></script>
+			@inlineScript(themeJS)
 			<link rel="preload" href={ href(ctx, "/static/fonts/geist-sans.woff2") } as="font" type="font/woff2" crossorigin/>
 			<link rel="stylesheet" href={ href(ctx, "/static/styles.css") }/>
 		</head>

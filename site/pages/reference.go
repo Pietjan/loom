@@ -30,7 +30,7 @@ const maxValues = 24
 // better elsewhere, returning the note and the section to link to. Only the
 // icon set qualifies: 1248 names belong in the browser, not a table.
 func valueNote(slug, group string) (note, anchor string, ok bool) {
-	if slug == "icon" && group == "Name" {
+	if slug == iconSlug && group == "Name" {
 		return "1248 generated constants, one per Phosphor icon.", "browse-icons", true
 	}
 	return "", "", false
