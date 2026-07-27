@@ -327,7 +327,7 @@ templ modeSwitch() {
 templ baseChip(name string) {
 	<a
 		href={ swatchHref("base", name) }
-		class="group relative flex w-14 flex-col items-center gap-2 rounded-lg before:absolute before:top-4 before:-left-7 before:h-px before:w-4 before:bg-base-200 before:content-[''] max-sm:[&:nth-child(3n+1)]:before:hidden sm:max-xl:[&:nth-child(5n+1)]:before:hidden xl:[&:nth-child(9n+1)]:before:hidden focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent dark:before:bg-base-700"
+		class="group relative flex w-14 flex-col items-center gap-2 rounded-lg before:absolute before:top-4 before:-left-7 before:h-px before:w-4 before:bg-base-200 before:content-[''] max-sm:nth-[3n+1]:before:hidden sm:max-xl:nth-[5n+1]:before:hidden xl:nth-[9n+1]:before:hidden focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent dark:before:bg-base-700"
 		data-theme-swatch="base"
 		data-theme-value={ name }
 	>
