@@ -44,6 +44,13 @@ jobs:
       - name: Render static site
         working-directory: site
         run: go run . build -o dist -base /loom/
+      # The page scripts are inlined, so minifying the HTML is what shrinks
+      # them - the HTML minifier runs the JS one over inline <script>. Only
+      # .html is named: pointed at the tree, minify rewrites the .woff2 fonts
+      # too, and they do not survive it. See the site/minify make target.
+      - name: Minify HTML
+        working-directory: site
+        run: find dist -name '*.html' -print0 | xargs -0 go tool -modfile=../tools/go.mod minify -i
       # include-hidden-files keeps the .nojekyll that `build` writes into dist;
       # v4 of this action started excluding dotfiles by default.
       - uses: actions/upload-pages-artifact@v5

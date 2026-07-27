@@ -148,6 +148,23 @@ site/run/live/server: site/css
 site/build: site/generate site/css
 	cd $(site_dir) && go run . build -o $(dist) -base $(base)
 
+# The scripts are inlined into every page, comments and all, so the HTML
+# minifier is what shrinks them - it runs the JS minifier over inline <script>
+# on its way through.
+#
+# The file list comes from find rather than minify's own --match, which
+# swallows the input path and then reports it has nothing to read. That matters
+# more than it looks: pointed at the tree, minify rewrites the .woff2 fonts as
+# well - three bytes longer and no longer a font. Naming the .html files is
+# what keeps it away from them.
+#
+# Not part of site/build. What you preview locally stays the readable output
+# that matches the templates; this runs on the way to Pages.
+## site/minify: minify the rendered HTML in $(dist), inline scripts with it
+.PHONY: site/minify
+site/minify:
+	find $(site_dir)/$(dist) -name '*.html' -print0 | xargs -0 go tool $(tools) minify -i
+
 ## site/preview: serve $(dist) under $(base) like GitHub Pages would
 .PHONY: site/preview
 site/preview: site/build
