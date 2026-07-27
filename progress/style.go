@@ -7,7 +7,11 @@ import (
 
 func trackClasses() string {
 	var b styles.Builder
-	b.Add("relative h-2 w-full overflow-hidden rounded-full bg-base-200 dark:bg-base-700")
+	// The track is recessed, not a surface: base-700 is what a card, input or
+	// popover is in dark mode, so a bar sitting in one of those had no track
+	// at all. base-600 is the step the toggle and timeline already use for the
+	// unfilled part of a control.
+	b.Add("relative h-2 w-full overflow-hidden rounded-full bg-base-200 dark:bg-base-600")
 	return b.String()
 }
 

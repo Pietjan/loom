@@ -38,6 +38,7 @@ jobs:
         working-directory: site
         run: |
           go run github.com/pietjan/loom/cmd/css -o css/input.css
+          go run github.com/pietjan/loom/cmd/css/themes >> css/input.css
           cat css/site.css >> css/input.css
           tailwindcss -i css/input.css -o static/styles.css --minify
       - name: Render static site

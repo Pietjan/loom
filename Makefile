@@ -109,6 +109,7 @@ site/generate:
 .PHONY: site/css
 site/css:
 	go run ./cmd/css -o $(site_dir)/css/input.css
+	go run ./cmd/css/themes >> $(site_dir)/css/input.css
 	cat $(site_dir)/css/site.css >> $(site_dir)/css/input.css
 	tailwindcss -i $(site_dir)/css/input.css -o $(site_dir)/static/styles.css --minify
 

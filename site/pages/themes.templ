@@ -1,0 +1,277 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/badge"
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/callout"
+	"github.com/pietjan/loom/card"
+	"github.com/pietjan/loom/checkbox"
+	"github.com/pietjan/loom/code"
+	"github.com/pietjan/loom/field"
+	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/input"
+	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/progress"
+	"github.com/pietjan/loom/text"
+)
+
+// themesSlug addresses the picker in the sidebar; it is not a component page,
+// so it is not in Categories and lives at its own path.
+const themesSlug = "themes"
+
+// accentNames and baseNames are the picker's presentation order - hue order
+// rather than the alphabetical order the stylesheet is generated in. They are
+// names only: the swatch colors come from the generated .loom-swatch-* classes,
+// so a shade is never restated here. TestPickerMatchesStylesheet fails if these
+// lists and the compiled stylesheet disagree.
+//
+// The five neutral accents are deliberately absent from the row: they are the
+// Base chip, which takes whichever neutral the base row has selected. Offering
+// them as colors means five swatches that are the same white in dark mode, and
+// a second way to say what the base row already says.
+var accentNames = []string{
+	"red", "orange", "amber", "yellow", "lime", "green", "emerald",
+	"teal", "cyan", "sky", "blue", "indigo", "violet", "purple",
+	"fuchsia", "pink", "rose",
+}
+
+// Tailwind's five neutrals first, then loom's four, so the row runs from the
+// palettes a reader already knows into the ones they do not.
+var baseNames = []string{
+	"slate", "gray", "zinc", "neutral", "stone",
+	"mauve", "olive", "mist", "taupe",
+}
+
+templ Themes() {
+	@layout("Themes - loom", themesSlug) {
+		<div class="space-y-2">
+			@heading.New(heading.Level(1), heading.XL) {
+				Themes
+			}
+		</div>
+		<section class="space-y-3" data-theme-picker>
+			<div class="flex flex-wrap gap-2 justify-center">
+				// Base is the monochrome accent - the neutral itself, dark on light
+				// and inverted on dark. Its swatch follows the base row, so the
+				// class here is only the first frame.
+				@accentChip("", "Base", "loom-swatch-zinc")
+				for _, name := range accentNames {
+					@accentChip(name, name, "loom-swatch-"+name)
+				}
+			</div>
+			<div class="flex justify-center mt-8">
+				<div class="flex items-start gap-3">
+					// The chain shows the state rather than the action: linked while
+					// the base follows the accent's pairing, broken once you have
+					// paired them yourself. data-selected is what the picker sets on
+					// the current chip, so the group variant is the whole switch.
+					@button.New(button.Ghost, button.Small, button.Class("group"), button.Label("Follow the accent's curated pairing"), button.Href("?base="), button.Attr("data-theme-swatch", "base"), button.Attr("data-theme-value", "")) {
+						@icon.New(icon.Link, icon.Class("hidden group-data-selected:block"))
+						@icon.New(icon.LinkBreak, icon.Class("block group-data-selected:hidden"))
+					}
+					// Wrapping is pinned to a count rather than left to the width:
+					// the track is capped at exactly 3, 5 or 9 chips, so the line
+					// starts are 3n+1, 5n+1 and 9n+1 and baseChip can hide its
+					// connector on precisely those. CSS cannot ask what wrapped,
+					// only arithmetic can - and a grid was no help, since it leaves
+					// a partial last row against the start edge instead of centred.
+					//
+					// The caps are chip + gap: 3·56 + 2·40 = 248, 5·56 + 4·40 = 440,
+					// 9·56 + 8·40 = 824. These and the ranges in baseChip are one
+					// setting split across two places; move one and the other has
+					// to follow, or a stray connector reappears mid-row.
+					<div class="flex max-w-62 flex-wrap justify-center gap-x-10 gap-y-6 sm:max-w-110 xl:max-w-206">
+						for _, name := range baseNames {
+							@baseChip(name)
+						}
+					</div>
+					<div class="w-8"></div>
+				</div>
+			</div>
+			<div class="flex justify-center mt-8">
+				@modeSwitch()
+			</div>
+		</section>
+		<section class="space-y-3">
+			@sectionHeading("Preview")
+			<div class="grid gap-4 sm:grid-cols-2">
+				@card.New() {
+					<div class="space-y-4">
+						<div class="flex items-center justify-between gap-3">
+							@heading.New(heading.Level(3)) {
+								Deployment
+							}
+							@badge.New(badge.Green) {
+								Live
+							}
+						</div>
+						@progress.New(progress.Value(68))
+						@text.New(text.Subtle, text.Small) {
+							68% of this month's build minutes used.
+						}
+						<div class="flex flex-wrap gap-2">
+							@button.New(button.Primary, button.Small) {
+								Deploy
+							}
+							@button.New(button.Outline, button.Small) {
+								History
+							}
+							@button.New(button.Ghost, button.Small, button.Label("More actions")) {
+								@icon.New(icon.DotsThree, icon.Small)
+							}
+						</div>
+					</div>
+				}
+				@card.New() {
+					<div class="space-y-4">
+						@field.Root() {
+							@field.Label() {
+								Project name
+							}
+							@input.New(input.Name("project"), input.Value("loom"))
+						}
+						@checkbox.New(checkbox.Label("Notify on failure"), checkbox.Checked())
+						@callout.New() {
+							@callout.Heading() {
+								Accent-aware
+							}
+							@callout.Text() {
+								Links, focus rings, and filled buttons all read from the same
+								three accent variables.
+							}
+						}
+						@link.New("#") {
+							Read the deployment log
+						}
+					</div>
+				}
+			</div>
+		</section>
+		<section class="space-y-3">
+			@sectionHeading("Take it with you")
+			@text.New() {
+				The command for the theme on screen. -base only appears once you pick one
+				yourself; without it the accent's curated pair is what you get.
+			}
+			@code.New(themeCommand, code.Language("sh"), code.Attr("data-theme-command", ""))
+			@text.New(text.Subtle, text.Small) {
+				Every choice is also a link -
+				@link.New("?accent=violet&base=stone&theme=dark") {
+					?accent=violet&base=stone&theme=dark
+				}
+				works on any page of this site.
+			}
+		</section>
+		@inlineScript(themePickerJS)
+	}
+}
+
+// themeCommand is the default rendered server-side; the picker rewrites it as
+// you choose, and it is what someone with the script blocked still sees.
+const themeCommand = `go run github.com/pietjan/loom/cmd/css -o css/input.css`
+
+// accentChip is one accent, and a real link: the picker script only makes it
+// instant. Follow one without it and theme.js applies the query string on the
+// way in, which is also what makes these worth sharing.
+//
+// The selected ring is neutral rather than accent-colored on purpose - it has
+// to read as "this one" against seventeen colors, two of which it would
+// otherwise disappear into.
+templ accentChip(value, label, swatchClass string) {
+	<a
+		href={ swatchHref("accent", value) }
+		class="flex items-center gap-2 rounded-lg border border-base-200 bg-white px-3 py-2 text-sm shadow-xs capitalize hover:border-base-300 data-selected:border-accent dark:border-base-700 dark:bg-base-800/40 dark:hover:border-base-600 dark:data-selected:border-accent"
+		data-theme-swatch="accent"
+		data-theme-value={ value }
+	>
+		<span
+			class={ "size-4 shrink-0 rounded border border-black/10 dark:border-white/15 " + swatchClass }
+			data-theme-swatch-fill
+		></span>
+		{ label }
+	</a>
+}
+
+// modeSwitch is light and dark as a pair rather than the header's toggle. On a
+// page for choosing a theme both options should be on screen, and which one is
+// on should be readable without decoding an icon.
+//
+// Nothing marks the current side: .dark on <html> is the state, so the dark:
+// variant is the entire switch - the same trick as the chain icon. The links
+// carry ?theme= so a shared URL brings the whole theme with it, not just the
+// colors.
+//
+// Only the side that is off gets a hover, and each hover is scoped to the mode
+// it belongs to. An unscoped one leaks across: hover:text-base-700 on the dark
+// side is the same value as its own dark:bg-base-700, so the label vanished
+// into its button on the way to clicking it.
+templ modeSwitch() {
+	<div class="inline-flex gap-1 rounded-xl border border-base-200 bg-base-100 p-1 dark:border-base-700 dark:bg-base-800">
+		<a
+			href={ swatchHref("theme", "light") }
+			class="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-sm text-base-800 shadow-xs dark:bg-transparent dark:text-base-400 dark:shadow-none dark:hover:text-base-200"
+			data-theme-mode="light"
+		>
+			@icon.New(icon.Sun, icon.Small)
+			Light
+		</a>
+		<a
+			href={ swatchHref("theme", "dark") }
+			class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-base-500 hover:text-base-800 dark:bg-base-700 dark:text-base-100 dark:shadow-xs dark:hover:text-base-100"
+			data-theme-mode="dark"
+		>
+			@icon.New(icon.Moon, icon.Small)
+			Dark
+		</a>
+	</div>
+}
+
+// baseChip is one neutral in the ramp track: swatch above, name below, the way
+// a scale is labelled.
+//
+// Each chip carries the connector on its left rather than the track placing
+// separators between chips, so a line can never end with a dangling one - none
+// of them trail. The chip that starts a line is the remaining case, and it
+// hides its own: the track's capped width makes "first in the line" the same
+// thing as nth-child(chips-per-line·n + 1).
+//
+// The three ranges are mutually exclusive on purpose. Stacked min-width
+// variants would leave a wider rule undoing a narrower one, and which of the
+// two won would come down to the order Tailwind happened to emit them in.
+// Written as max-sm / sm-to-xl / xl, exactly one applies at any width.
+//
+// A fixed chip width keeps the columns even, so every connector spans the same
+// gap: the track's gap-x-10 is 40px, and -left-7 through w-4 sits in the middle
+// of it with 12px clear on each side. The focus ring is drawn inside the box so
+// it stays clear of the chip beside it.
+templ baseChip(name string) {
+	<a
+		href={ swatchHref("base", name) }
+		class="group relative flex w-14 flex-col items-center gap-2 rounded-lg before:absolute before:top-4 before:-left-7 before:h-px before:w-4 before:bg-base-200 before:content-[''] max-sm:[&:nth-child(3n+1)]:before:hidden sm:max-xl:[&:nth-child(5n+1)]:before:hidden xl:[&:nth-child(9n+1)]:before:hidden focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent dark:before:bg-base-700"
+		data-theme-swatch="base"
+		data-theme-value={ name }
+	>
+		// Dimmed until chosen. The swatch is the true ramp color either way -
+		// the opacity is the picker deciding how loudly to say it, so nine
+		// neutrals read as a set of options rather than nine flat tiles.
+		//
+		// Every edge comes from the generated class, selection included: it
+		// takes the emphasised shade the palette exposes, so a chip stays in
+		// its own ramp in every state. No border-base-* utility here on
+		// purpose - those land in the utilities layer and would win, painting
+		// all nine chips with whichever base is currently in force.
+		<span class={ "size-8 rounded-lg border shadow-sm opacity-60 transition-opacity group-hover:opacity-85 group-data-selected:opacity-100 group-data-selected:border-(--loom-swatch-edge-strong) loom-swatch-base-" + name }></span>
+		<span class="text-xs capitalize text-base-400 group-data-selected:text-base-800 dark:text-base-500 dark:group-data-selected:text-base-100">
+			{ name }
+		</span>
+	</a>
+}
+
+// swatchHref names one axis only. The other is not dropped by the omission -
+// theme.js remembers it - so a link can stay short enough to read. Base has no
+// accent of its own: it is whichever neutral is in force, which only the
+// stylesheet knows, so its link clears the accent and lets the base row answer.
+func swatchHref(kind, value string) templ.SafeURL {
+	return templ.URL("?" + kind + "=" + value)
+}

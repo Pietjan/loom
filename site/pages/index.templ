@@ -4,6 +4,7 @@ import (
 	"github.com/pietjan/loom/button"
 	"github.com/pietjan/loom/code"
 	"github.com/pietjan/loom/heading"
+	"github.com/pietjan/loom/link"
 	"github.com/pietjan/loom/text"
 )
 
@@ -50,6 +51,15 @@ templ Index() {
 				theme and scans loom's packages for classes; the Tailwind CLI compiles it.
 			}
 			@code.New(cssSnippet, code.Language("sh"))
+			@text.New(text.Subtle, text.Small) {
+				Pass -accent to bake in another theme; each one brings a matching neutral
+				base along, which -base overrides. Try them on first:
+				@link.New(href(ctx, "/themes/")) {
+					the theme picker
+				}
+				 re-themes this site as you click, and hands you the command for what you
+				land on.
+			}
 		</section>
 		<div class="flex justify-center pt-2">
 			@button.New(button.Primary, button.Href(href(ctx, "/components/button/"))) {

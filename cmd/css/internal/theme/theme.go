@@ -11,6 +11,8 @@ package theme
 import (
 	"bytes"
 	"fmt"
+	"maps"
+	"slices"
 	"text/template"
 )
 
@@ -42,6 +44,14 @@ const tmpl = `/*
 }
 
 @layer theme {
+    /* Which theme this is. The variables above are colors and say nothing
+     * about where they came from; UI that offers a choice has to be able to
+     * show which one is in force, including when nothing has been picked. */
+    :root {
+        --loom-accent-name: "{{.Name}}";
+        --loom-base-name: "{{.Base}}";
+    }
+
     /* Dark accent tracks Tailwind's default dark: variant (media query),
      * and also a manual .dark class for apps using a class toggle. */
     @media (prefers-color-scheme: dark) {
@@ -62,6 +72,100 @@ const tmpl = `/*
 
 `
 
+// allTmpl renders every accent and base as an attribute-scoped override, for
+// pages that switch theme at runtime rather than recompiling.
+const allTmpl = `/*
+ * Every curated accent and neutral base, scoped to a data attribute, so a page
+ * can switch theme by setting data-accent / data-base on <html>. Appended to
+ * the entry file by cmd/css/themes; cmd/css itself still writes one theme.
+ *
+ * html[data-...] is a 0,1,1 selector - it outranks both the :root defaults
+ * @theme emits and the plain .dark block above, without !important. The dark
+ * blocks repeat the .dark / :not(.light) pair the single theme uses.
+ */
+@layer theme {
+{{- range .Accents}}
+    html[data-accent="{{.Name}}"] {
+{{- range .Light}}
+        {{.Name}}: var({{.Value}});
+{{- end}}
+        --loom-accent-name: "{{.Name}}";
+        --loom-base-name: "{{.Base}}";
+    }
+    @media (prefers-color-scheme: dark) {
+        html:not(.light)[data-accent="{{.Name}}"] {
+{{- range .Dark}}
+            {{.Name}}: var({{.Value}});
+{{- end}}
+        }
+    }
+    html.dark[data-accent="{{.Name}}"] {
+{{- range .Dark}}
+        {{.Name}}: var({{.Value}});
+{{- end}}
+    }
+{{end}}
+    /* Bases last: an explicit data-base ties on specificity with the base ramp
+     * an accent brings along, so source order is what lets it win. */
+{{- range .Bases}}
+    html[data-base="{{.Name}}"] {
+{{- range .Vars}}
+        {{.Name}}: var({{.Value}});
+{{- end}}
+        --loom-base-name: "{{.Name}}";
+    }
+{{- end}}
+}
+
+/* Swatches: what each theme looks like before it is applied, for a picker that
+ * has to draw the choice. Chrome rather than tokens, but the colors belong to
+ * the table above - a picker that names its own shades drifts from the theme
+ * it is selecting.
+ *
+ * The five monochrome accents all invert to the same white in dark mode, so a
+ * picker that offers them as colors has five identical swatches. Pair this
+ * with --loom-base-name and offer one "base" choice per neutral instead,
+ * which is the distinction that survives.
+ *
+ * @layer components, not theme: Tailwind's preflight sets border-color on
+ * every element in @layer base, and a later layer wins whatever the
+ * specificity - in the theme layer a swatch got its fill and not its edge.
+ * Components still sits below utilities, so a picker can override any of this
+ * with a plain class. */
+@layer components {
+{{- range .Accents}}
+    .loom-swatch-{{.Name}} { background-color: var({{.Swatch}}); }
+{{- end}}
+    @media (prefers-color-scheme: dark) {
+{{- range .Accents}}
+        html:not(.light) .loom-swatch-{{.Name}} { background-color: var({{.SwatchDark}}); }
+{{- end}}
+    }
+{{- range .Accents}}
+    html.dark .loom-swatch-{{.Name}} { background-color: var({{.SwatchDark}}); }
+{{- end}}
+{{- range .Bases}}
+    .loom-swatch-base-{{.Name}} {
+        background-color: var({{.Swatch}});
+        border-color: var({{.SwatchEdge}});
+        --loom-swatch-edge-strong: var({{.SwatchEdgeStrong}});
+    }
+{{- end}}
+    /* The emphasised edge inverts: a darker shade defines a swatch on a light
+     * page, and disappears into a dark one. Left as a variable rather than a
+     * rule so whoever draws the picker decides what emphasis means - hover,
+     * selection, focus - without the palette knowing about any of them. */
+    @media (prefers-color-scheme: dark) {
+{{- range .Bases}}
+        html:not(.light) .loom-swatch-base-{{.Name}} { --loom-swatch-edge-strong: var({{.SwatchEdgeStrongDark}}); }
+{{- end}}
+    }
+{{- range .Bases}}
+    html.dark .loom-swatch-base-{{.Name}} { --loom-swatch-edge-strong: var({{.SwatchEdgeStrongDark}}); }
+{{- end}}
+}
+`
+
 // Color is a Tailwind palette name.
 type Color string
 
@@ -79,6 +183,10 @@ const (
 	Zinc    Color = "zinc"
 	Neutral Color = "neutral"
 	Stone   Color = "stone"
+	Mauve   Color = "mauve"
+	Olive   Color = "olive"
+	Mist    Color = "mist"
+	Taupe   Color = "taupe"
 	Red     Color = "red"
 	Orange  Color = "orange"
 	Amber   Color = "amber"
@@ -122,6 +230,10 @@ var Accents = map[Color]Accent{
 	Zinc:    monochromeAccent(Zinc),
 	Neutral: monochromeAccent(Neutral),
 	Stone:   monochromeAccent(Stone),
+	Mauve:   monochromeAccent(Mauve),
+	Olive:   monochromeAccent(Olive),
+	Mist:    monochromeAccent(Mist),
+	Taupe:   monochromeAccent(Taupe),
 	Red: {
 		Accent: Red.Variant(500), AccentContent: Red.Variant(600), AccentForeground: colorWhite,
 		Dark: AccentDark{Accent: Red.Variant(500), AccentContent: Red.Variant(400), AccentForeground: colorWhite},
@@ -201,17 +313,28 @@ func monochromeAccent(c Color) Accent {
 	}
 }
 
+// neutrals are the palettes allowed as a base ramp, in the order they are
+// emitted. All nine of Tailwind's - the four tinted ones (mauve, olive, mist,
+// taupe) arrived after the original five.
+var neutrals = []Color{Slate, Gray, Zinc, Neutral, Stone, Mauve, Olive, Mist, Taupe}
+
+// shades are the steps of the base ramp.
+var shades = []int{50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950}
+
 // pairs curates a matching neutral base per accent.
 var pairs = map[Color]Color{
 	Slate: Slate, Gray: Gray, Zinc: Zinc, Neutral: Neutral, Stone: Stone,
+	Mauve: Mauve, Olive: Olive, Mist: Mist, Taupe: Taupe,
 	Red: Zinc, Orange: Neutral, Amber: Neutral, Yellow: Stone,
 	Lime: Zinc, Green: Zinc, Emerald: Zinc, Teal: Gray,
 	Cyan: Gray, Sky: Gray, Blue: Slate, Indigo: Slate,
 	Violet: Gray, Purple: Gray, Fuchsia: Zinc, Pink: Zinc, Rose: Zinc,
 }
 
-// Theme is a resolved accent + base combination.
+// Theme is a resolved accent + base combination. Name is the accent's palette
+// name, kept alongside its shades so the output can say which theme it is.
 type Theme struct {
+	Name   Color
 	Accent Accent
 	Base   Color
 }
@@ -226,6 +349,7 @@ func WithAccent(accent string) Option {
 		if !ok {
 			return fmt.Errorf("theme: unknown accent %q", accent)
 		}
+		t.Name = Color(accent)
 		t.Accent = Accents[Color(accent)]
 		t.Base = base
 		return nil
@@ -236,19 +360,18 @@ func WithAccent(accent string) Option {
 // zinc, neutral, stone).
 func WithBase(base string) Option {
 	return func(t *Theme) error {
-		switch c := Color(base); c {
-		case Slate, Gray, Zinc, Neutral, Stone:
-			t.Base = c
-			return nil
-		default:
+		c := Color(base)
+		if !slices.Contains(neutrals, c) {
 			return fmt.Errorf("theme: base must be a neutral palette, got %q", base)
 		}
+		t.Base = c
+		return nil
 	}
 }
 
 // Generate renders the theme CSS (@theme variables + dark overrides).
 func Generate(opts ...Option) ([]byte, error) {
-	t := Theme{Accent: Accents[Zinc], Base: Zinc}
+	t := Theme{Name: Zinc, Accent: Accents[Zinc], Base: Zinc}
 	for _, opt := range opts {
 		if err := opt(&t); err != nil {
 			return nil, err
@@ -264,4 +387,94 @@ func Generate(opts ...Option) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// decl is one custom property and the palette variable it aliases.
+type decl struct{ Name, Value string }
+
+// accentBlock is an accent's rules: the light declarations (its triple plus
+// the base ramp it pairs with), the dark overrides for the triple, and the
+// surface color on its own, for swatches.
+type accentBlock struct {
+	Name       Color
+	Base       Color
+	Light      []decl
+	Dark       []decl
+	Swatch     string
+	SwatchDark string
+}
+
+// baseBlock is a neutral base ramp on its own, for overriding the one an
+// accent brings along. The swatch carries its own edge as well as its fill:
+// a picker drawing nine ramps has to draw each one in its own color, and a
+// border taken from --color-base-* would be the ramp currently in force
+// rather than the one on offer.
+type baseBlock struct {
+	Name                 Color
+	Vars                 []decl
+	Swatch               string
+	SwatchEdge           string
+	SwatchEdgeStrong     string
+	SwatchEdgeStrongDark string
+}
+
+// GenerateAll renders every accent and base as an attribute-scoped override
+// (html[data-accent], html[data-base]), so a page can switch theme by setting
+// attributes rather than compiling a stylesheet per combination. Generate
+// still supplies the defaults these override.
+func GenerateAll() ([]byte, error) {
+	var data struct {
+		Accents []accentBlock
+		Bases   []baseBlock
+	}
+
+	for _, name := range slices.Sorted(maps.Keys(Accents)) {
+		base, ok := pairs[name]
+		if !ok {
+			return nil, fmt.Errorf("theme: accent %q has no paired base", name)
+		}
+		a := Accents[name]
+		data.Accents = append(data.Accents, accentBlock{
+			Name: name,
+			Base: base,
+			Light: append([]decl{
+				{"--color-accent", a.Accent},
+				{"--color-accent-content", a.AccentContent},
+				{"--color-accent-foreground", a.AccentForeground},
+			}, baseDecls(base)...),
+			Dark: []decl{
+				{"--color-accent", a.Dark.Accent},
+				{"--color-accent-content", a.Dark.AccentContent},
+				{"--color-accent-foreground", a.Dark.AccentForeground},
+			},
+			Swatch:     a.Accent,
+			SwatchDark: a.Dark.Accent,
+		})
+	}
+	for _, base := range neutrals {
+		data.Bases = append(data.Bases, baseBlock{
+			Name: base, Vars: baseDecls(base),
+			Swatch: base.Variant(400), SwatchEdge: base.Variant(500),
+			SwatchEdgeStrong: base.Variant(700), SwatchEdgeStrongDark: base.Variant(200),
+		})
+	}
+
+	parsed, err := template.New("themes").Parse(allTmpl)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	if err := parsed.Execute(&buf, data); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// baseDecls aliases the base ramp to a neutral palette.
+func baseDecls(base Color) []decl {
+	out := make([]decl, 0, len(shades))
+	for _, s := range shades {
+		out = append(out, decl{fmt.Sprintf("--color-base-%d", s), base.Variant(s)})
+	}
+	return out
 }

@@ -43,6 +43,11 @@ func TestScriptsAreInlined(t *testing.T) {
 	if !strings.Contains(head, "root.classList.toggle('dark'") {
 		t.Error("theme script is not inline in <head>; a light frame will show on a dark OS")
 	}
+	// Same for ?accent= / ?base=: applied late, the page repaints in the
+	// theme the visitor asked it not to use.
+	if !strings.Contains(head, "URLSearchParams") {
+		t.Error("accent/base params are not resolved in <head>")
+	}
 
 	// The icon browser's script must follow the grid it queries.
 	icons := renderPage(t, iconSlug)

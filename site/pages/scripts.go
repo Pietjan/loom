@@ -30,6 +30,9 @@ var themeJS string
 //go:embed scripts/icon-browser.js
 var iconBrowserJS string
 
+//go:embed scripts/theme-picker.js
+var themePickerJS string
+
 // inlineScript writes an embedded script into the page verbatim. The content
 // is our own source, not user input, so it is written raw - templ would
 // otherwise escape it into something that no longer parses as JavaScript.

@@ -78,6 +78,7 @@ func handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	mux.Handle("/{$}", templ.Handler(pages.Index()))
+	mux.Handle("/themes/{$}", templ.Handler(pages.Themes()))
 	mux.HandleFunc("/components/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		p, ok := pages.Find(r.PathValue("slug"))
 		if !ok {
@@ -113,6 +114,9 @@ func build(out, base string) error {
 	if err := render("index.html", pages.Index()); err != nil {
 		return err
 	}
+	if err := render(filepath.Join("themes", "index.html"), pages.Themes()); err != nil {
+		return err
+	}
 	for _, p := range pages.All() {
 		if err := render(filepath.Join("components", p.Slug, "index.html"), p.Body()); err != nil {
 			return err
@@ -126,7 +130,8 @@ func build(out, base string) error {
 	if err := os.WriteFile(filepath.Join(out, ".nojekyll"), nil, 0o644); err != nil {
 		return err
 	}
-	log.Printf("site: rendered %d pages to %s", len(pages.All())+1, out)
+	// +2: the index and the theme picker are not component pages.
+	log.Printf("site: rendered %d pages to %s", len(pages.All())+2, out)
 	return nil
 }
 

@@ -45,6 +45,10 @@ templ layout(title, activeSlug string) {
 							@icon.New(icon.House, icon.Small)
 							Introduction
 						}
+						@navlist.Item(href(ctx, "/themes/"), navItemCurrent(activeSlug == themesSlug)...) {
+							@icon.New(icon.Palette, icon.Small)
+							Themes
+						}
 					}
 					for _, cat := range Categories {
 						@navlist.New(navlist.Label(cat.Name)) {
@@ -60,7 +64,7 @@ templ layout(title, activeSlug string) {
 					}
 				}
 				<div class="flex-1 min-w-0">
-					<main class="mx-auto max-w-4xl space-y-10 p-8">
+					<main class="mx-auto max-w-5xl space-y-10 p-8">
 						{ children... }
 					</main>
 				</div>
