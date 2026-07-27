@@ -21,10 +21,13 @@
 	if (!chips.length) return;
 
 	var command = document.querySelector('[data-theme-command]');
-	// The Base chip has no color of its own - it is the monochrome accent, and
-	// which neutral that is comes from the base row.
-	var monoChip = document.querySelector('[data-theme-swatch="accent"][data-theme-value=""]');
-	var monoFill = monoChip && monoChip.querySelector('[data-theme-swatch-fill]');
+	// The narrow-screen form of the same two choices. Both forms are bound;
+	// only one is on screen, and neither needs to know which.
+	var selects = Array.prototype.slice.call(document.querySelectorAll('[data-theme-select]'));
+	// Base has no color of its own - it is the monochrome accent, and which
+	// neutral that is comes from the base row. Both forms of the picker draw
+	// it, so both swatches are collected and repainted together.
+	var monoFills = Array.prototype.slice.call(document.querySelectorAll('[data-theme-mono-fill]'));
 	// The neutrals are read off the base row instead of listed again here.
 	var neutrals = chips
 		.filter(function (chip) {
@@ -80,8 +83,17 @@
 			chip.setAttribute('aria-pressed', selected ? 'true' : 'false');
 		}
 
-		if (monoFill) {
-			monoFill.className = monoFill.className.replace(/loom-swatch-\S+/, 'loom-swatch-' + base);
+		// The selects carry the same two absences as the chips: an empty accent
+		// is Base, an empty base is matched to it.
+		for (var j = 0; j < selects.length; j++) {
+			var select = selects[j];
+			select.value = select.getAttribute('data-theme-select') === 'accent'
+				? (isMono(accent) ? '' : accent)
+				: (linked ? '' : base);
+		}
+
+		for (var k = 0; k < monoFills.length; k++) {
+			monoFills[k].className = monoFills[k].className.replace(/loom-swatch-\S+/, 'loom-swatch-' + base);
 		}
 	}
 
@@ -145,10 +157,21 @@
 			if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
 			event.preventDefault();
 			choose(this.getAttribute('data-theme-swatch'), this.getAttribute('data-theme-value'));
-			mark();
-			describe();
-			url();
+			apply();
 		});
+	}
+
+	for (var j = 0; j < selects.length; j++) {
+		selects[j].addEventListener('change', function () {
+			choose(this.getAttribute('data-theme-select'), this.value);
+			apply();
+		});
+	}
+
+	function apply() {
+		mark();
+		describe();
+		url();
 	}
 
 	mark();

@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"strings"
+
 	"github.com/pietjan/loom/badge"
 	"github.com/pietjan/loom/button"
 	"github.com/pietjan/loom/callout"
@@ -12,6 +14,7 @@ import (
 	"github.com/pietjan/loom/icon"
 	"github.com/pietjan/loom/input"
 	"github.com/pietjan/loom/link"
+	"github.com/pietjan/loom/picker"
 	"github.com/pietjan/loom/progress"
 	"github.com/pietjan/loom/text"
 )
@@ -51,7 +54,8 @@ templ Themes() {
 			}
 		</div>
 		<section class="space-y-3" data-theme-picker>
-			<div class="flex flex-wrap gap-2 justify-center">
+			@smallScreenPickers()
+			<div class="flex flex-wrap gap-2 justify-center max-sm:hidden">
 				// Base is the monochrome accent - the neutral itself, dark on light
 				// and inverted on dark. Its swatch follows the base row, so the
 				// class here is only the first frame.
@@ -60,7 +64,7 @@ templ Themes() {
 					@accentChip(name, name, "loom-swatch-"+name)
 				}
 			</div>
-			<div class="flex justify-center mt-8">
+			<div class="flex justify-center mt-8 max-sm:hidden">
 				<div class="flex items-start gap-3">
 					// The chain shows the state rather than the action: linked while
 					// the base follows the accent's pairing, broken once you have
@@ -171,6 +175,79 @@ templ Themes() {
 // you choose, and it is what someone with the script blocked still sees.
 const themeCommand = `go run github.com/pietjan/loom/cmd/css -o css/input.css`
 
+// smallScreenPickers is the same two choices as the chips, for widths where
+// the chips are five rows of accents above three rows of bases. Two selects
+// say it in two lines - and the picker is loom's own component, so the page
+// demonstrates what it is offering while you use it.
+//
+// Both forms are always in the DOM and one is hidden, rather than one being
+// built at the width that needs it: the picker script binds everything once at
+// load, and marks whichever is on screen from the same theme state.
+//
+// The empty values match the chips they stand in for - "" is the Base accent
+// and the matched base, the two things that are the absence of a choice rather
+// than a choice.
+templ smallScreenPickers() {
+	<div class="mx-auto w-full max-w-xs space-y-4 sm:hidden">
+		@field.Root() {
+			@field.Label() {
+				Accent
+			}
+			// Rich options: the swatch is the same generated class the chips
+			// use, so both forms of the picker show the same colors. Chromium
+			// styles the options and clones the selected one into the closed
+			// state, so the swatch follows the choice up; everywhere else the
+			// option collapses to its text and the name carries it alone.
+			@picker.New(picker.Attr("data-theme-select", "accent")) {
+				@picker.Item("") {
+					<span
+						class="size-4 shrink-0 rounded border border-black/10 loom-swatch-zinc dark:border-white/15"
+						data-theme-mono-fill
+					></span>
+					Base
+				}
+				for _, name := range accentNames {
+					@picker.Item(name) {
+						<span class={ "size-4 shrink-0 rounded border border-black/10 dark:border-white/15 loom-swatch-" + name }></span>
+						{ title(name) }
+					}
+				}
+			}
+		}
+		@field.Root() {
+			@field.Label() {
+				Base
+			}
+			@picker.New(picker.Attr("data-theme-select", "base")) {
+				// The chain again rather than a swatch: matched is a state, not
+				// a color, and it is the same state the chain button shows.
+				@picker.Item("") {
+					@icon.New(icon.Link, icon.ExtraSmall)
+					Matched to the accent
+				}
+				for _, name := range baseNames {
+					@picker.Item(name) {
+						// Border width only - the color is the ramp's own, from
+						// the generated class, as on the chips.
+						<span class={ "size-4 shrink-0 rounded border loom-swatch-base-" + name }></span>
+						{ title(name) }
+					}
+				}
+			}
+		}
+	</div>
+}
+
+// title capitalises a palette name for display. The chips do it in CSS, but
+// option text is the browser's to render and text-transform does not reach it
+// outside Chromium.
+func title(name string) string {
+	if name == "" {
+		return name
+	}
+	return strings.ToUpper(name[:1]) + name[1:]
+}
+
 // accentChip is one accent, and a real link: the picker script only makes it
 // instant. Follow one without it and theme.js applies the query string on the
 // way in, which is also what makes these worth sharing.
@@ -187,7 +264,9 @@ templ accentChip(value, label, swatchClass string) {
 	>
 		<span
 			class={ "size-4 shrink-0 rounded border border-black/10 dark:border-white/15 " + swatchClass }
-			data-theme-swatch-fill
+			if value == "" {
+				data-theme-mono-fill
+			}
 		></span>
 		{ label }
 	</a>
