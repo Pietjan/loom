@@ -86,7 +86,8 @@ scope by policy; per-point tooltips are the offering.
 
 **Forms** - field, input, textarea, checkbox, radio, toggle, picker, fieldset,
 slider (native range), fileupload (native file input), inputgroup (input with
-leading/trailing addons). The field composite wires everything by itself -
+leading/trailing addons), combobox (filter-as-you-type, with the choices in a
+popover). The field composite wires everything by itself -
 including a control wrapped in an inputgroup:
 
 ```templ
@@ -100,6 +101,12 @@ including a control wrapped in an inputgroup:
 renders label `for` ↔ control `id`, `aria-describedby` listing exactly the parts
 that rendered, `aria-invalid` + error styling, mirrored `required`/`disabled` -
 zero manual plumbing.
+
+`input.Small` is the compact field, at `button.Small`'s height so the two line
+up on one row - a filter beside a menu button, say. There is no extra-small: a
+button that size is still a target to hit, an input is a target to type in, and
+the text starts colliding with its own padding. Inside an `inputgroup` the group
+sets the height and the input fills it, so a size there is ignored.
 
 **Layout** - two application shells. A **sidebar** layout (left `sidebar`
 
@@ -185,8 +192,10 @@ rather than approximated:
 
 - **The full ARIA tabs pattern** (`role=tab` with arrow-key roving). `tabs` is a
   disclosure group and is announced as one - see above.
-- **Combobox / autocomplete.** `picker` covers the native select; there is
-  nothing for the filter-as-you-type case.
+- **Async anything.** `combobox` renders the filter-as-you-type control -
+  a query field and a floating panel of choices - but narrowing the list,
+  deciding when it is open, and moving the cursor through it are the
+  composer's, because nothing here runs.
 - **A synced crosshair cursor** with a live multi-value tooltip, à la Flux's
   `chart.cursor`. `chart` labels points individually instead.
 

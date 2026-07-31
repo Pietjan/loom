@@ -33,6 +33,7 @@ var l2 = []string{
 	"field", "input", "textarea", "checkbox", "radio", "toggle", "picker", "fieldset",
 	"slider", "fileupload", "inputgroup",
 	"modal", "dropdown", "popover", "accordion", "tabs", "navlist", "sidebar", "navbar", "header", "table",
+	"launcher", "combobox",
 }
 
 // embeddable primitives may be composed by any component (their Node

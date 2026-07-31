@@ -19,9 +19,23 @@ import (
 	"github.com/pietjan/loom/internal/scope"
 )
 
+// Size is the input size.
+//
+// There is no extra-small, unlike button: a button at h-6 is still a target
+// to hit, while an input is a target to type in, and text at that height
+// collides with its own padding. Two sizes that both work beat three where
+// one does not.
+type Size string
+
+const (
+	SizeBase  Size = "base" // default
+	SizeSmall Size = "sm"
+)
+
 // Config holds input options.
 type Config struct {
 	opts.Common
+	Size    Size
 	invalid bool
 	grouped bool // inside an input group: render without its own shell
 }
@@ -34,6 +48,13 @@ var (
 	ID    = opts.ID[*Config]
 	Attr  = opts.Attr[*Config]
 )
+
+// WithSize sets the input size.
+func WithSize(s Size) Option { return func(c *Config) { c.Size = s } }
+
+// Small renders the compact input - the same height as button.Small, so a
+// field and a button sitting on one row line up.
+var Small = WithSize(SizeSmall)
 
 // Type sets the input type (default "text").
 func Type(t string) Option { return Attr("type", t) }

@@ -59,7 +59,11 @@ func TestScriptsAreInlined(t *testing.T) {
 // The embeds must actually carry the files - an empty string still compiles
 // and renders, and only fails in the browser.
 func TestEmbeddedScriptsAreNotEmpty(t *testing.T) {
-	for name, js := range map[string]string{"theme.js": themeJS, "icon-browser.js": iconBrowserJS} {
+	for name, js := range map[string]string{
+		"theme.js":        themeJS,
+		"icon-browser.js": iconBrowserJS,
+		"launcher.js":     launcherJS,
+	} {
 		if len(strings.TrimSpace(js)) < 100 {
 			t.Errorf("%s embedded as %d bytes", name, len(js))
 		}

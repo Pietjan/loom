@@ -55,6 +55,7 @@ type Scope struct {
 // Config holds dropdown options.
 type Config struct {
 	opts.Common
+	PairName string
 }
 
 // Option configures a dropdown part.
@@ -66,6 +67,15 @@ var (
 	Attr  = opts.Attr[*Config]
 )
 
+// Name gives the menu a stable, user-chosen id stem instead of a generated
+// one, so the pair survives being re-rendered.
+//
+// It matters for the same reason it does on modal and combobox: a popover's
+// open state lives on the element. Re-render the wrapper with a fresh id and
+// the morph replaces the panel, which closes it - so a menu whose items
+// change what the page shows would shut on every click.
+func Name(name string) Option { return func(c *Config) { c.PairName = name } }
+
 // Root renders the positioning wrapper and generates the trigger/menu pair.
 func Root(options ...Option) templ.Component {
 	return render.Component(func(ctx context.Context) (*html.Node, error) {
@@ -74,7 +84,12 @@ func Root(options ...Option) templ.Component {
 			opt(&cfg)
 		}
 
-		id := ids.New(ctx, "dropdown")
+		id := cfg.PairName
+		if id == "" {
+			id = ids.New(ctx, "dropdown")
+		} else {
+			id = "loom-dropdown-" + id
+		}
 		sc := Scope{MenuID: id, AnchorName: "--" + id}
 
 		// The wrapper is the containing block for the non-anchor fallback

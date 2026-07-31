@@ -141,7 +141,8 @@ func assertControlsAreLabelled(t *testing.T, tree *html.Node) {
 		}
 	}
 
-	controls := dom.FindAll(tree, dom.ByMarker("input", "textarea", "picker", "checkbox", "radio", "toggle"))
+	controls := dom.FindAll(tree, dom.ByMarker("input", "textarea", "picker", "checkbox", "radio", "toggle",
+		"combobox-input"))
 	for _, c := range controls {
 		if dom.GetAttr(c, "aria-label") != "" || dom.GetAttr(c, "aria-labelledby") != "" {
 			continue

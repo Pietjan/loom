@@ -5,6 +5,7 @@ package loom_test
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/pietjan/loom/accordion"
 	"github.com/pietjan/loom/badge"
 	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/combobox"
 	"github.com/pietjan/loom/dropdown"
 	"github.com/pietjan/loom/header"
 	"github.com/pietjan/loom/internal/dom"
@@ -339,4 +341,155 @@ func TestPhase3Goldens(t *testing.T) {
 	testutil.Golden(t, "tooltip", composites["tooltip"]())
 	testutil.Golden(t, "header", composites["header"]())
 	testutil.Golden(t, "sidebar", composites["sidebar"]())
+}
+
+// fullCombobox is the filter-as-you-type control: a query field, a floating
+// panel of choices, and the hidden input that makes it a form control.
+func fullCombobox() templ.Component {
+	return testutil.WithChildren(
+		combobox.Root(combobox.Name("person"), combobox.Field("assignee"), combobox.Value("ada")),
+		testutil.Sequence(
+			// A placeholder is not a name: the harness checks this control
+			// has one, the same as every other.
+			combobox.Input(combobox.Placeholder("Find a person…"), combobox.Query("ad"),
+				combobox.Expanded(), combobox.Attr("aria-label", "Assignee")),
+			testutil.WithChildren(combobox.List(), testutil.Sequence(
+				testutil.WithChildren(combobox.Item(combobox.Value("ada"), combobox.Chosen()),
+					testutil.Text("Ada Lovelace")),
+				testutil.WithChildren(combobox.Item(combobox.Value("alan")),
+					testutil.Text("Alan Turing")),
+			)),
+			testutil.WithChildren(combobox.Empty(), testutil.Text("Nobody by that name.")),
+		))
+}
+
+func init() { composites["combobox"] = fullCombobox }
+
+// TestComboboxPanelIsAPopover. The whole point of the component over
+// launcher: the list floats, so it overlays the page instead of pushing it
+// and escapes a clipping ancestor - and its Esc and light dismiss are the
+// platform's rather than a script's.
+func TestComboboxPanelIsAPopover(t *testing.T) {
+	tree := testutil.NewTree(t, testutil.Render(t, fullCombobox()))
+
+	list := tree.One("combobox-list")
+	if !dom.HasAttr(list, "popover") {
+		t.Error("the list is not a popover, so it cannot leave the flow or dismiss itself")
+	}
+
+	// Anchored to the wrapper: the name Root sets is the name the panel
+	// positions against, or the panel lands wherever the fallback puts it.
+	root := tree.One("combobox")
+	anchor := dom.GetAttr(root, "style")
+	if !strings.Contains(anchor, "anchor-name: --loom-combobox-person") {
+		t.Errorf("root carries no anchor-name: %q", anchor)
+	}
+	if got := dom.GetAttr(list, "style"); !strings.Contains(got, "position-anchor: --loom-combobox-person") {
+		t.Errorf("list is anchored to nothing: %q", got)
+	}
+}
+
+// TestComboboxIDsAreStableUnderAName. A popover's open state lives on the
+// element, so a re-render that changes the panel's id closes the list - on
+// every keystroke, for a component whose whole job is to re-render as you
+// type.
+func TestComboboxIDsAreStableUnderAName(t *testing.T) {
+	first := testutil.Render(t, fullCombobox())
+	second := testutil.Render(t, fullCombobox())
+	if first != second {
+		t.Error("two renders of the same named combobox differ")
+	}
+
+	tree := testutil.NewTree(t, testutil.Render(t, fullCombobox()))
+	if got := dom.GetAttr(tree.One("combobox-list"), "id"); got != "loom-combobox-person-list" {
+		t.Errorf("list id = %q, want the stem the name asked for", got)
+	}
+
+	// Rows are addressed by position, so a morph matches the row that is
+	// already in the page rather than replacing it and losing focus.
+	rows := dom.FindAll(tree.Root, dom.ByMarker("combobox-item"))
+	for i, row := range rows {
+		want := "loom-combobox-person-list-opt-" + strconv.Itoa(i)
+		if got := dom.GetAttr(row, "id"); got != want {
+			t.Errorf("row %d id = %q, want %q", i, got, want)
+		}
+	}
+}
+
+// TestComboboxSubmitsItsValue: what separates this from launcher, which
+// produces no value at all.
+func TestComboboxSubmitsItsValue(t *testing.T) {
+	tree := testutil.NewTree(t, testutil.Render(t, fullCombobox()))
+	hidden := tree.One("combobox-value")
+	if got := dom.GetAttr(hidden, "name"); got != "assignee" {
+		t.Errorf("hidden name = %q, want assignee", got)
+	}
+	if got := dom.GetAttr(hidden, "value"); got != "ada" {
+		t.Errorf("hidden value = %q, want ada", got)
+	}
+}
+
+// TestComboboxPartsFailLoudlyWithoutAScope, like every other paired
+// component here: a part that cannot find its stem would otherwise render
+// ids nothing points at.
+func TestComboboxPartsFailLoudlyWithoutAScope(t *testing.T) {
+	err := testutil.RenderErr(testutil.WithChildren(combobox.List(), testutil.Text("x")))
+	if !errors.Is(err, combobox.ErrNoScope) {
+		t.Errorf("List outside Root: err = %v, want ErrNoScope", err)
+	}
+
+	// ...unless it is told which combobox it belongs to, which is how a
+	// handler re-renders just the list.
+	if err := testutil.RenderErr(combobox.List(combobox.For("person"))); err != nil {
+		t.Errorf("List with For: %v", err)
+	}
+}
+
+// TestComboboxQueryRendersItsValue. The morph compares an input's value
+// attribute, not its property, so a re-render that omits it wipes what the
+// user just typed - which for this component is every re-render.
+func TestComboboxQueryRendersItsValue(t *testing.T) {
+	tree := testutil.NewTree(t, testutil.Render(t, fullCombobox()))
+	in := tree.One("combobox-input")
+	if got := dom.GetAttr(in, "value"); got != "ad" {
+		t.Errorf("query value = %q, want ad", got)
+	}
+	if got := dom.GetAttr(in, "aria-expanded"); got != "true" {
+		t.Errorf("aria-expanded = %q, want true", got)
+	}
+	if got := dom.GetAttr(in, "aria-controls"); got != "loom-combobox-person-list" {
+		t.Errorf("aria-controls = %q, want the list id", got)
+	}
+}
+
+// TestDropdownNameSurvivesARerender. A generated id is fine for a page
+// rendered once and wrong for a menu whose items change the page: the
+// popover's open state lives on the element, so a fresh id closes it.
+func TestDropdownNameSurvivesARerender(t *testing.T) {
+	named := func() templ.Component {
+		return testutil.WithChildren(dropdown.Root(dropdown.Name("columns")), testutil.Sequence(
+			testutil.WithChildren(dropdown.Trigger(),
+				testutil.WithChildren(button.New(), testutil.Text("Columns"))),
+			testutil.WithChildren(dropdown.Menu(),
+				testutil.WithChildren(dropdown.ItemButton(), testutil.Text("Name"))),
+		))
+	}
+
+	if first, second := testutil.Render(t, named()), testutil.Render(t, named()); first != second {
+		t.Error("two renders of the same named dropdown differ")
+	}
+
+	tree := testutil.NewTree(t, testutil.Render(t, named()))
+	menu := tree.One("dropdown-menu")
+	if got := dom.GetAttr(menu, "id"); got != "loom-dropdown-columns" {
+		t.Errorf("menu id = %q, want the stem the name asked for", got)
+	}
+	// The trigger has to point at the same id, or the button opens nothing.
+	btn := dom.Find(tree.Root, dom.ByTag(atom.Button))
+	if got := dom.GetAttr(btn, "commandfor"); got != "loom-dropdown-columns" {
+		t.Errorf("commandfor = %q, want the menu id", got)
+	}
+	if got := dom.GetAttr(btn, "style"); !strings.Contains(got, "anchor-name: --loom-dropdown-columns") {
+		t.Errorf("trigger anchor = %q, want the named one", got)
+	}
 }

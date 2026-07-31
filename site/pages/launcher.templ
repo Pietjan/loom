@@ -1,0 +1,189 @@
+package pages
+
+import (
+	"github.com/pietjan/loom/button"
+	"github.com/pietjan/loom/icon"
+	"github.com/pietjan/loom/kbd"
+	"github.com/pietjan/loom/launcher"
+	"github.com/pietjan/loom/modal"
+)
+
+const launcherSnippet = `@launcher.Root(launcher.Name("cmdk")) {
+	@launcher.Input(
+		launcher.Field("q"),
+		launcher.Placeholder("Search commands…"),
+		launcher.Attr("hx-post", "/commands"),
+		launcher.Attr("hx-trigger", "keyup changed delay:150ms"),
+		launcher.Attr("hx-target", "#loom-launcher-cmdk-list"),
+	)
+	@launcher.List() {
+		for _, c := range results {
+			@launcher.Item(c.Href) {
+				@icon.New(c.Icon)
+				{ c.Title }
+			}
+		}
+	}
+	@launcher.Empty() { No commands match. }
+}`
+
+const launcherFragmentSnippet = `// The swap target is the list, so the handler renders that part on its
+// own. For reproduces the ids the full page emitted - same list id, same
+// row ids - which is what lets a morph match rows instead of replacing
+// them. Without it the render fails rather than emitting a fragment whose
+// ids nobody can address.
+func commands(w http.ResponseWriter, r *http.Request) {
+	list := launcher.List(launcher.For("cmdk"))
+	// ... one Item per search hit
+	templ.Handler(list).ServeHTTP(w, r)
+}`
+
+const launcherModalSnippet = `@modal.Root(modal.Name("cmdk")) {
+	@modal.Trigger() {
+		@button.New(button.Outline) {
+			@icon.New(icon.MagnifyingGlass, icon.Small)
+			Search commands
+			@kbd.New() { ⌘K }
+		}
+	}
+	@modal.Content(modal.Class("p-3")) {
+		@launcher.Root(launcher.Name("cmdk")) {
+			@launcher.Input(launcher.Placeholder("Search commands…"))
+			@launcher.List() { ... }
+			@launcher.Empty() { No commands match. }
+		}
+	}
+}
+
+// The shortcut is the one part neither the platform nor loom supplies.
+// showModal is all it takes - the dialog, the backdrop, light dismiss and
+// Escape are already the platform's.
+document.addEventListener("keydown", (e) => {
+	if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+		e.preventDefault();
+		document.getElementById("cmdk").showModal();
+	}
+});`
+
+// launcherCommand is one row of the demo launcher.
+type launcherCommand struct {
+	Icon  icon.Name
+	Title string
+}
+
+var launcherCommands = []launcherCommand{
+	{icon.Gear, "Open settings"},
+	{icon.Rocket, "Deploy to production"},
+	{icon.UserPlus, "Invite a teammate"},
+	{icon.GitBranch, "Create a branch"},
+	{icon.Database, "Run a migration"},
+	{icon.Key, "Rotate API keys"},
+	{icon.Palette, "Change the theme"},
+	{icon.Trash, "Delete this project"},
+}
+
+templ Launcher() {
+	@componentPage("launcher") {
+		@prose() {
+			A search field above a list of actions. Narrowing the list is your
+			server's job: the input carries whatever request attributes you put on it,
+			the handler re-renders the list, and the swap target is the list id - which
+			Name makes predictable. No script ships with the component.
+		}
+		@example("Filter list", launcherSnippet) {
+			<div class="w-full max-w-md">
+				@launcher.Root(launcher.Name("demo")) {
+					@launcher.Input(
+						launcher.Field("q"),
+						launcher.Placeholder("Search commands…"),
+					)
+					@launcher.List() {
+						for _, c := range launcherCommands {
+							@launcher.Item("#" + anchorID(c.Title)) {
+								@icon.New(c.Icon)
+								{ c.Title }
+							}
+						}
+					}
+					@launcher.Empty() {
+						No commands match.
+					}
+				}
+			</div>
+		}
+		@prose() {
+			Focus the field to open the panel, type to narrow it, and use the arrow
+			keys to move between rows. The filtering here runs in the browser so the
+			page can be static - wired to a server it is the same markup with request
+			attributes on the input.
+		}
+		@prose() {
+			Whether the panel or the empty message is showing is not toggled by either
+			one: CSS derives it from focus and from whether any row survived, keyed on
+			the row markers. A server that narrows the list and a script that hides
+			rows land on the same rules.
+		}
+		@example("Answering the request", launcherFragmentSnippet) {
+			@prose() {
+				A part rendered outside Root needs For to say which launcher it belongs
+				to, so a fragment reproduces the ids the full page emitted.
+			}
+		}
+		@example("In a modal", launcherModalSnippet) {
+			@modal.Root(modal.Name("cmdk")) {
+				@modal.Trigger() {
+					@button.New(button.Outline) {
+						@icon.New(icon.MagnifyingGlass, icon.Small)
+						Search commands
+						@kbd.New() {
+							⌘K
+						}
+					}
+				}
+				@modal.Content(modal.Class("p-3"), modal.Attr("data-launcher-hotkey", "")) {
+					@launcher.Root(launcher.Name("cmdk")) {
+						@launcher.Input(
+							launcher.Placeholder("Search commands…"),
+							launcher.Attr("aria-label", "Search commands"),
+						)
+						@launcher.List() {
+							for _, c := range launcherCommands {
+								@launcher.Item("#" + anchorID(c.Title)) {
+									@icon.New(c.Icon)
+									{ c.Title }
+								}
+							}
+						}
+						@launcher.Empty() {
+							No commands match.
+						}
+					}
+				}
+			}
+		}
+		@prose() {
+			Press ⌘K or Ctrl+K anywhere on this page, or use the button. The dialog,
+			its backdrop, light dismiss and Escape are all the platform's; the shortcut
+			is a keydown listener calling showModal, and it belongs to your app. Escape
+			clears the query first and closes the dialog on the second press, which is
+			what the handler above buys by claiming the key only when there is
+			something to clear.
+		}
+		@prose() {
+			This is a launcher, not a form control. Rows are links and buttons:
+			activating one navigates or submits. It produces no value and holds no
+			selection, and nothing is submitted but the query. To choose a value from a
+			set, use picker - the filter-as-you-type form control is a different
+			component and does not exist yet.
+		}
+		@prose() {
+			That is also why there is no listbox ARIA here. role="option" on a link
+			overrides the link role, so it would announce "option" while activating it
+			navigates - the wrong interaction, described confidently. A search field
+			above a list of links is what this is, and is what it says. The arrow keys
+			on this page move real focus, which keeps Enter native and needs no roles
+			to explain it.
+		}
+		@inlineScript(launcherJS)
+	}
+}

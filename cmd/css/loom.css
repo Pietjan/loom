@@ -343,6 +343,12 @@
 
     /* Anchor positioning where the platform has it... */
     @supports (anchor-name: --a) {
+        /* The combobox panel tracks the field it is anchored to, because it
+         * is that field's list. A menu is not its trigger's width. */
+        [data-ui="combobox-list"] {
+            width: anchor-size(width);
+        }
+        [data-ui="combobox-list"],
         [data-ui="dropdown-menu"],
         [data-ui="popover-content"] {
             position: fixed;
@@ -358,6 +364,7 @@
      * popover stays fully functional (open/close/light dismiss); it just
      * can't escape clipping ancestors. */
     @supports not (anchor-name: --a) {
+        [data-ui="combobox-list"],
         [data-ui="dropdown-menu"],
         [data-ui="popover-content"] {
             position: absolute;
@@ -365,8 +372,14 @@
             top: calc(100% + 0.25rem);
             left: 0;
         }
+        /* Without anchor positioning a popover still leaves the flow, so
+         * the panel has no width of its own to inherit: state the field's. */
+        [data-ui="combobox-list"] {
+            width: 100%;
+        }
     }
 
+    [data-ui="combobox-list"],
     [data-ui="dropdown-menu"],
     [data-ui="popover-content"] {
         opacity: 0;
@@ -377,12 +390,14 @@
             overlay 100ms allow-discrete,
             display 100ms allow-discrete;
     }
+    [data-ui="combobox-list"]:popover-open,
     [data-ui="dropdown-menu"]:popover-open,
     [data-ui="popover-content"]:popover-open {
         opacity: 1;
         scale: 1;
     }
     @starting-style {
+        [data-ui="combobox-list"]:popover-open,
         [data-ui="dropdown-menu"]:popover-open,
         [data-ui="popover-content"]:popover-open {
             opacity: 0;
@@ -513,6 +528,36 @@
     }
     [data-ui="code"] .gl {
         text-decoration: underline;
+    }
+
+    /* launcher: the panel and its empty message are both always in the
+     * markup. Which one is showing is derived here - from focus, and from
+     * whether any row survived the filter - so neither the server nor a
+     * script has to toggle either of them. A server that narrows the list
+     * and a script that hides rows both land on the same rules.
+     *
+     * display is owned here rather than by the component's class string
+     * because a utility would sit in the utilities layer and beat these
+     * rules, which is the one thing a visibility toggle cannot survive. */
+    [data-ui="launcher-list"],
+    [data-ui="launcher-empty"] {
+        display: none;
+    }
+    [data-ui="launcher"]:focus-within
+        [data-ui="launcher-list"]:has([data-ui="launcher-item"]:not([hidden])) {
+        display: flex;
+        flex-direction: column;
+    }
+    [data-ui="launcher"]:focus-within:not(
+            :has([data-ui="launcher-item"]:not([hidden]))
+        )
+        [data-ui="launcher-empty"] {
+        display: block;
+    }
+    /* Keyboard movement scrolls the panel; without this the row it moves to
+     * lands flush against the border it just scrolled past. */
+    [data-ui="launcher-item"] {
+        scroll-margin-block: 0.25rem;
     }
 
     /* Dark: flip the vars. .dark is the manual toggle; the media query is the

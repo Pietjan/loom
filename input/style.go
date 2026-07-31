@@ -13,7 +13,11 @@ func classes(c Config) string {
 		return b.String()
 	}
 
-	b.Add("block w-full h-10 px-3 text-sm rounded-lg")
+	b.Add("block w-full text-sm")
+	// The small size matches button.Small (h-8, rounded-md), which is the
+	// point of having it: a filter field beside a button on one row.
+	b.If(c.Size == SizeSmall, "h-8 px-2.5 rounded-md")
+	b.If(c.Size != SizeSmall, "h-10 px-3 rounded-lg")
 	b.Add("bg-white text-base-800 placeholder:text-base-400")
 	b.Add("border shadow-xs")
 	b.Add("dark:bg-base-700 dark:text-base-100")
