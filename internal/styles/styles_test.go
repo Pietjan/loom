@@ -1,7 +1,11 @@
 package styles_test
 
 import (
+	"os"
+	"os/exec"
+	"runtime"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/pietjan/loom/internal/styles"
@@ -44,6 +48,91 @@ func TestMergeUserWins(t *testing.T) {
 func TestMergeEmptyUser(t *testing.T) {
 	if got := styles.Merge("px-4", ""); got != "px-4" {
 		t.Fatalf("got %q", got)
+	}
+}
+
+func TestMergeConcurrent(t *testing.T) {
+	if os.Getenv("LOOM_MERGE_CONCURRENT_HELPER") == "1" {
+		runConcurrentMergeChecks(t)
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=^TestMergeConcurrent$")
+	cmd.Env = append(os.Environ(), "LOOM_MERGE_CONCURRENT_HELPER=1")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("concurrent merge subprocess failed: %v\n%s", err, out)
+	}
+	if len(out) != 0 {
+		t.Logf("concurrent merge subprocess output:\n%s", out)
+	}
+}
+
+func runConcurrentMergeChecks(t *testing.T) {
+	t.Helper()
+
+	testCases := []struct {
+		component string
+		user      string
+		mustHave  []string
+		mustMiss  []string
+	}{
+		{
+			component: "px-4 py-2 bg-accent text-sm",
+			user:      "bg-red-500 p-8",
+			mustHave:  []string{"bg-red-500", "p-8", "text-sm"},
+			mustMiss:  []string{"bg-accent", "px-4", "py-2"},
+		},
+		{
+			component: "inline-flex items-center gap-2 rounded-lg border border-base-200 px-3 py-2",
+			user:      "border-base-400 px-8 hover:bg-base-50",
+			mustHave:  []string{"inline-flex", "items-center", "gap-2", "rounded-lg", "border", "border-base-400", "px-8", "py-2", "hover:bg-base-50"},
+			mustMiss:  []string{"border-base-200", "px-3"},
+		},
+		{
+			component: "absolute start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xs",
+			user:      "text-sm dark:text-white",
+			mustHave:  []string{"absolute", "start-1/2", "top-1/2", "-translate-x-1/2", "-translate-y-1/2", "text-sm", "dark:text-white"},
+			mustMiss:  []string{"text-xs"},
+		},
+	}
+
+	workers := max(8, runtime.GOMAXPROCS(0)*4)
+	iterations := 200
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	errCh := make(chan string, workers*iterations*len(testCases))
+
+	for range workers {
+		wg.Go(func() {
+			<-start
+			for range iterations {
+				for _, tc := range testCases {
+					got := styles.Merge(tc.component, tc.user)
+					for _, want := range tc.mustHave {
+						if !strings.Contains(got, want) {
+							errCh <- "missing " + want + " in " + got
+						}
+					}
+					for _, miss := range tc.mustMiss {
+						if strings.Contains(got, miss) {
+							errCh <- "unexpected " + miss + " in " + got
+						}
+					}
+					if got != styles.Sort(got) {
+						errCh <- "non-canonical output " + got
+					}
+				}
+			}
+		})
+	}
+
+	close(start)
+	wg.Wait()
+	close(errCh)
+
+	for got := range errCh {
+		t.Fatalf("Merge returned invalid output: %s", got)
 	}
 }
 
@@ -97,5 +186,15 @@ func TestSortKeepsArbitraryValuesIntact(t *testing.T) {
 		if !strings.Contains(got, tok) {
 			t.Fatalf("token %q mangled; got %q", tok, got)
 		}
+	}
+}
+
+func BenchmarkMerge(b *testing.B) {
+	const component = "inline-flex items-center gap-2 rounded-lg border border-base-200 bg-white px-3 py-2 text-sm text-base-800 dark:border-base-600 dark:bg-base-700 dark:text-base-100"
+	const user = "border-base-400 bg-base-50 px-8 text-base hover:bg-base-100 dark:bg-base-800"
+
+	b.ReportAllocs()
+	for b.Loop() {
+		_ = styles.Merge(component, user)
 	}
 }

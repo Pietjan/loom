@@ -125,7 +125,7 @@ func TestAccentIsNotAHue(t *testing.T) {
 		shape = shape[:strings.Index(shape, ">")]
 		// One stroke color per variant. stroke-1 is the width, not a color.
 		var light, dark int
-		for _, class := range strings.Fields(shape) {
+		for class := range strings.FieldsSeq(shape) {
 			switch {
 			case class == "stroke-1":
 			case strings.HasPrefix(class, "stroke-"):

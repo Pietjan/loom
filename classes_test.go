@@ -3,6 +3,7 @@ package loom_test
 import (
 	"fmt"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -136,9 +137,7 @@ func utilityTable(css string) map[string]map[string]string {
 			// A class can be emitted more than once (light and dark, say);
 			// the declarations are collected together, which is what a
 			// browser resolves anyway.
-			for prop, value := range decls {
-				table[class][prop] = value
-			}
+			maps.Copy(table[class], decls)
 		}
 	})
 	return table

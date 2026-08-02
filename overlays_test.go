@@ -360,7 +360,8 @@ func fullCombobox() templ.Component {
 					testutil.Text("Alan Turing")),
 			)),
 			testutil.WithChildren(combobox.Empty(), testutil.Text("Nobody by that name.")),
-		))
+		),
+	)
 }
 
 func init() { composites["combobox"] = fullCombobox }
