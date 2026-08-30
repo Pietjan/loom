@@ -38,6 +38,7 @@ var ErrNoText = errors.New("tooltip: tooltip.Text(...) is required")
 type Config struct {
 	opts.Common
 	TipText string
+	Side    string // "" (top) or "right"
 }
 
 // Option configures a tooltip.
@@ -51,6 +52,10 @@ var (
 
 // Text sets the tooltip content.
 func Text(text string) Option { return func(c *Config) { c.TipText = text } }
+
+// Right places the bubble to the right of the trigger instead of above
+// it — for icon rails at a window edge, where "above" has no room.
+func Right() Option { return func(c *Config) { c.Side = "right" } }
 
 // New wraps its block with a tooltip.
 func New(options ...Option) templ.Component {
@@ -78,7 +83,7 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 	tip := dom.El(atom.Span, dom.Marker("tooltip-content"),
 		dom.Attr("id", tipID), dom.Attr("role", "tooltip"))
 	tip.AppendChild(dom.Text(cfg.TipText))
-	dom.SetAttr(tip, "class", tipClasses())
+	dom.SetAttr(tip, "class", tipClasses(cfg))
 	wrap.AppendChild(tip)
 
 	// Describe the wrapped element; enhance buttons/links with interest
