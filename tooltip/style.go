@@ -2,9 +2,15 @@ package tooltip
 
 import "github.com/pietjan/loom/internal/styles"
 
+// classes is the wrapper's. The tip's z-10 only counts inside the nearest
+// stacking context, and a wrapper the caller positions or transforms - a
+// pin centred on a map point - is one, so siblings drawn after it paint
+// over the tip. Raising the wrapper while it is hovered or focused lifts
+// the tip with it, among whatever it is placed in.
 func classes(_ Config) string {
 	var b styles.Builder
 	b.Add("group/tooltip relative inline-flex")
+	b.Add("hover:z-30 focus-within:z-30")
 	return b.String()
 }
 
