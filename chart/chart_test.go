@@ -2,8 +2,13 @@ package chart_test
 
 import (
 	"errors"
+	"fmt"
+	"math"
+	"strconv"
 	"strings"
 	"testing"
+
+	"golang.org/x/net/html"
 
 	"github.com/pietjan/loom/chart"
 	"github.com/pietjan/loom/internal/dom"
@@ -86,6 +91,112 @@ func TestBarChart(t *testing.T) {
 		t.Fatalf("expected 2 bar tooltips, got %d", got)
 	}
 }
+
+// Stacked bars share their label's column: one x and the group's full
+// width, each segment sitting on the one before it with the bar gap
+// between them. A negative value hangs from zero instead of cutting into
+// the positives, and the y-axis reaches the stack totals.
+func TestStackedBarChart(t *testing.T) {
+	out := testutil.Render(t, chart.New(
+		chart.Bars(), chart.Stacked(),
+		chart.Labels("A", "B"),
+		chart.Series("x", []float64{10, 20}),
+		chart.Series("y", []float64{30, -10}),
+		chart.Series("z", []float64{20, 5}),
+	))
+	tree := testutil.NewTree(t, out)
+	bars := dom.FindAll(tree.Root, dom.ByMarker("chart-bar"))
+	if len(bars) != 6 {
+		t.Fatalf("expected 6 segments (3 series × 2 labels), got %d", len(bars))
+	}
+	// Series-major: x(A), x(B), y(A), y(B), z(A), z(B).
+	xA, xB, yA, yB, zA, zB := box(t, bars[0]), box(t, bars[1]), box(t, bars[2]), box(t, bars[3]), box(t, bars[4]), box(t, bars[5])
+
+	for _, b := range []rect{yA, zA} {
+		if b.x != xA.x || b.w != xA.w {
+			t.Errorf("segment %+v not in A's column %+v", b, xA)
+		}
+	}
+	// 600-wide default: band 278, group 194.6, minus the 2-unit gap.
+	if !near(xA.w, 192.6) {
+		t.Errorf("stacked bar width = %v, want the full group (192.6)", xA.w)
+	}
+
+	// A climbs x, y, z from the baseline, a 2-unit gap at each junction.
+	if gap := xA.y - (yA.y + yA.h); !near(gap, 2) {
+		t.Errorf("gap between x and y = %v, want 2", gap)
+	}
+	if gap := yA.y - (zA.y + zA.h); !near(gap, 2) {
+		t.Errorf("gap between y and z = %v, want 2", gap)
+	}
+
+	// A has nothing negative, so its stack stands right on zero. B's
+	// negative y hangs from zero, and the two sides meet there like any
+	// other junction: the gap split across the zero line.
+	zero := xA.y + xA.h
+	if bottom := xB.y + xB.h; !near(bottom, zero-1) {
+		t.Errorf("x(B) bottom = %v, want 1 above zero (%v)", bottom, zero)
+	}
+	if !near(yB.y, zero+1) {
+		t.Errorf("negative segment top = %v, want 1 below zero (%v)", yB.y, zero)
+	}
+	// z(B) stacks on x(B), not on the negative y.
+	if gap := xB.y - (zB.y + zB.h); !near(gap, 2) {
+		t.Errorf("z(B) does not sit on x(B): gap %v", gap)
+	}
+
+	// A's stack totals 60, beyond any single value: the axis runs to 100.
+	if !strings.Contains(out, ">100<") {
+		t.Errorf("y-axis does not reach the stack total: %s", out)
+	}
+
+	// Each segment's hover area is its own rect.
+	tips := dom.FindAll(tree.Root, dom.ByMarker("tooltip"))
+	if len(tips) != 6 {
+		t.Fatalf("expected 6 tooltips, got %d", len(tips))
+	}
+	var tip rect
+	style := dom.GetAttr(tips[4], "style")
+	if _, err := fmt.Sscanf(style, "left: %f%%; top: %f%%; width: %f%%; height: %f%%",
+		&tip.x, &tip.y, &tip.w, &tip.h); err != nil {
+		t.Fatalf("z(A) tooltip style %q: %v", style, err)
+	}
+	// Percentages of the 600×240 box.
+	if !near(tip.x, zA.x/6) || !near(tip.y, zA.y/2.4) || !near(tip.w, zA.w/6) || !near(tip.h, zA.h/2.4) {
+		t.Errorf("z(A) tooltip %+v does not cover its segment %+v", tip, zA)
+	}
+}
+
+// Stacking is a bar layout; a line chart renders as if it were not asked.
+func TestStackedIgnoredWithoutBars(t *testing.T) {
+	options := []chart.Option{
+		chart.Labels("A", "B"),
+		chart.Series("x", []float64{10, 20}),
+		chart.Series("y", []float64{30, 40}),
+	}
+	plain := testutil.Render(t, chart.New(options...))
+	stacked := testutil.Render(t, chart.New(append(options, chart.Stacked())...))
+	if plain != stacked {
+		t.Errorf("Stacked() changed a line chart:\n%s\nvs\n%s", plain, stacked)
+	}
+}
+
+type rect struct{ x, y, w, h float64 }
+
+func box(t *testing.T, n *html.Node) rect {
+	t.Helper()
+	f := func(name string) float64 {
+		v, err := strconv.ParseFloat(dom.GetAttr(n, name), 64)
+		if err != nil {
+			t.Fatalf("bar %s: %v", name, err)
+		}
+		return v
+	}
+	return rect{f("x"), f("y"), f("width"), f("height")}
+}
+
+// near compares coordinates that were rounded to two decimals on output.
+func near(a, b float64) bool { return math.Abs(a-b) < 0.02 }
 
 func TestSparklineIsBare(t *testing.T) {
 	out := testutil.Render(t, chart.New(chart.Sparkline(),

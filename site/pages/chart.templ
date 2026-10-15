@@ -23,6 +23,16 @@ const chartBarsSnippet = `@chart.New(
 	chart.Legend(),
 )`
 
+const chartStackedSnippet = `@chart.New(
+	chart.Title("Signups by channel"),
+	chart.Bars(), chart.Stacked(),
+	chart.Labels("Q1", "Q2", "Q3", "Q4"),
+	chart.Series("Direct", []float64{60, 75, 70, 95}, chart.Indigo),
+	chart.Series("Referral", []float64{35, 40, 55, 60}, chart.Sky),
+	chart.Series("Social", []float64{20, 30, 25, 45}, chart.Teal),
+	chart.Legend(),
+)`
+
 const chartSparklineSnippet = `@chart.New(chart.Sparkline(), chart.Series("Trend", []float64{4, 7, 5, 9, 8, 12, 10, 14}))`
 
 const chartColorsSnippet = `@chart.New(
@@ -59,6 +69,19 @@ templ Chart() {
 					chart.Labels("Q1", "Q2", "Q3", "Q4"),
 					chart.Series("2025", []float64{110, 140, 125, 180}, chart.Indigo),
 					chart.Series("2026", []float64{150, 170, 160, 210}, chart.Blue),
+					chart.Legend(),
+				)
+			</div>
+		}
+		@example("Stacked bar chart", chartStackedSnippet) {
+			<div class="w-full">
+				@chart.New(
+					chart.Title("Signups by channel"),
+					chart.Bars(), chart.Stacked(),
+					chart.Labels("Q1", "Q2", "Q3", "Q4"),
+					chart.Series("Direct", []float64{60, 75, 70, 95}, chart.Indigo),
+					chart.Series("Referral", []float64{35, 40, 55, 60}, chart.Sky),
+					chart.Series("Social", []float64{20, 30, 25, 45}, chart.Teal),
 					chart.Legend(),
 				)
 			</div>

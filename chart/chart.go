@@ -1,5 +1,5 @@
 // Package chart renders data as SVG on the server - line, area, and bar
-// charts plus sparklines:
+// charts (grouped or stacked) plus sparklines:
 //
 //	@chart.New(
 //		chart.Title("Visitors per month"),
@@ -93,6 +93,7 @@ type Config struct {
 	area      bool
 	smooth    bool
 	bars      bool
+	stacked   bool
 	sparkline bool
 	inset     float64
 	legend    bool
@@ -145,6 +146,12 @@ func Smooth() Option { return func(c *Config) { c.smooth = true } }
 
 // Bars renders grouped bars instead of lines.
 func Bars() Option { return func(c *Config) { c.bars = true } }
+
+// Stacked piles each label's bars into a single column, in series order
+// with the first series at the base. Positive values stack up from zero and
+// negative ones hang down from it, so a negative segment never cuts into
+// the positives. It applies to bar charts; line and area charts ignore it.
+func Stacked() Option { return func(c *Config) { c.stacked = true } }
 
 // Sparkline strips axes, grid, labels, and points for inline use.
 func Sparkline() Option { return func(c *Config) { c.sparkline = true } }
@@ -230,15 +237,11 @@ func Node(ctx context.Context, options ...Option) (*html.Node, error) {
 // bar's top-center because the tooltip's bubble anchors to its wrapper's
 // top edge.
 func appendTooltips(ctx context.Context, plot *html.Node, cfg Config, n int) error {
-	g := plotGeometry(cfg)
-	lo, hi := domain(cfg.series)
-	ticks := niceTicks(lo, hi, cfg.ticks)
-	g.lo, g.hi = ticks[0], ticks[len(ticks)-1]
-
-	band := (g.right - g.left) / float64(n)
-	group := band * 0.7
-	bar := group / float64(len(cfg.series))
-	baseline := g.y(max(g.lo, 0))
+	g, _ := scale(cfg)
+	var bars [][]rect
+	if cfg.bars {
+		bars = barRects(cfg, g, n)
+	}
 
 	// The hoverable surface fills whatever box its tooltip wrapper defines.
 	fill := render.Component(func(context.Context) (*html.Node, error) {
@@ -254,16 +257,12 @@ func appendTooltips(ctx context.Context, plot *html.Node, cfg Config, n int) err
 
 			var class, style string
 			if cfg.bars {
-				// Cover the whole bar rect - matches drawBars geometry.
-				x := g.left + band*float64(i) + (band-group)/2 + bar*float64(si)
-				top, height := g.y(v), baseline-g.y(v)
-				if height < 0 {
-					top, height = baseline, -height
-				}
+				// Cover the whole bar rect - the one drawBars draws.
+				r := bars[si][i]
 				class = "absolute"
 				style = fmt.Sprintf("left: %s%%; top: %s%%; width: %s%%; height: %s%%",
-					fmtCoord(x/cfg.W*100), fmtCoord(top/cfg.H*100),
-					fmtCoord((bar-2)/cfg.W*100), fmtCoord(height/cfg.H*100))
+					fmtCoord(r.x/cfg.W*100), fmtCoord(r.y/cfg.H*100),
+					fmtCoord(r.w/cfg.W*100), fmtCoord(r.h/cfg.H*100))
 			} else {
 				// A centered hit spot over the point.
 				x, y := g.x(i, n), g.y(v)
@@ -301,6 +300,22 @@ func (g geometry) y(v float64) float64 {
 	return g.bottom - (g.bottom-g.top)*(v-g.lo)/(g.hi-g.lo)
 }
 
+// scale returns the plot geometry with its y domain set to the nice ticks
+// that enclose the data, and those ticks.
+func scale(cfg Config) (geometry, []float64) {
+	g := plotGeometry(cfg)
+	lo, hi := domain(cfg.series)
+	if cfg.bars && cfg.stacked {
+		// A stack reaches its positive total above zero and its negative
+		// total below, not any one value.
+		pos, neg := stackTotals(cfg.series)
+		lo, hi = domain([]series{{values: pos}, {values: neg}})
+	}
+	ticks := niceTicks(lo, hi, cfg.ticks)
+	g.lo, g.hi = ticks[0], ticks[len(ticks)-1]
+	return g, ticks
+}
+
 func plotGeometry(cfg Config) geometry {
 	if cfg.sparkline {
 		i := cfg.inset
@@ -331,11 +346,7 @@ func draw(cfg Config, n int) *html.Node {
 	// so we deliberately omit it.
 	dom.SetAttr(svg, "aria-label", label)
 
-	g := plotGeometry(cfg)
-
-	lo, hi := domain(cfg.series)
-	ticks := niceTicks(lo, hi, cfg.ticks)
-	g.lo, g.hi = ticks[0], ticks[len(ticks)-1]
+	g, ticks := scale(cfg)
 
 	if !cfg.sparkline {
 		drawGrid(svg, cfg, g, ticks)
@@ -436,30 +447,112 @@ func drawPoints(svg *html.Node, cfg Config, g geometry, n int) {
 }
 
 func drawBars(svg *html.Node, cfg Config, g geometry, n int) {
-	band := (g.right - g.left) / float64(n)
-	group := band * 0.7
-	bar := group / float64(len(cfg.series))
-	baseline := g.y(max(g.lo, 0))
-
+	bars := barRects(cfg, g, n)
 	for si, s := range cfg.series {
 		style := styleFor(s.color)
-		for i, v := range s.values {
-			x := g.left + band*float64(i) + (band-group)/2 + bar*float64(si)
-			y := g.y(v)
-			top, height := y, baseline-y
-			if height < 0 { // negative value: bar hangs below the baseline
-				top, height = baseline, -height
-			}
+		for _, r := range bars[si] {
 			rect := dom.CustomEl("rect", dom.Marker("chart-bar"),
-				dom.Attr("x", fmtCoord(x)),
-				dom.Attr("y", fmtCoord(top)),
-				dom.Attr("width", fmtCoord(bar-2)),
-				dom.Attr("height", fmtCoord(height)),
+				dom.Attr("x", fmtCoord(r.x)),
+				dom.Attr("y", fmtCoord(r.y)),
+				dom.Attr("width", fmtCoord(r.w)),
+				dom.Attr("height", fmtCoord(r.h)),
 				dom.Attr("rx", "2"),
 				dom.Attr("class", style.dot))
 			svg.AppendChild(rect)
 		}
 	}
+}
+
+// barGap is the space between neighbouring bars in viewBox units: beside
+// each other in a group, and between the segments of a stack.
+const barGap = 2
+
+// rect is a bar's box in viewBox units.
+type rect struct{ x, y, w, h float64 }
+
+// barRects lays out every bar, indexed [series][label]. Grouped bars share
+// each label's group side by side; stacked bars span the whole group and
+// sit on the running total of the series before them. drawBars and the
+// tooltip overlay both read it, so a bar and its hover area cannot drift.
+func barRects(cfg Config, g geometry, n int) [][]rect {
+	band := (g.right - g.left) / float64(n)
+	group := band * 0.7
+	width := group
+	if !cfg.stacked {
+		width = group / float64(len(cfg.series))
+	}
+	// Grouped bars stand on zero, or on the floor of the plot when the
+	// domain does not reach down to it.
+	base := max(g.lo, 0)
+
+	// Running totals per label, and the stacks' final extents: a segment
+	// short of its stack's total has another segment beyond it.
+	var pos, neg, posTotal, negTotal []float64
+	if cfg.stacked {
+		pos, neg = make([]float64, n), make([]float64, n)
+		posTotal, negTotal = stackTotals(cfg.series)
+	}
+
+	rects := make([][]rect, len(cfg.series))
+	for si, s := range cfg.series {
+		rects[si] = make([]rect, n)
+		for i, v := range s.values {
+			x := g.left + band*float64(i) + (band-group)/2
+			from, to := base, v
+			// A neighbouring segment on the zero side and the far side.
+			// At zero the neighbour is the other sign's stack, when the
+			// column has one.
+			var below, beyond bool
+			if cfg.stacked {
+				if v >= 0 {
+					from, to = pos[i], pos[i]+v
+					pos[i] = to
+					below, beyond = from > 0 || negTotal[i] < 0, to < posTotal[i]
+				} else {
+					from, to = neg[i], neg[i]+v
+					neg[i] = to
+					below, beyond = from < 0 || posTotal[i] > 0, to > negTotal[i]
+				}
+			} else {
+				x += width * float64(si)
+			}
+
+			top, bottom := g.y(max(from, to)), g.y(min(from, to))
+			// Split the gap across each junction, so the boundary
+			// between two segments stays where its value puts it. A
+			// positive segment meets the next one at its top, a negative
+			// one at its bottom.
+			topJoin, bottomJoin := beyond, below
+			if v < 0 {
+				topJoin, bottomJoin = below, beyond
+			}
+			if topJoin {
+				top += barGap / 2
+			}
+			if bottomJoin {
+				bottom -= barGap / 2
+			}
+			rects[si][i] = rect{x: x, y: top, w: width - barGap, h: max(bottom-top, 0)}
+		}
+	}
+	return rects
+}
+
+// stackTotals returns each label's stack extents: the sum of its positive
+// values and the sum of its negative ones.
+func stackTotals(series []series) (pos, neg []float64) {
+	n := len(series[0].values)
+	pos, neg = make([]float64, n), make([]float64, n)
+	for _, s := range series {
+		for i, v := range s.values {
+			if v >= 0 {
+				pos[i] += v
+			} else {
+				neg[i] += v
+			}
+		}
+	}
+	return pos, neg
 }
 
 func legend(cfg Config) *html.Node {
