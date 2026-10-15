@@ -1,0 +1,90 @@
+package pages
+
+import "github.com/pietjan/loom/sankey"
+
+const sankeyFunnelSnippet = `@sankey.New(
+	sankey.Title("Signup funnel"),
+	sankey.Flow("Search", "Landing", 1200),
+	sankey.Flow("Direct", "Landing", 600),
+	sankey.Flow("Social", "Landing", 350),
+	sankey.Flow("Landing", "Signup", 1100),
+	sankey.Flow("Landing", "Bounce", 1050),
+	sankey.Flow("Signup", "Paid", 420),
+	sankey.Flow("Signup", "Free", 680),
+)`
+
+const sankeyColorsSnippet = `@sankey.New(
+	sankey.Title("Energy, source to use"),
+	sankey.Totals(),
+	sankey.Flow("Wind", "Grid", 320, sankey.Teal),
+	sankey.Flow("Solar", "Grid", 210, sankey.Amber),
+	sankey.Flow("Gas", "Grid", 470, sankey.Zinc),
+	sankey.Flow("Grid", "Homes", 400),
+	sankey.Flow("Grid", "Industry", 450),
+	sankey.Flow("Grid", "Losses", 150, sankey.Rose),
+	sankey.Node("Grid", sankey.Blue),
+	sankey.Node("Losses", sankey.Rose),
+)`
+
+const sankeyNarrowSnippet = `@sankey.New(
+	sankey.Size(440, 220),
+	sankey.Gap(10),
+	sankey.Flow("Visits", "Cart", 900),
+	sankey.Flow("Visits", "Left", 2100),
+	sankey.Flow("Cart", "Bought", 540),
+	sankey.Flow("Cart", "Abandoned", 360),
+)`
+
+templ Sankey() {
+	@componentPage("sankey") {
+		@prose() {
+			A sankey draws where quantity goes: each node is a bar, each flow a
+			ribbon as thick as the value it carries. Naming an endpoint declares
+			it, so the flows are the whole input - columns, bar heights and
+			ribbon order are worked out from them. Hovering a ribbon or a bar
+			reveals its value in a tooltip.
+		}
+		@example("Funnel", sankeyFunnelSnippet) {
+			<div class="w-full">
+				@sankey.New(
+					sankey.Title("Signup funnel"),
+					sankey.Flow("Search", "Landing", 1200),
+					sankey.Flow("Direct", "Landing", 600),
+					sankey.Flow("Social", "Landing", 350),
+					sankey.Flow("Landing", "Signup", 1100),
+					sankey.Flow("Landing", "Bounce", 1050),
+					sankey.Flow("Signup", "Paid", 420),
+					sankey.Flow("Signup", "Free", 680),
+				)
+			</div>
+		}
+		@example("Palette colors and totals", sankeyColorsSnippet) {
+			<div class="w-full">
+				@sankey.New(
+					sankey.Title("Energy, source to use"),
+					sankey.Totals(),
+					sankey.Flow("Wind", "Grid", 320, sankey.Teal),
+					sankey.Flow("Solar", "Grid", 210, sankey.Amber),
+					sankey.Flow("Gas", "Grid", 470, sankey.Zinc),
+					sankey.Flow("Grid", "Homes", 400),
+					sankey.Flow("Grid", "Industry", 450),
+					sankey.Flow("Grid", "Losses", 150, sankey.Rose),
+					sankey.Node("Grid", sankey.Blue),
+					sankey.Node("Losses", sankey.Rose),
+				)
+			</div>
+		}
+		@example("Sized to fit", sankeyNarrowSnippet) {
+			<div class="w-full max-w-md">
+				@sankey.New(
+					sankey.Size(440, 220),
+					sankey.Gap(10),
+					sankey.Flow("Visits", "Cart", 900),
+					sankey.Flow("Visits", "Left", 2100),
+					sankey.Flow("Cart", "Bought", 540),
+					sankey.Flow("Cart", "Abandoned", 360),
+				)
+			</div>
+		}
+	}
+}

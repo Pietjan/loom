@@ -16,6 +16,7 @@ import (
 	"github.com/pietjan/loom/internal/palette"
 	"github.com/pietjan/loom/internal/testutil"
 	"github.com/pietjan/loom/progress"
+	"github.com/pietjan/loom/sankey"
 	"github.com/pietjan/loom/timeline"
 )
 
@@ -81,6 +82,19 @@ func TestEveryHueResolves(t *testing.T) {
 					t.Errorf("chart series %s missing %q: %s", hue, want, line)
 				}
 			}
+
+			// A sankey node's bar takes the hue as a fill, and the
+			// ribbons leaving it take the same hue on a gradient stop,
+			// so both rows must exist for every hue. The far node is
+			// pinned to the accent, which is a token rather than a hue,
+			// so it cannot supply the one under test.
+			flow := testutil.Render(t, sankey.New(sankey.Flow("a", "b", 1),
+				sankey.Node("a", sankey.Colored(sankey.Color(hue))), sankey.Node("b", sankey.Accent)))
+			for _, want := range []string{"fill-" + hue + "-500", "[stop-color:var(--color-" + hue + "-500)]"} {
+				if !strings.Contains(flow, want) {
+					t.Errorf("sankey %s missing %q: %s", hue, want, flow)
+				}
+			}
 		})
 	}
 }
@@ -102,6 +116,21 @@ func TestAccentIsNotAHue(t *testing.T) {
 		chart.Series("s", []float64{1, 2}, chart.Accent)))
 	if !strings.Contains(line, "stroke-accent") {
 		t.Errorf("accent series is not accent: %s", line)
+	}
+
+	flow := testutil.Render(t, sankey.New(sankey.Flow("a", "b", 1), sankey.Node("a", sankey.Accent)))
+	for _, want := range []string{"fill-accent", "[stop-color:var(--color-accent)]"} {
+		if !strings.Contains(flow, want) {
+			t.Errorf("accent sankey node missing %q: %s", want, flow)
+		}
+	}
+	unknown := testutil.Render(t, sankey.New(
+		sankey.Flow("a", "b", 1), sankey.Node("a", sankey.Colored("chartreuse")),
+	))
+	for _, want := range []string{"fill-base-300", "[stop-color:var(--color-base-300)]"} {
+		if !strings.Contains(unknown, want) {
+			t.Errorf("unknown sankey hue did not fall through to the neutral %q: %s", want, unknown)
+		}
 	}
 
 	// A diagram node must always land on exactly one stroke: an accent, a

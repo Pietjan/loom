@@ -18,6 +18,8 @@
 //   - Bg, Stroke, Fill and Wash paint the hue itself, for elements that
 //     ARE the color rather than sitting on it - a progress bar, a chart
 //     line, an area under it.
+//   - Stop is the hue on an SVG gradient stop, for a mark that blends from
+//     one hue into another and so cannot name either in a fill utility.
 //
 // Class strings are complete literals here, as everywhere: the Tailwind
 // scanner reads source text, so a hue assembled at runtime compiles to
@@ -66,6 +68,7 @@ type Shades struct {
 	Stroke string // the hue as an SVG stroke
 	Fill   string // the hue as an SVG fill
 	Wash   string // Fill, transparent enough to sit under a line
+	Stop   string // the hue on an SVG gradient stop
 }
 
 // Of returns a hue's shades. The bool reports whether the color is one of
@@ -88,6 +91,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-zinc-500",
 		Fill:   "fill-zinc-500",
 		Wash:   "fill-zinc-500/15",
+		Stop:   "[stop-color:var(--color-zinc-500)]",
 	},
 	Red: {
 		Tint:   "bg-red-400/15 text-red-700 dark:bg-red-400/25 dark:text-red-300",
@@ -96,6 +100,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-red-500",
 		Fill:   "fill-red-500",
 		Wash:   "fill-red-500/15",
+		Stop:   "[stop-color:var(--color-red-500)]",
 	},
 	Orange: {
 		Tint:   "bg-orange-400/15 text-orange-700 dark:bg-orange-400/25 dark:text-orange-300",
@@ -104,6 +109,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-orange-500",
 		Fill:   "fill-orange-500",
 		Wash:   "fill-orange-500/15",
+		Stop:   "[stop-color:var(--color-orange-500)]",
 	},
 	Amber: {
 		Tint:   "bg-amber-400/20 text-amber-800 dark:bg-amber-400/25 dark:text-amber-300",
@@ -112,6 +118,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-amber-500",
 		Fill:   "fill-amber-500",
 		Wash:   "fill-amber-500/15",
+		Stop:   "[stop-color:var(--color-amber-500)]",
 	},
 	Yellow: {
 		Tint:   "bg-yellow-400/20 text-yellow-800 dark:bg-yellow-400/25 dark:text-yellow-200",
@@ -120,6 +127,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-yellow-500 dark:stroke-yellow-400",
 		Fill:   "fill-yellow-500 dark:fill-yellow-400",
 		Wash:   "fill-yellow-500/15 dark:fill-yellow-400/15",
+		Stop:   "[stop-color:var(--color-yellow-500)] dark:[stop-color:var(--color-yellow-400)]",
 	},
 	Lime: {
 		Tint:   "bg-lime-400/20 text-lime-800 dark:bg-lime-400/25 dark:text-lime-300",
@@ -128,6 +136,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-lime-500",
 		Fill:   "fill-lime-500",
 		Wash:   "fill-lime-500/15",
+		Stop:   "[stop-color:var(--color-lime-500)]",
 	},
 	Green: {
 		Tint:   "bg-green-400/15 text-green-800 dark:bg-green-400/25 dark:text-green-300",
@@ -136,6 +145,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-green-500",
 		Fill:   "fill-green-500",
 		Wash:   "fill-green-500/15",
+		Stop:   "[stop-color:var(--color-green-500)]",
 	},
 	Emerald: {
 		Tint:   "bg-emerald-400/15 text-emerald-800 dark:bg-emerald-400/25 dark:text-emerald-300",
@@ -144,6 +154,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-emerald-500",
 		Fill:   "fill-emerald-500",
 		Wash:   "fill-emerald-500/15",
+		Stop:   "[stop-color:var(--color-emerald-500)]",
 	},
 	Teal: {
 		Tint:   "bg-teal-400/15 text-teal-800 dark:bg-teal-400/25 dark:text-teal-300",
@@ -152,6 +163,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-teal-500",
 		Fill:   "fill-teal-500",
 		Wash:   "fill-teal-500/15",
+		Stop:   "[stop-color:var(--color-teal-500)]",
 	},
 	Cyan: {
 		Tint:   "bg-cyan-400/15 text-cyan-800 dark:bg-cyan-400/25 dark:text-cyan-300",
@@ -160,6 +172,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-cyan-500",
 		Fill:   "fill-cyan-500",
 		Wash:   "fill-cyan-500/15",
+		Stop:   "[stop-color:var(--color-cyan-500)]",
 	},
 	Sky: {
 		Tint:   "bg-sky-400/15 text-sky-800 dark:bg-sky-400/25 dark:text-sky-300",
@@ -168,6 +181,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-sky-500",
 		Fill:   "fill-sky-500",
 		Wash:   "fill-sky-500/15",
+		Stop:   "[stop-color:var(--color-sky-500)]",
 	},
 	Blue: {
 		Tint:   "bg-blue-400/15 text-blue-800 dark:bg-blue-400/25 dark:text-blue-300",
@@ -176,6 +190,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-blue-500",
 		Fill:   "fill-blue-500",
 		Wash:   "fill-blue-500/15",
+		Stop:   "[stop-color:var(--color-blue-500)]",
 	},
 	Indigo: {
 		Tint:   "bg-indigo-400/15 text-indigo-700 dark:bg-indigo-400/25 dark:text-indigo-300",
@@ -184,6 +199,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-indigo-500",
 		Fill:   "fill-indigo-500",
 		Wash:   "fill-indigo-500/15",
+		Stop:   "[stop-color:var(--color-indigo-500)]",
 	},
 	Violet: {
 		Tint:   "bg-violet-400/15 text-violet-700 dark:bg-violet-400/25 dark:text-violet-300",
@@ -192,6 +208,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-violet-500",
 		Fill:   "fill-violet-500",
 		Wash:   "fill-violet-500/15",
+		Stop:   "[stop-color:var(--color-violet-500)]",
 	},
 	Purple: {
 		Tint:   "bg-purple-400/15 text-purple-700 dark:bg-purple-400/25 dark:text-purple-300",
@@ -200,6 +217,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-purple-500",
 		Fill:   "fill-purple-500",
 		Wash:   "fill-purple-500/15",
+		Stop:   "[stop-color:var(--color-purple-500)]",
 	},
 	Fuchsia: {
 		Tint:   "bg-fuchsia-400/15 text-fuchsia-700 dark:bg-fuchsia-400/25 dark:text-fuchsia-300",
@@ -208,6 +226,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-fuchsia-500",
 		Fill:   "fill-fuchsia-500",
 		Wash:   "fill-fuchsia-500/15",
+		Stop:   "[stop-color:var(--color-fuchsia-500)]",
 	},
 	Pink: {
 		Tint:   "bg-pink-400/15 text-pink-700 dark:bg-pink-400/25 dark:text-pink-300",
@@ -216,6 +235,7 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-pink-500",
 		Fill:   "fill-pink-500",
 		Wash:   "fill-pink-500/15",
+		Stop:   "[stop-color:var(--color-pink-500)]",
 	},
 	Rose: {
 		Tint:   "bg-rose-400/15 text-rose-700 dark:bg-rose-400/25 dark:text-rose-300",
@@ -224,5 +244,6 @@ var shades = map[Color]Shades{
 		Stroke: "stroke-rose-500",
 		Fill:   "fill-rose-500",
 		Wash:   "fill-rose-500/15",
+		Stop:   "[stop-color:var(--color-rose-500)]",
 	},
 }

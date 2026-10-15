@@ -11,6 +11,7 @@ import (
 	"github.com/pietjan/loom/diagram"
 	"github.com/pietjan/loom/internal/testutil"
 	"github.com/pietjan/loom/modal"
+	"github.com/pietjan/loom/sankey"
 )
 
 // TestErrorsAreMatchable: a component that fails loudly must do so with an
@@ -79,6 +80,21 @@ func TestErrorsAreMatchable(t *testing.T) {
 				diagram.New(diagram.Edge("a", "a")), node("a"),
 			)),
 			diagram.ErrSelfLoop,
+		},
+		{
+			"sankey flow naming one node twice",
+			testutil.RenderErr(sankey.New(sankey.Flow("a", "a", 1))),
+			sankey.ErrSelfLoop,
+		},
+		{
+			"sankey flow carrying nothing",
+			testutil.RenderErr(sankey.New(sankey.Flow("a", "b", 0))),
+			sankey.ErrNonPositiveValue,
+		},
+		{
+			"sankey node no flow mentions",
+			testutil.RenderErr(sankey.New(sankey.Flow("a", "b", 1), sankey.Node("typo"))),
+			sankey.ErrUnknownNode,
 		},
 		{
 			"modal trigger with no dialog",
